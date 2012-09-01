@@ -12,7 +12,7 @@ TTF_Font *setup_ttf_adler(int points){
 
     int renderstyle = TTF_STYLE_NORMAL;
     int outline = 0;
-    int kerning       = 1;
+    int kerning = 1;
 
     TTF_SetFontStyle(ttf_tmp, renderstyle);
     return ttf_tmp;
