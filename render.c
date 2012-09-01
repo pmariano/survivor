@@ -1,7 +1,8 @@
 #include "render.h"
 
 void render(App *app){
-  SDL_FillRect(app->screen, NULL , 0xcccccccc);
+  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
+  SDL_FillRect(app->screen, NULL , color);
   SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 }
 
