@@ -5,7 +5,8 @@ void renderPlayer(SDL_Surface *screen, Player *player){
   SDL_BlitSurface(player->image, NULL, screen, &player->position);
 }
 void render(App *app){
-  SDL_FillRect(app->screen, NULL , 0xcccccccc);
+  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
+  SDL_FillRect(app->screen, NULL , color);
   Game game = app->game;
   renderPlayer(app->screen, &game.player1);
   renderPlayer(app->screen, &game.player2);
@@ -22,5 +23,4 @@ void renderInit(App *app){
   app->game.player2.position.y = 768/2+40;
 
   app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
-}
 }
