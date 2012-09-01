@@ -6,46 +6,14 @@
 #include <math.h>
 
 #include "font.h"
-
-typedef struct {
-
-} KeyboardConfig;
-
-typedef struct {
-
-} Menu;
-
-typedef enum {
-  PLAYER_READY,
-  PLAYER_IDLE,
-} PlayerStatus;
-
-typedef struct{
-  PlayerStatus state;
-} Player;
-
-typedef struct {
-  Player player1;
-  Player player2;
-} Game;
-
-typedef enum {
-  STATE_EXIT,
-  STATE_MENU,
-} AppState;
-
-typedef struct {
-  SDL_Surface *screen;
-  Game game;
-  AppState state;
-  Menu menu;
-} App;
+#include "app.h"
 
 void move(char* msg){
   printf("%s\n",msg);
 }
 
 void finishHim(App *app){
+  printf("FINISH HIM");
   app->state = STATE_EXIT;
 }
 
@@ -101,7 +69,7 @@ void handleArcadeKeys(App *app, SDLKey *key){
   }
 }
 
-void handleMenuKeyboard(App *app)
+void handleArcadeKeyboard(App *app)
 {
   SDL_Event event;
   if(SDL_PollEvent(&event)){
@@ -113,7 +81,7 @@ void handleMenuKeyboard(App *app)
 }
 
 void handleMenu(App *app){
-  handleMenuKeyboard(app);
+  handleArcadeKeyboard(app);
 }
 
 int hasNoReadyPlayers(Game *game) {
@@ -133,8 +101,6 @@ int main( int argc, char* args[] )
 		handleMenu(&app);
 		if(hasNoReadyPlayers(&app.game)){
 		  printf("No players at moment \n");
-		} else {
-
 		}
 	  }
 

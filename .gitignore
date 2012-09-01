@@ -1,6 +1,6 @@
 # Xcode
 programoutput*
-.swp
+*swp
 build/*
 *.pbxuser
 !default.pbxuser
