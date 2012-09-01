@@ -4,9 +4,6 @@
 #include <strings.h>
 #include <math.h>
 
-#include "font.h"
-
-
 typedef struct {
 
 } Game;
