@@ -1,4 +1,5 @@
 # Xcode
+programoutput*
 build/*
 *.pbxuser
 !default.pbxuser
