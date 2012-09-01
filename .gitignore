@@ -1,5 +1,8 @@
 # Xcode
 programoutput*
+*sw[pon]
+*.o
+survivor
 build/*
 *.pbxuser
 !default.pbxuser
