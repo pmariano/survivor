@@ -12,7 +12,7 @@ typedef enum {
 
 typedef struct{
   PlayerStatus state;
-  SDL_Rect *position;
+  SDL_Rect position;
   SDL_Surface *image;
 } Player;
 
@@ -25,10 +25,12 @@ typedef enum {
   STATE_EXIT,
   STATE_MENU,
 } AppState;
+
 typedef struct {
   SDL_Surface *screen;
   Game game;
   AppState state;
   Menu menu;
 } App;
+
 #endif
