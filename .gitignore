@@ -14,3 +14,6 @@ build/*
 xcuserdata
 profile
 *.moved-aside
+*.o
+survivor
+survivor.exe
