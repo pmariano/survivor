@@ -6,14 +6,28 @@
 
 #include "font.h"
 
-
 typedef struct {
 
-} Game;
+} KeyboardConfig;
 
 typedef struct {
 
 } Menu;
+
+typedef enum {
+  PLAYER_READY,
+  PLAYER_IDLE,
+} PlayerStatus;
+
+typedef struct{
+  KeyboardddConfig config;
+  PlayerStatus status;
+} Player;
+
+typedef struct {
+  Player player1;
+  Player player2;
+} Game;
 
 typedef enum {
   STATE_EXIT,
@@ -22,35 +36,40 @@ typedef enum {
 
 typedef struct {
   SDL_Surface *screen;
-  Game *game;
+  Game game;
   AppState state;
-  Menu *menu;
+  Menu menu;
 } App;
 
-void handleKeyboard(App *app)
-{
-  SDL_Event event;
-  if(SDL_PollEvent(&event)){
-	switch(event.type) {
-	  case SDL_QUIT:
-		app->state = STATE_EXIT;
-		break;
-	  case SDL_KEYDOWN:
-		switch(event.key.keysym.sym) {
-		  case SDLK_ESCAPE:
+void handleArcadeKeys(){
+
+ case SDLK_ESCAPE:
 		  case SDLK_q:
 			app->state = STATE_EXIT;
 			break;
 
-		}
+}
+
+void handleMenuKeyboard(App *app)
+{
+  SDL_Event event;
+  if(SDL_PollEvent(&event)){
+	switch(event.type) {
+	  case SDL_KEYDOWN:
+		handleArcadeKeys();
+		switch(event.key.keysym.sym) {
+		  handleArcadeKeys();
+		 		}
 	}
   }
 }
 
-void handleMenu(){
+void handleMenu(App *app){
+  handleMenuKeyboardFor(app);
+}
 
-
-
+int hasNoReadyPlayers(Game *game) {
+  return game->player1.status == PLAYER_READY || game->player2.status == PLAYER_READY;
 }
 
 int main( int argc, char* args[] )
@@ -63,12 +82,16 @@ int main( int argc, char* args[] )
 
 	while(app.state != STATE_EXIT){
 	  if (app.state == STATE_MENU){
-		handleMenu();
-		handleKeyboard(&app);
+		handleMenu(&app);
+		if(hasNoReadyPlayers(&app.game)){
+		  printf("No players at moment \n");
+		} else {
+
+		}
 	  }
 
 	  app.screen = SDL_SetVideoMode( 1024, 768, 32, SDL_HWSURFACE);
-	  SDL_FillRect(app.screen, NULL , 0x00000000);
+	  SDL_FillRect(app.screen, NULL , 0xcccccccc);
 	  SDL_UpdateRect(app.screen, 0, 0, 0, 0);
 	}
 
