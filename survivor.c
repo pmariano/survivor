@@ -7,6 +7,7 @@
 
 #include "font.h"
 #include "app.h"
+#include "render.h"
 
 void move(char* msg){
   printf("%s\n",msg);
@@ -72,7 +73,7 @@ void handleArcadeKeys(App *app, SDLKey *key){
 void handleArcadeKeyboard(App *app)
 {
   SDL_Event event;
-  if(SDL_PollEvent(&event)){
+  while(SDL_PollEvent(&event)){
 	switch(event.type) {
 	  case SDL_KEYDOWN:
 		handleArcadeKeys(app, &event.key.keysym.sym);
@@ -96,6 +97,7 @@ int main( int argc, char* args[] )
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 
+	renderInit(&app);
 	while(app.state != STATE_EXIT){
 	  if (app.state == STATE_MENU){
 		handleMenu(&app);
@@ -103,11 +105,9 @@ int main( int argc, char* args[] )
 		  printf("No players at moment \n");
 		}
 	  }
-
-	  app.screen = SDL_SetVideoMode( 1024, 768, 32, SDL_HWSURFACE);
-	  SDL_FillRect(app.screen, NULL , 0xcccccccc);
-	  SDL_UpdateRect(app.screen, 0, 0, 0, 0);
+	  render(&app);
 	}
 
 	return 0;
 }
+

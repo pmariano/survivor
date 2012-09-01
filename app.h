@@ -1,3 +1,5 @@
+#ifndef _APP_H
+#define _APP_H
 #include <SDL.h>
 typedef struct {
 
@@ -11,6 +13,7 @@ typedef enum {
 typedef struct{
   PlayerStatus state;
   SDL_Rect *position;
+  SDL_Surface *image;
 } Player;
 
 typedef struct {
@@ -28,4 +31,4 @@ typedef struct {
   AppState state;
   Menu menu;
 } App;
-
+#endif
