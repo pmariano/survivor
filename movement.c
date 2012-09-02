@@ -148,15 +148,6 @@ void move_enemies(App *app)
     if(app->game.enemies[i].state == ENEMY_LIVE)
     {
         Body *enemy_body = &app->game.enemies[i].body;
-        if(app->game.latest_enemy_updated+1 == i)
-        {
-          pathStatus[i] = FindPath(i,
-              enemy_body->pos.x,
-              enemy_body->pos.y,
-              app->game.player1.body.pos.x,
-              app->game.player1.body.pos.y);
-          app->game.latest_enemy_updated = i;
-        }
         if(pathStatus[i] == found)
         {
           int reach = ReadPath(i, enemy_body->pos.x, enemy_body->pos.y, 1);
