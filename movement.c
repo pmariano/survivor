@@ -34,6 +34,18 @@ void body_move(Game *game, Body *body, float angle)
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
+void enemy_move(Body *enemy_body)
+{
+  if(pathStatus[1] == found)
+  {
+    printf("ronaldo : %d \n", enemy_body->pos.x);
+    ReadPath(1, enemy_body->pos.x, enemy_body->pos.y, 1);    
+    printf("caires : %d \n", xPath[1]);
+    enemy_body->pos.x = xPath[1];
+    enemy_body->pos.y = yPath[1];
+  }
+}
+
 void player_move(Game *game, Body *body, int up, int right, int down, int left)
 {
     int dx=right-left;

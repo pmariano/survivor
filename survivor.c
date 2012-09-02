@@ -9,6 +9,7 @@
 #include "app.h"
 #include "render.h"
 #include "movement.h"
+#include "aStarLibrary.h"
 
 #define FPS 140
 #define MAX(a,b) ((a)>(b)?(a):(b))
@@ -225,9 +226,11 @@ int main(int argc, char* args[] )
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
+  InitializePathfinder();  
 	renderInit(&app);
 	gameInit(&app);
 
+  pathStatus[1] = FindPath(1, app.game.enemy.body.pos.x, app.game.enemy.body.pos.y, app.game.player1.body.pos.x, app.game.player1.body.pos.y);
 	while(app.state != STATE_EXIT){
 	  Uint32 startTime = SDL_GetTicks();
 		bindKeyboard(&app);
@@ -239,6 +242,7 @@ int main(int argc, char* args[] )
 		}	else {
 			renderMenu(&app);
 		}
+    enemy_move(&app.game.enemy.body);
 		handleDelay(startTime);
 	}
 
