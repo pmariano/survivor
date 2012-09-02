@@ -14,8 +14,10 @@ typedef enum {
 
 typedef struct {
   MenuItem selected;
-  SDL_Surface *pointerImage;
-  SDL_Surface *background;
+  SDL_Surface *soldier;
+  SDL_Surface *zombie;
+  SDL_Surface *engineer;
+  SDL_Surface *bigZombie;
 } Menu;
 
 typedef enum {
@@ -90,6 +92,7 @@ typedef enum {
 typedef struct {
   SDL_Surface *screen;
   Game game;
+  int debug;
   AppState state;
   /**
    * just to handle if is to show or not the resume page

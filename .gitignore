@@ -20,3 +20,4 @@ profile
 *.o
 survivor
 survivor.exe
+.DS_Store

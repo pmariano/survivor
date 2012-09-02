@@ -11,7 +11,7 @@
 #include "movement.h"
 #include "aStarLibrary.h"
 
-#define FPS 140
+#define FPS 40
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
 void finishHim(App *app){
@@ -46,7 +46,6 @@ void gameInit(App *app){
   {
     app->game.enemies[i].state = ENEMY_DEAD;
   }
-
 }
 
 void resetApp(App *app){
@@ -73,6 +72,9 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			break;
 		case SDLK_2:
 			pauseOrJoinTheGame(app, player2);
+			break;
+		case SDLK_0:
+			app->debug ^= 1;
 			break;
 		case SDLK_ESCAPE:
 			finishHim(app);
@@ -238,19 +240,30 @@ void spawnEnemy(App *app)
   } 
 }
 
+void loadMap(App *app, int map_index) {
+	char image_path[256];
+	char hit_path[256];
+	sprintf(image_path, "data/map%d.bmp", map_index);
+	sprintf(hit_path, "data/map%d_hit.bmp", map_index);
+	app->game.board.image = IMG_Load(image_path);
+	app->game.board.hit = IMG_Load(hit_path);
+	moveInit(app);
+}
+
 int main(int argc, char* args[] )
 {
 	App app;
+	app.debug = 0;
 	memset(&app, 0, sizeof(app));
 
-	Menu menu;
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
-  InitializePathfinder();  
+  InitializePathfinder();
 	renderInit(&app);
+	loadMap(&app, 0); // calls moveInit
 	gameInit(&app);
 	moveInit(&app);
 

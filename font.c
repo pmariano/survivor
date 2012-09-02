@@ -12,7 +12,7 @@ TTF_Font *setup_ttf(int points){
 	if(points >= TTF_POINT_LIMIT) return NULL;
     TTF_Font *ttf_tmp = ttf_point_cache[points];
 	if(ttf_tmp) return ttf_tmp;
-    ttf_point_cache[points] = ttf_tmp = TTF_OpenFont("data/Chalkduster.ttf", points);
+    ttf_point_cache[points] = ttf_tmp = TTF_OpenFont("data/pixelsix00.ttf", points);
 
     int renderstyle = TTF_STYLE_NORMAL;
     int outline = 0;
