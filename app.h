@@ -14,8 +14,10 @@ typedef enum {
 
 typedef struct {
   MenuItem selected;
-  SDL_Surface *pointerImage;
-  SDL_Surface *background;
+  SDL_Surface *soldier;
+  SDL_Surface *zombie;
+  SDL_Surface *engineer;
+  SDL_Surface *bigZombie;
 } Menu;
 
 typedef enum {

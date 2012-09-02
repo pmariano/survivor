@@ -219,7 +219,6 @@ int main(int argc, char* args[] )
 	App app;
 	memset(&app, 0, sizeof(app));
 
-	Menu menu;
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
 

@@ -37,18 +37,18 @@ void renderEnemy(SDL_Surface *screen, Enemy *enemy){
 }
 
 void render(App *app){
-	Game game = app->game;
+  Game game = app->game;
 
-	Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
-	SDL_FillRect(app->screen, NULL , color);
+  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
+  SDL_FillRect(app->screen, NULL , color);
 
-	SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
+  SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
 
-	renderPlayer(app->screen, &game.player1);
-	renderPlayer(app->screen, &game.player2);
+  renderPlayer(app->screen, &game.player1);
+  renderPlayer(app->screen, &game.player2);
   renderEnemy(app->screen, &game.enemy);
-	//SDL_UpdateRect(app->screen, 0, 0, 0, 0);
-	SDL_Flip(app->screen);
+  //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
+  SDL_Flip(app->screen);
 }
 
 void renderMapInit(App *app, int map_index) {
@@ -63,6 +63,8 @@ void renderMapInit(App *app, int map_index) {
 void renderInit(App *app){
 	renderMapInit(app, 0);
 
+	app->menu.soldier = IMG_Load("data/soldado1_grande.png");
+	app->menu.zombie = IMG_Load("data/engenheiro1_grande.png");
 	app->game.player1.up = IMG_Load("data/soldado1_costas.png");
 	app->game.player1.down = IMG_Load("data/soldado1.png");
 	app->game.player1.left = IMG_Load("data/soldado1.png");
@@ -86,12 +88,18 @@ void renderMenu(App *app){
 	Menu *menu = &app->menu;
 	SDL_Surface *screen = app->screen;
 
+	SDL_Rect soldierPos = {-700, -50, screen->w, screen->h};
+    SDL_BlitSurface(menu->soldier, &soldierPos, screen, NULL );
+
+	SDL_Rect engPos = {-700, -400, screen->w, screen->h};
+    SDL_BlitSurface(menu->zombie, &engPos, screen, NULL );
+
 	int resumePadding = 0;
 	if(app->state  == STATE_PAUSED){
 	  resumePadding = 100;
 	  text_write(screen, 100, 250, "resume game", menu->selected == MENU_RESUME);
 	}
-    text_write_raw(screen, 300, 100, "Survivor", red, 96);
+    text_write_raw(screen, 300, 50, "Survivor", red, 96);
 
 	text_write(screen, 100, 250 + resumePadding, "new game", menu->selected == MENU_NEW_GAME);
 	text_write(screen, 100, 450 + resumePadding, "credits", menu->selected == MENU_CREDITS);
@@ -106,7 +114,10 @@ void renderCredits(App *app)
 	SDL_Surface *screen = app->screen;
 	SDL_FillRect(screen, NULL , color);
 
-    text_write_raw(screen, 300, 30, "Credits", red, 96);
+	SDL_Rect zombiePos = {-700, -50, screen->w, screen->h};
+    SDL_BlitSurface(app->menu.zombie, &zombiePos, screen, NULL );
+
+    text_write_raw(screen, 300, 50, "Credits", red, 96);
     text_write_raw(screen, 100, 150, "team", green, 36);
     text_write_raw(screen, 100, 200, "Carlo \"zED\" Caputo", white, 26);
     text_write_raw(screen, 100, 250, "Pedro Mariano", white, 26);
@@ -119,8 +130,7 @@ void renderCredits(App *app)
     text_write_raw(screen, 100, 500, "tileset", green, 36);
     text_write_raw(screen, 100, 550, "lost garden", white, 26);
     text_write_raw(screen, 400, 500, "font", green, 36);
-    text_write_raw(screen, 400, 550, "Chalkduster, 2008 Apple Computer, Inc", white, 26);
-
+    text_write_raw(screen, 400, 550, "Pixelsix, 2005 by Cal Henderson", white, 26);
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
