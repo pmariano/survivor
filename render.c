@@ -7,26 +7,39 @@ SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color trueRed = {0XFF, 0x00, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
+SDL_Color yellow = {0xFF, 0XFF, 0x00};
 
 void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2){
   if(player1->state != PLAYER_IDLE){
-    text_write_raw(screen, 5, 30, "Player 1", green, 30);
+    text_write_raw(screen, 5, 60, "Player 1", green, 30);
 
 	if(player1->state != PLAYER_DEAD){
+
+	  char ammo[256];
+	  //sprintf(kills, "ammo: %i (s)", player1->body.item.ammo_total - player1->body.item.type->ammo);
+	  sprintf(ammo, "ammo: %i", 11);
+	  text_write_raw(screen, 5, 30, ammo, yellow, 20);
+
 	  Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
 	  SDL_Rect rect = { 5, 10, player1->body.life*2, 20};
 	  SDL_FillRect(screen, &rect, color);
 	}
   }
 
+
   char kills[256];
   sprintf(kills, "%i kill(s)", app->game.kill_count);
   text_write_raw(screen, 400, 30, kills, white, 50);
 
   if(player2->state != PLAYER_IDLE){
-    text_write_raw(screen, 900, 30, "Player 2", green, 30);
+    text_write_raw(screen, 900, 60, "Player 2", green, 30);
 
 	if(player2->state != PLAYER_DEAD){
+	  char ammo[256];
+	  //sprintf(kills, "ammo: %i (s)", player1->body.item.ammo_total - player1->body.item.type->ammo);
+	  sprintf(ammo, "ammo: %i", 11);
+	  text_write_raw(screen, 910, 30, ammo, yellow, 20);
+
 	  Uint32 color = SDL_MapRGB(screen->format, "FF", 0,0 );
 	  SDL_Rect rect = { 830, 10, player2->body.life*2, 20};
 	  SDL_FillRect(screen, &rect, color);
