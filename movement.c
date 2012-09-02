@@ -10,12 +10,12 @@ void movePrepare(App *app)
 	if( app->game.player1.state == PLAYER_READY) {
 		int x = app->game.player1.body.pos.x/tileSize;
 		int y = app->game.player1.body.pos.y/tileSize;
-		app->game.board.crowd[x][y] = unwalkable;
+		app->game.board.crowd[x][y] = 2;
 	}
 	if( app->game.player2.state == PLAYER_READY) {
 		int x = app->game.player2.body.pos.x/tileSize;
 		int y = app->game.player2.body.pos.y/tileSize;
-		app->game.board.crowd[x][y] = unwalkable;
+		app->game.board.crowd[x][y] = 3;
 	}
 	for(i=0; i < ENEMY_COUNT; i++)
 	{
@@ -23,7 +23,7 @@ void movePrepare(App *app)
 		{
 			int x = app->game.enemies[i].body.pos.x/tileSize;
 			int y = app->game.enemies[i].body.pos.y/tileSize;
-			app->game.board.crowd[x][y] = unwalkable;
+			app->game.board.crowd[x][y] = 4+i;
 		}
 
 	}
@@ -35,6 +35,7 @@ void moveInit(App *app)
 	int x,y;
 	SDL_Surface *hit = app->game.board.hit;
 	memset(app->game.board.wall, 0, sizeof(app->game.board.wall));
+	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
 	app->game.board.spawn_count = 0;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
@@ -188,7 +189,21 @@ int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y)
 	for(i=0; i< 100; i++) {
 		int x1 = rand() % mapWidth;
 		int y1 = rand() % mapHeight;
-		if(game->board.crowd[x1][y1] == walkable) {
+		if(!game->board.crowd[x1][y1]) {
+			*x = x1 * tileSize + tileSize/2;
+			*y = y1 * tileSize + tileSize/2;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int powerup_spawn_pos(Game *game, int *x, int *y) {
+	int i;
+	for(i=0; i< 10; i++) {
+		int x1 = rand() % mapWidth;
+		int y1 = rand() % mapHeight;
+		if(!game->board.wall[x1][y1] && !game->board.powerup[x1][y1]) {
 			*x = x1 * tileSize + tileSize/2;
 			*y = y1 * tileSize + tileSize/2;
 			return 1;

@@ -84,7 +84,7 @@ typedef struct{
   SDL_Surface *image;
   SDL_Surface *hit;
   char wall[mapWidth][mapHeight];
-  char crowd[mapWidth][mapHeight];
+  int crowd[mapWidth][mapHeight];
   char powerup[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;

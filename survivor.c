@@ -261,6 +261,90 @@ void loadMap(App *app, int map_index) {
 	moveInit(app);
 }
 
+int trace_bullet_shot(App *app, Body *body, int x, int y)
+{
+	Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
+	p[0] = 0xff;
+	p[1] = 0xff;
+	int hit = app->game.board.crowd[x/tileSize][y/tileSize];
+	if(hit) {
+		if(hit>4) {
+			int i = hit - 4;
+			hit(body, &app->game.enemies[i].body);
+
+			// move to hit()
+			SDL_Rect rect = {
+				x - body->item.hit_image.w/2,
+				y - body->item.hit_image.h/2,
+				body->item.hit_image.w,
+				body->item.hit_image.h
+			};
+			SDL_BlitSurface(body->item.hit_image, NULL, app->screen, &rect);
+		}
+	}
+	return hit;
+}
+
+
+int trace(App *app, Body *body, int range, int (*draw)(App *app, int x, int y))
+{
+	int x1,int y1,int x2,int y2;
+	int dx, dy, i, e;
+	int incx, incy, inc1, inc2;
+	int x,y;
+
+	dx = x2 - x1;
+	dy = y2 - y1;
+
+	if(dx < 0) dx = -dx;
+	if(dy < 0) dy = -dy;
+	incx = 1;
+	if(x2 < x1) incx = -1;
+	incy = 1;
+	if(y2 < y1) incy = -1;
+	x=x1;
+	y=y1;
+
+	if(dx > dy)
+	{
+		if(draw(app,body,x,y)) return 1;
+		e = 2*dy - dx;
+		inc1 = 2*( dy -dx);
+		inc2 = 2*dy;
+		for(i = 0; i < dx; i++)
+		{
+			if(e >= 0)
+			{
+				y += incy;
+				e += inc1;
+			}
+			else e += inc2;
+			x += incx;
+			if(draw(app,body,x,y)) return 1;
+		}
+	}
+	else
+	{
+		if(draw(app,body,x,y)) return 1;
+		e = 2*dx - dy;
+		inc1 = 2*( dx - dy);
+		inc2 = 2*dx;
+		for(i = 0; i < dy; i++)
+		{
+			if(e >= 0)
+			{
+				x += incx;
+				e += inc1;
+			}
+			else e += inc2;
+			y += incy;
+			if(draw(app,body,x,y)) return 1;
+		}
+	}
+	return 0;
+}
+
+
 int main(int argc, char* args[] )
 {
 	srand(time(NULL));
