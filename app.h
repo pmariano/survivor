@@ -3,6 +3,7 @@
 #include <SDL.h>
 
 #define ENEMY_COUNT 666
+#include "aStarLibrary.h"
 
 typedef enum {
   MENU_RESUME = 0,
@@ -65,9 +66,23 @@ typedef struct{
 } Enemy;
 
 
+typedef struct {
+	int x,y;
+	int open;
+} Spawn;
+
+typedef struct {
+	SDL_Rect rect;
+	SDL_Surface *image;
+} Sprite;
+
 typedef struct{
   SDL_Surface *image;
   SDL_Surface *hit;
+  char wall[mapWidth][mapHeight];
+  char powerup[mapWidth][mapHeight];
+  Spawn spawn[mapWidth*mapHeight];
+  int spawn_count;
 } Board;
 
 typedef struct {

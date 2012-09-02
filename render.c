@@ -11,7 +11,6 @@ SDL_Color green = {0x00, 0XFF, 0x00};
 
 void renderPlayer(SDL_Surface *screen, Player *player){
 	if(player->state != PLAYER_READY) return;
-	printf("blitting on X: %i/Y: %i\n", player->body.pos.x, player->body.pos.y);
 	int a = player->body.angle;
 	SDL_Surface *image;
 	if(a >= 315 || a < 45) image = player->right;
@@ -74,7 +73,6 @@ void render(App *app){
 
   renderPlayer(app->screen, &game.player1);
   renderPlayer(app->screen, &game.player2);
-  renderEnemy(app->screen, &game.enemy);
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
   SDL_Flip(app->screen);
 }
