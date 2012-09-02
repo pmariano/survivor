@@ -5,7 +5,8 @@
 #define ENEMY_COUNT 666
 
 typedef enum {
-  MENU_NEW_GAME = 0,
+  MENU_RESUME = 0,
+  MENU_NEW_GAME,
   MENU_CREDITS,
   MENU_QUIT,
   MENU_COUNT
@@ -65,6 +66,7 @@ typedef struct {
 
 typedef enum {
   STATE_MENU,
+  STATE_PAUSED,
   STATE_PLAYING,
   STATE_CREDITS,
   STATE_EXIT,

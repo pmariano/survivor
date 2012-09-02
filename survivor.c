@@ -3,16 +3,32 @@
 #include <SDL_image.h>
 #include <stdio.h>
 #include <strings.h>
+#include <math.h>
 
 #include "font.h"
 #include "app.h"
 #include "render.h"
 #include "movement.h"
 
-
+#define FPS 140
+#define MAX(a,b) ((a)>(b)?(a):(b))
 
 void finishHim(App *app){
 	app->state = STATE_EXIT;
+}
+
+void resetApp(App *app){
+	gameInit(app);
+	//reset here other stuffs
+}
+
+void pauseOrJoinTheGame(App *app, Player *player){
+	if(player->state == PLAYER_READY){
+		app->state = STATE_PAUSED;
+		app->menu.selected = MENU_RESUME;
+	} else{
+		player->state = PLAYER_READY;
+	}
 }
 
 void bindGameplayKeysDown(App *app, SDLKey *key){
@@ -21,10 +37,10 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 
 	switch(*key){
 		case SDLK_1:
-			player1->state = PLAYER_READY;
+			pauseOrJoinTheGame(app, player1);
 			break;
 		case SDLK_2:
-			player2->state = PLAYER_READY;
+			pauseOrJoinTheGame(app, player2);
 			break;
 		case SDLK_ESCAPE:
 			finishHim(app);
@@ -36,6 +52,14 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 	Player *player1 = &app->game.player1;
 	Player *player2 = &app->game.player2;
 	Menu *menu = &app->menu;
+	int firstMenu = MENU_NEW_GAME;
+
+	/**
+	 * when game is paused there is more menu options
+	 * */
+	if(app->state == STATE_PAUSED){
+		firstMenu = MENU_RESUME;
+	}
 
 	switch(*key){
 		case SDLK_1:
@@ -47,7 +71,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		case SDLK_UP:
 		case SDLK_q:
 		case SDLK_t:
-			if(menu->selected != 0){
+			if(menu->selected != firstMenu){
 				menu->selected--;
 			}
 			break;
@@ -61,18 +85,24 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		case SDLK_a:
 		case SDLK_z:
 		case SDLK_RETURN:
+			if(app->state == STATE_CREDITS){
+			}
+
 			if(*key == SDLK_z){
 				player2->state = PLAYER_READY;
 			} else {
 				player1->state = PLAYER_READY;
 			}
+
 			if(menu->selected == MENU_NEW_GAME){
+				resetApp(app);
 				app->state = STATE_PLAYING;
 			} else if (menu->selected == MENU_QUIT){
 				finishHim(app);
 			} else if(menu->selected == MENU_CREDITS){
 				app->state = STATE_CREDITS;
-				renderCredits(app);
+			} else if(menu->selected == MENU_RESUME){
+				app->state = STATE_PLAYING;
 			}
 			break;
 		case SDLK_ESCAPE:
@@ -98,7 +128,7 @@ void bindGameplayKeystate(App *app){
 	 * S = SECONDARY ATTACK
 	 * */
 
-	player_move(&app->game, &player1->body, 
+	player_move(&app->game, &player1->body,
 		keystate[SDLK_UP] || keystate[SDLK_q],
 		keystate[SDLK_RIGHT] || keystate[SDLK_r],
 		keystate[SDLK_DOWN] || keystate[SDLK_w],
@@ -111,7 +141,7 @@ void bindGameplayKeystate(App *app){
 	 * Z = ATTACK
 	 * S = SECONDARY ATTACK
 	 * */
-	player_move(&app->game, &player2->body, 
+	player_move(&app->game, &player2->body,
 		keystate[SDLK_KP6] || keystate[SDLK_i],
 		keystate[SDLK_KP8] || keystate[SDLK_t],
 		keystate[SDLK_KP4] || keystate[SDLK_u],
@@ -125,33 +155,27 @@ void bindKeyboard(App *app)
 	while(SDL_PollEvent(&event)){
 		switch(event.type) {
 			case SDL_KEYDOWN:
-				if (app->state == STATE_MENU){
-					bindMenuKeysDown(app, &event.key.keysym.sym);
-				} else{
+				if (app->state == STATE_PLAYING){
 					bindGameplayKeysDown(app, &event.key.keysym.sym);
+				} else{
+					bindMenuKeysDown(app, &event.key.keysym.sym);
 				}
 		}
 	}
 
-	if (app->state != STATE_MENU){
+	if (app->state == STATE_PLAYING){
 		bindGameplayKeystate(app);
 	}
 }
 
-int hasNoReadyPlayers(Game *game) {
-	return !game->player1.state == PLAYER_READY && !game->player2.state == PLAYER_READY;
-}
-
 void gameInit(App *app){
-	app->game.player1.state = PLAYER_IDLE;
-
 	/**
 	 * Player 1 init settings
 	 * */
 	Body *p1body = &app->game.player1.body;
 	p1body->ang_vel = 0.3;
 	p1body->max_vel = 5;
-	p1body->angle = 1;
+	p1body->angle = 0;
 	p1body->pos.x = 1204/2+15;
 	p1body->pos.y = 768/2+15;
 
@@ -165,30 +189,52 @@ void gameInit(App *app){
 	p2body->angle = 1;
 	p2body->pos.x = 1204/2+40;
 	p2body->pos.y = 768/2+40;
+
+	/**
+	 * Enemy Body
+	 *
+	 * */
+  Body *enemybody = &app->game.enemy.body;
+	enemybody->ang_vel = 0.3;
+	enemybody->max_vel = 5;
+	enemybody->angle = 1;
+	enemybody->pos.x = 1204/2-550;
+	enemybody->pos.y = 768/2+80;
 }
 
+void handleDelay(Uint32 start) {
+    Uint32 end = SDL_GetTicks();
+    int actual_delta = end - start;
+    int expected_delta = 1000/FPS;
+    int delay = MAX(0, expected_delta - actual_delta);
+    SDL_Delay(delay);
+}
 int main(int argc, char* args[] )
 {
 	App app;
+	memset(&app, 0,sizeof(app));
+
 	Menu menu;
 	app.state = STATE_MENU;
-	app.menu.selected = 0;
+	app.menu.selected = MENU_NEW_GAME;
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
 	renderInit(&app);
 	gameInit(&app);
+
 	while(app.state != STATE_EXIT){
+	  Uint32 startTime = SDL_GetTicks();
 		bindKeyboard(&app);
 
-		if (app.state == STATE_MENU){
-			if(hasNoReadyPlayers(&app.game)){
-				printf("No players at moment \n");
-			}
-			renderMenu(&app);
-		} else {
+		if (app.state == STATE_PLAYING){
 			render(&app);
+		} else if (app.state == STATE_CREDITS) {
+			renderCredits(&app);
+		}	else {
+			renderMenu(&app);
 		}
+		handleDelay(startTime);
 	}
 
 	return 0;

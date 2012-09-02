@@ -25,7 +25,7 @@ TTF_Font *setup_ttf(int points){
 void text_write(SDL_Surface *screen, int x, int y, char *message, int selected){
 
     SDL_Color color;
-    SDL_Color red = {0xFF, 0X00, 0x00};
+    SDL_Color red = {0x00, 0XFF, 0x00};
     SDL_Color white = {0xFF, 0XFF, 0xFF};
 
     color = (selected) ? white : red;
