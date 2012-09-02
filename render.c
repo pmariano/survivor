@@ -26,17 +26,6 @@ void renderPlayer(SDL_Surface *screen, Player *player){
 	SDL_BlitSurface(image, NULL, screen, &rect);
 }
 
-void renderEnemy(SDL_Surface *screen, Enemy *enemy){
-	SDL_Surface *image = enemy->image;
-	SDL_Rect rect = {
-		enemy->body.pos.x - image->w/2,
-		enemy->body.pos.y - image->h/2,
-		enemy->body.pos.w,
-		enemy->body.pos.h
-	};
-	SDL_BlitSurface(image, NULL, screen, &rect);
-}
-
 void renderEnemies(App *app)
 {
   int i = 0;
@@ -44,7 +33,15 @@ void renderEnemies(App *app)
   {
     if(app->game.enemies[i].state == ENEMY_LIVE)
     {
-      renderEnemy(app->screen, &app->game.enemies[i]);
+      Enemy *enemy = &app->game.enemies[i];
+      SDL_Surface *image = enemy->image;
+      SDL_Rect rect = {
+        enemy->body.pos.x - image->w/2,
+        enemy->body.pos.y - image->h/2,
+        enemy->body.pos.w,
+        enemy->body.pos.h
+      };
+      SDL_BlitSurface(image, NULL, app->screen, &rect);
     }
   }
 }
@@ -72,7 +69,7 @@ void render(App *app){
 
   renderPlayer(app->screen, &game.player1);
   renderPlayer(app->screen, &game.player2);
-  renderEnemy(app->screen, &game.enemy);
+  renderEnemies(app);
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
   SDL_Flip(app->screen);
 }
