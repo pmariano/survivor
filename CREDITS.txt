@@ -1,0 +1,5 @@
+
+characters: http://pixelblock.tumblr.com/post/27489446059/its-team-fortress-2-all-of-the-classes-from
+tileset: http://www.lostgarden.com/2006/07/more-free-game-graphics.html
+font: Chalkduster, Copyright 2008 Apple Computer, Inc.
+
