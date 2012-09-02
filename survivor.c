@@ -380,10 +380,12 @@ int hit(App *app, Body *source, Body *target){
 	}
 
   if(target->life <= 0){
-	if(target->status != BODY_DEAD){
-	  app->game.kill_count++;
+	if(target->status == BODY_ALIVE){
+	  if(target->status != BODY_DEAD){
+		app->game.kill_count++;
+	  }
+	  target->status = BODY_DEAD;
 	}
-	target->status = BODY_DEAD;
 	return 1;
   }
   return 0;
@@ -438,7 +440,7 @@ int shoot(App *app, Body *body)
 
 	x1 = body->pos.x;
 	y1 = body->pos.y;
-		
+
 	float a = (int)(body->angle + ((rand() % (body->item.type->spread+1)) - body->item.type->spread/2))%360;
 	x2 = x1 + cos(a * M_PI / 180.) * range;
 	y2 = y1 - sin(a * M_PI / 180.) * range;
