@@ -286,10 +286,7 @@ void spawnEnemy(App *app)
 
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
-	int k = rand() % 2;
-	printf(" k %d %p\n" , k, game->enemy_class[k].image);
-	printf(" img %d\n" , game->enemy_class[k].image->w);
-    
+	int k = rand() % ENEMY_TYPE_COUNT;
     enemy->image = game->enemy_class[k].image;
     Body *enemybody = &enemy->body;
     enemybody->ang_vel = 0.05;
@@ -451,7 +448,7 @@ int main(int argc, char* args[] )
 				spawnEnemy(&app);
 				app.game.spawnTime = startTime;
 			}
-			//move_enemies(&app);
+			move_enemies(&app);
 			renderFinish(&app);
 			checkGameover(&app);
 		} else if (app.state == STATE_CREDITS) {
