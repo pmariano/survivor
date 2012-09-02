@@ -29,8 +29,7 @@ void gameInit(App *app){
 	p1body->ang_vel = 0.3;
 	p1body->max_vel = 5;
 	p1body->angle = 0;
-	p1body->pos.x = app->screen->w/2+15;
-	p1body->pos.y = app->screen->h/2+15;
+	player_spawn_pos(&p1body->pos.x, &p1body->pos.y);
 
 	/**
 	 * Player 2 init settings
@@ -40,8 +39,7 @@ void gameInit(App *app){
 	p2body->ang_vel = 0.3;
 	p2body->max_vel = 5;
 	p2body->angle = 1;
-	p2body->pos.x = app->screen->w/2+40;
-	p2body->pos.y = app->screen->h/2+40;
+	player_spawn_pos(&p2body->pos.x, &p2body->pos.y);
   int i = 0;
   for(;i < ENEMY_COUNT; i++)
   {
@@ -225,6 +223,8 @@ void spawnEnemy(App *app)
 {
   Game *game = &app->game;
   Enemy *enemy = NULL;
+  int x,y;
+  
   int i = 0;
   for(; i < ENEMY_COUNT; i++)
   {
@@ -235,14 +235,15 @@ void spawnEnemy(App *app)
       break;
     }
   }
-  if(enemy != NULL)
+  
+  if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
     enemy->image = game->enemy_class_medic.image;
     Body *enemybody = &enemy->body;
     enemybody->ang_vel = 0.05;
     enemybody->max_vel = 2.5;
     enemybody->angle = 1;
-    enemybody->pos.x = 70;
+    enemybody->pos.x = x;
     enemybody->pos.y = app->screen->h/2+30;
   }
 }
@@ -273,12 +274,11 @@ int main(int argc, char* args[] )
   InitializePathfinder();
 	renderInit(&app);
 	loadMap(&app, 0); // calls moveInit
-	gameInit(&app);
-	moveInit(&app);
 	soundInit();
 
 	while(app.state != STATE_EXIT){
 	  Uint32 startTime = SDL_GetTicks();
+		movePrepare(&app);
 		bindKeyboard(&app);
 
 		if (app.state == STATE_PLAYING){

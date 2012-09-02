@@ -1,20 +1,55 @@
 #include "movement.h"
 #include "aStarLibrary.h"
 
-#define ATAN2(dx,dy) ((int)(360+atan2(-(dy),(dx))*180/M_PI)%360)
+#define ATAN2(dx,dy) ((int)(720+atan2(-(dy),(dx))*180/M_PI)%360) // FIXME wrap angle properly
+
+void movePrepare(App *app)
+{
+	int i;
+	memcpy(walkability, app->game.board.wall, sizeof(app->game.board.wall));
+	if( app->game.player1.state == PLAYER_READY) {
+		int x = app->game.player1.body.pos.x/tileSize;
+		int y = app->game.player1.body.pos.y/tileSize;
+		walkability[x][y] = unwalkable;
+	}
+	if( app->game.player2.state == PLAYER_READY) {
+		int x = app->game.player2.body.pos.x/tileSize;
+		int y = app->game.player2.body.pos.y/tileSize;
+		walkability[x][y] = unwalkable;
+	}
+	for(i=0; i < ENEMY_COUNT; i++)
+	{
+		if(app->game.enemies[i].state == ENEMY_LIVE)
+		{
+			int x = app->game.enemies[i].body.pos.x/tileSize;
+			int y = app->game.enemies[i].body.pos.y/tileSize;
+			walkability[x][y] = unwalkable;
+		}
+
+	}
+}
+
 
 void moveInit(App *app)
 {
 	int x,y;
 	SDL_Surface *hit = app->game.board.hit;
-	memset(walkability, 0, sizeof(walkability));
+	memset(app->game.board.wall, 0, sizeof(app->game.board.wall));
+	app->game.board.spawn_count = 0;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
 			Uint8 *p = ((Uint8*)app->game.board.hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch);
 			printf("%d,%d: %d %d %d %d\n", x,y, hit->format->BytesPerPixel,p[0], p[1], p[2]);
-			walkability[x][y] = !(p[0]||p[2]);
+			app->game.board.wall[x][y] = !p[0];
+			if(p[2]) {
+				app->game.board.spawn[app->game.board.spawn_count].x = x;
+				app->game.board.spawn[app->game.board.spawn_count].y = y;
+				app->game.board.spawn[app->game.board.spawn_count].open = 1;
+				app->game.board.spawn_count++;
+			}
 		}
 	}
+	movePrepare(app);
 }
 
 void angle_rotate(float *a0_base, float a1, float f)
@@ -26,8 +61,22 @@ void angle_rotate(float *a0_base, float a1, float f)
 		else
 			a1 += 360;
 	}
-	a0 = (360+a0)*(1-f) + f*(360+a1);
-	*a0_base = a0 > 360 ? a0 - 360 : a0;
+	// FIXME wrap angle properly
+	a0 = (720+a0)*(1-f) + f*(720+a1);
+	while(a0>360) a0-=360;
+	*a0_base = a0;
+}
+
+int is_solid(Body *body, int x, int y)
+{
+	x/=tileSize;
+	y/=tileSize;
+	if(body->pos.x/tileSize == x && body->pos.y/tileSize == y) return 0;
+	return walkability[x][y];
+}
+int is_empty(Body *body, int x, int y)
+{
+	return !is_solid(body,x,y);
 }
 
 void body_move(Game *game, Body *body, float angle)
@@ -42,9 +91,25 @@ void body_move(Game *game, Body *body, float angle)
 	float a = body->angle * M_PI / 180.;
 	float dx = (int)(cos(a) * v * 100)/100.;
 	float dy = (int)(sin(a) * v * 100)/100.;
-	body->pos.x += dx;
-	body->pos.y -= dy;
-	printf("body: angle: %f a: %f 2pi:%f y:%f\n", body->angle, a, 2*M_PI, sin(a) * v);
+	int x0 = body->pos.x;
+	int y0 = body->pos.y;
+	int x1 = x0 + dx;
+	int y1 = y0 - dy;
+
+	if(is_empty(body,x1,y1)) {
+		body->pos.x = x1;
+		body->pos.y = y1;
+	} else {
+		if(is_empty(body,x1,y0)) {
+			body->pos.x = x1;
+		} else if(is_empty(body,x0,y1)) {
+			body->pos.y = y1;
+		}
+	}
+
+	
+
+	//printf("body: angle: %f a: %f 2pi:%f y:%f\n", body->angle, a, 2*M_PI, sin(a) * v);
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
@@ -85,10 +150,40 @@ void player_move(Game *game, Body *body, int up, int right, int down, int left)
 }
 
 
-void enemy_spawn_pos(int *x, int *y) {
-
+int enemy_spawn_pos(Game *game, int *x, int *y) {
+	if(!game->board.spawn_count) return 0;
+	int i = rand() % game->board.spawn_count;
+	*x = game->board.spawn[i].x;
+	*y = game->board.spawn[i].y;
+	return 1;
 }
 
-void powerup_spawn_pos(int *x, int *y) {
+int player_spawn_pos(Uint16 *x, Uint16 *y)
+{
+	int i;
+	for(i=0; i< 100; i++) {
+		int x1 = rand() % mapWidth;
+		int y1 = rand() % mapHeight;
+		printf("player spawn (%d) %d %d = %d\n", i, x1, y1, walkability[x1][y1]);
+		if(walkability[x1][y1] == walkable) {
+			*x = x1 * tileSize + tileSize/2;
+			*y = y1 * tileSize + tileSize/2;
+			return 1;
+		}
+	}
+	return 0;
+}
 
+int powerup_spawn_pos(Game *game, int *x, int *y) {
+	int i;
+	for(i=0; i< 10; i++) {
+		int x1 = rand() % mapWidth;
+		int y1 = rand() % mapHeight;
+		if(!game->board.wall[x1][y1] && !game->board.powerup[x1][y1]) {
+			*x = x1 * tileSize + tileSize/2;
+			*y = y1 * tileSize + tileSize/2;
+			return 1;
+		}
+	}
+	return 0;
 }
