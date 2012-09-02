@@ -17,7 +17,6 @@ void renderStats(SDL_Surface *screen, Player *player1, Player *player2){
 	  SDL_Rect rect = { 5, 10, player1->body.life*2, 20};
 	  SDL_FillRect(screen, &rect, color);
 	}
-
   }
 
   if(player2->state != PLAYER_IDLE){
@@ -28,7 +27,6 @@ void renderStats(SDL_Surface *screen, Player *player1, Player *player2){
 	  SDL_Rect rect = { 830, 10, player2->body.life*2, 20};
 	  SDL_FillRect(screen, &rect, color);
 	}
-
   }
 }
 
