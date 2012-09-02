@@ -1,6 +1,7 @@
 #include <SDL_image.h>
 #include "render.h"
 #include "font.h"
+#include "aStarLibrary.h"
 
 SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
@@ -37,12 +38,28 @@ void renderEnemy(SDL_Surface *screen, Enemy *enemy){
 }
 
 void render(App *app){
+  int x,y;
+
   Game game = app->game;
 
   Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
   SDL_FillRect(app->screen, NULL , color);
 
   SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
+
+  renderPlayer(app->screen, &game.player1);
+  renderPlayer(app->screen, &game.player2);
+  renderEnemy(app->screen, &game.enemy);
+  //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
+  SDL_Flip(app->screen);
+  for (x=0; x < mapWidth;x++) {
+	for (y=0; y < mapHeight;y++) {
+	  if(walkability[x][y]) {
+		SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
+		SDL_FillRect(app->screen, &rect , 0xffffff);
+	  }
+	}
+  }
 
   renderPlayer(app->screen, &game.player1);
   renderPlayer(app->screen, &game.player2);

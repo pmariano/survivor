@@ -18,10 +18,11 @@ clean:
 %.o : %.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
-render.o: survivor.c | app.h render.h
+render.o: render.c | app.h render.h
 survivor.o: survivor.c | app.h
-movement.o: survivor.c | movement.h
+movement.o: movement.c | movement.h app.h aStarLibrary.h
+aStarLibrary.o: aStarLibrary.c | aStarLibrary.h app.h
 
-$(OUTPUT): survivor.o render.o font.o adler.o movement.o
+$(OUTPUT): survivor.o render.o font.o adler.o movement.o aStarLibrary.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 

@@ -1,11 +1,14 @@
-
 programadores: Carlo "zED" Caputo, Pedro Mariano, Caires Vinicius
 
 personagens:
   http://pixelblock.tumblr.com/post/27489446059/its-team-fortress-2-all-of-the-classes-from
   modificados por www.pedrojatoba.blogspot.com
 
-tileset: http://www.lostgarden.com/2006/07/more-free-game-graphics.html
-font: Chalkduster, Copyright 2008 Apple Computer, Inc.
-font: Pixelated, created by “Greenma201”. http://fontstruct.com/fontstructions/show/426637
+tileset: Daniel Cook, 2006
+http://www.lostgarden.com/2006/07/more-free-game-graphics.html
+
+font: PixelSixated, created by
+
+pathfinding: Patrick Lester (2005)
+http://www.policyalmanac.org/games/aStarTutorial.htm
 
