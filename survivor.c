@@ -207,12 +207,13 @@ void gameInit(App *app){
 }
 
 void handleDelay(Uint32 start) {
-    Uint32 end = SDL_GetTicks();
-    int actual_delta = end - start;
-    int expected_delta = 1000/FPS;
-    int delay = MAX(0, expected_delta - actual_delta);
-    SDL_Delay(delay);
+	Uint32 end = SDL_GetTicks();
+	int actual_delta = end - start;
+	int expected_delta = 1000/FPS;
+	int delay = MAX(0, expected_delta - actual_delta);
+	SDL_Delay(delay);
 }
+
 int main(int argc, char* args[] )
 {
 	App app;

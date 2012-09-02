@@ -2,8 +2,9 @@
 #include "render.h"
 #include "font.h"
 
-SDL_Color red = {0xFF, 0X00, 0x00};
+SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
+SDL_Color green = {0x00, 0XFF, 0x00};
 
 void renderPlayer(SDL_Surface *screen, Player *player){
 	if(player->state != PLAYER_READY) return;
@@ -75,7 +76,6 @@ void renderInit(App *app){
 	app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }
 
-
 /**
  *
  * TODO: refactor this to be part of render func
@@ -106,13 +106,21 @@ void renderCredits(App *app)
 	SDL_Surface *screen = app->screen;
 	SDL_FillRect(screen, NULL , color);
 
-    text_write_raw(screen, 300, 100, "CREDITS", red, 96);
-    text_write_raw(screen, 200, 250, "team", red, 36);
-    text_write_raw(screen, 200, 300, "Carlo \"zED\" Caputo", white, 26);
-    text_write_raw(screen, 200, 350, "Pedro Mariano", white, 26);
-    text_write_raw(screen, 200, 400, "Caires Vinicius", white, 26);
+    text_write_raw(screen, 300, 30, "Credits", red, 96);
+    text_write_raw(screen, 100, 150, "team", green, 36);
+    text_write_raw(screen, 100, 200, "Carlo \"zED\" Caputo", white, 26);
+    text_write_raw(screen, 100, 250, "Pedro Mariano", white, 26);
+    text_write_raw(screen, 100, 300, "Caires Vinicius", white, 26);
 
-    text_write_raw(screen, 200, 500, "music", red, 36);
+    text_write_raw(screen, 100, 350, "chars", green, 36);
+    text_write_raw(screen, 100, 400, "based on http://pixelblock.tumblr.com/post/27489446059/its-team-fortress-2-all-of-the-classes-from", white, 26);
+    text_write_raw(screen, 100, 450, "modified by Pedro Jatoba", white, 26);
+
+    text_write_raw(screen, 100, 500, "tileset", green, 36);
+    text_write_raw(screen, 100, 550, "lost garden", white, 26);
+    text_write_raw(screen, 400, 500, "font", green, 36);
+    text_write_raw(screen, 400, 550, "Chalkduster, 2008 Apple Computer, Inc", white, 26);
+
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
