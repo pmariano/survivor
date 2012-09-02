@@ -20,13 +20,21 @@ void finishHim(App *app){
 }
 
 void checkGameover(App *app){
-  Player *player1 = &app->game.player1;
-  Player *player2 = &app->game.player2;
+	Player player1 = app->game.player1;
+	Player player2 = app->game.player2;
 
-	if(!(player1->state == PLAYER_IDLE && player2->state == PLAYER_IDLE)){
-		if(!(player1->state == PLAYER_READY || player2->state == PLAYER_READY)){
-			app->state = STATE_GAMEOVER;
-		}
+	int numCurrentPlayers = (player1.state == PLAYER_READY) + (player2.state == PLAYER_READY);
+
+	if(numCurrentPlayers == 0 ){
+		//there is no player
+		return;
+	}
+	int numDeadPlayers = (player1.body.status == BODY_DEAD) + (player2.body.status == BODY_DEAD);
+
+	printf("numero de mortos: %i/%i\n", numDeadPlayers, numCurrentPlayers);
+
+	if(numCurrentPlayers == numDeadPlayers){
+		app->state = STATE_GAMEOVER;
 	}
 }
 
@@ -41,6 +49,7 @@ void gameInit(App *app){
 	p1body->max_vel = 5;
 	p1body->angle = 0;
 	p1body->life = 100.0;
+	p1body->status = BODY_ALIVE;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
@@ -52,6 +61,8 @@ void gameInit(App *app){
 	p2body->max_vel = 5;
 	p2body->angle = 1;
 	p2body->life = 100.0;
+	p2body->status = BODY_ALIVE;
+
   app->game.latest_enemy_updated = 0;
   app->game.item_count = 0;
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
@@ -145,13 +156,13 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 				} else{
 					app->credits = CREDITS_SOUND;
 				}
-
 				break;
 			}
 
 			if(*key == SDLK_z){
 				player2->state = PLAYER_READY;
 			} else {
+				printf("player 1 is ready\n");
 				player1->state = PLAYER_READY;
 			}
 
@@ -290,8 +301,12 @@ int hit(App *app, Body *source, Body *target){
 		source->item.type->hit_image->h
 	};
 	SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, &rect);
-
-	return target->life <= 0;
+	if(target->life <= 0){
+		target->status = 1;
+		printf("MORREUUU\n");
+		return 1;
+	}
+	return 0;
 }
 
 int trace_bullet_shot(App *app, Body *body, int x, int y)
@@ -304,13 +319,10 @@ int trace_bullet_shot(App *app, Body *body, int x, int y)
 		if(target>4) {
 			int i = target - 4;
 			hit(app, body, &app->game.enemies[i].body);
-
 		}
 	}
 	return target;
 }
-
-
 
 int trace(App *app, Body *body, int range, int (*draw)(App *app, Body *body, int x, int y))
 {
@@ -410,9 +422,10 @@ int main(int argc, char* args[] )
         spawnEnemy(&app);
         app.game.spawnTime = startTime;
       }
+
+			checkGameover(&app);
       move_enemies(&app);
 			render(&app);
-			checkGameover(&app);
 		} else if (app.state == STATE_CREDITS) {
 			renderCredits(&app);
 		}	else {

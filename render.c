@@ -102,7 +102,7 @@ void showPowerups(App *app)
       app->game.board.sprite[i].rect = rect;
     }
   }
-      
+
 }
 
 void renderPowerups(App *app)

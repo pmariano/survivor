@@ -87,7 +87,7 @@ int is_empty(Game *game, Body *body, int x, int y)
 
 void body_move(Game *game, Body *body, float angle)
 {
-	if(body->action == ACTION_DEATH){
+	if(body->status== BODY_DEAD){
 		return;
 	}
 
