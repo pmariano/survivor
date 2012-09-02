@@ -77,6 +77,7 @@ typedef enum {
 typedef struct {
   SDL_Surface *screen;
   Game game;
+  int debug;
   AppState state;
   /**
    * just to handle if is to show or not the resume page

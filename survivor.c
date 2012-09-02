@@ -11,7 +11,7 @@
 #include "movement.h"
 #include "aStarLibrary.h"
 
-#define FPS 140
+#define FPS 40
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
 void finishHim(App *app){
@@ -76,6 +76,9 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			break;
 		case SDLK_2:
 			pauseOrJoinTheGame(app, player2);
+			break;
+		case SDLK_0:
+			app->debug ^= 1;
 			break;
 		case SDLK_ESCAPE:
 			finishHim(app);
@@ -218,6 +221,7 @@ void handleDelay(Uint32 start) {
 int main(int argc, char* args[] )
 {
 	App app;
+	app.debug = 0;
 	memset(&app, 0, sizeof(app));
 
 	app.state = STATE_MENU;
@@ -225,7 +229,7 @@ int main(int argc, char* args[] )
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
-  InitializePathfinder();  
+  InitializePathfinder();
 	renderInit(&app);
 	gameInit(&app);
 	moveInit(&app);
@@ -235,10 +239,10 @@ int main(int argc, char* args[] )
 		bindKeyboard(&app);
 
 		if (app.state == STATE_PLAYING){
-			pathStatus[1] = FindPath(1, 
-				app.game.enemy.body.pos.x, 
-				app.game.enemy.body.pos.y, 
-				app.game.player1.body.pos.x, 
+			pathStatus[1] = FindPath(1,
+				app.game.enemy.body.pos.x,
+				app.game.enemy.body.pos.y,
+				app.game.player1.body.pos.x,
 				app.game.player1.body.pos.y);
 			enemy_move(&app.game, &app.game.enemy.body);
 			render(&app);

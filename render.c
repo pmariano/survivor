@@ -47,16 +47,13 @@ void render(App *app){
 
   SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
 
-  renderPlayer(app->screen, &game.player1);
-  renderPlayer(app->screen, &game.player2);
-  renderEnemy(app->screen, &game.enemy);
-  //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
-  SDL_Flip(app->screen);
-  for (x=0; x < mapWidth;x++) {
-	for (y=0; y < mapHeight;y++) {
-	  if(walkability[x][y]) {
-		SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
-		SDL_FillRect(app->screen, &rect , 0xffffff);
+  if(app->debug){
+	for (x=0; x < mapWidth;x++) {
+	  for (y=0; y < mapHeight;y++) {
+		if(walkability[x][y]) {
+		  SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
+		  SDL_FillRect(app->screen, &rect , 0xffffff);
+		}
 	  }
 	}
   }
