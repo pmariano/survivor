@@ -16,9 +16,15 @@ typedef struct{
   SDL_Surface *image;
 } Player;
 
+typedef struct{
+  SDL_Surface *image;
+  SDL_Surface *hit;
+} Board;
+
 typedef struct {
   Player player1;
   Player player2;
+  Board board;
 } Game;
 
 typedef enum {

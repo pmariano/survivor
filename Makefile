@@ -18,8 +18,8 @@ clean:
 %.o : %.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
-survivor.o: survivor.c
-	$(CC) $(CFLAGS) $< -c -o $@
+render.o: survivor.c | app.h render.h
+survivor.o: survivor.c | app.h
 
 $(OUTPUT): survivor.o render.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
