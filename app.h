@@ -26,10 +26,10 @@ typedef struct {
 } Menu;
 
 typedef enum {
-    ACTION_MOVE=0,
-    ACTION_ATTACK,
-    ACTION_DEATH,
-    ACTION_COUNT
+  ACTION_MOVE=0,
+  ACTION_ATTACK,
+  ACTION_DEATH,
+  ACTION_COUNT
 } Action;
 
 typedef enum {
@@ -38,7 +38,16 @@ typedef enum {
 } PlayerStatus;
 
 typedef struct {
+  SDL_Surface *image;
+  float damage;
+  int ammo;
+} Item;
+
+typedef struct {
   SDL_Rect pos;
+  float life;
+  int ammo;
+  Item item;
   Action action;
   float max_vel;
   float ang_vel;
@@ -68,7 +77,6 @@ typedef struct{
   SDL_Surface *image;
   EnemyState state;
 } Enemy;
-
 
 typedef struct {
 	int x,y;
