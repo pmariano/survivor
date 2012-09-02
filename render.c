@@ -147,14 +147,14 @@ void renderCredits(App *app)
 	text_write_raw(screen, 100, 250, "Pedro Mariano", white, 26);
 	text_write_raw(screen, 100, 300, "Caires Vinicius", white, 26);
 
-	text_write_raw(screen, 100, 350, "chars", green, 36);
-	text_write_raw(screen, 100, 400, "based on http://pixelblock.tumblr.com", white, 26);
-	text_write_raw(screen, 100, 450, "modified by Pedro Jatoba", white, 26);
+	text_write_raw(screen, 100, 400, "chars", green, 36);
+	text_write_raw(screen, 100, 450, "based on http://pixelblock.tumblr.com", white, 26);
+	text_write_raw(screen, 100, 500, "modified by Pedro Jatoba", white, 26);
 
-	text_write_raw(screen, 100, 500, "tileset", green, 36);
-	text_write_raw(screen, 100, 550, "lost garden", white, 26);
-	text_write_raw(screen, 400, 500, "font", green, 36);
-	text_write_raw(screen, 400, 550, "Pixelsix, 2005 by Cal Henderson", white, 26);
+	text_write_raw(screen, 100, 600, "tileset", green, 36);
+	text_write_raw(screen, 100, 650, "lost garden", white, 26);
+	text_write_raw(screen, 400, 600, "font", green, 36);
+	text_write_raw(screen, 400, 650, "Pixelsix, 2005 by Cal Henderson", white, 26);
   } else {
 	text_write_raw(screen, 100, 150, "Musics", green, 36);
 	text_write_raw(screen, 100, 200, "cluck, Computer Savvy - The J Arthut Keenes band", white, 26);
