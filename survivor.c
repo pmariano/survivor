@@ -19,6 +19,17 @@ void finishHim(App *app){
 	app->state = STATE_EXIT;
 }
 
+void checkGameover(App *app){
+  Player *player1 = &app->game.player1;
+  Player *player2 = &app->game.player2;
+
+	if(!(player1->state == PLAYER_IDLE && player2->state == PLAYER_IDLE)){
+		if(!(player1->state == PLAYER_READY || player2->state == PLAYER_READY)){
+			app->state = STATE_GAMEOVER;
+		}
+	}
+}
+
 void gameInit(App *app){
   app->game.start = SDL_GetTicks();
   app->game.spawnTime = app->game.start;
@@ -158,7 +169,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 			}
 			break;
 		case SDLK_ESCAPE:
-			app->state = STATE_PAUSED;
+			finishHim(app);
 			break;
 	}
 }
@@ -401,6 +412,7 @@ int main(int argc, char* args[] )
       }
       move_enemies(&app);
 			render(&app);
+			checkGameover(&app);
 		} else if (app.state == STATE_CREDITS) {
 			renderCredits(&app);
 		}	else {
