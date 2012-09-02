@@ -85,6 +85,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 			break;
 		case SDLK_a:
 		case SDLK_z:
+		case SDLK_RETURN:
 			if(menu->selected == MENU_NEW_GAME){
 				app->state = STATE_PLAYING;
 			} else if (menu->selected == MENU_QUIT){
