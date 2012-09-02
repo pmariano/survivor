@@ -71,12 +71,14 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		case SDLK_2:
 			player2->state = PLAYER_READY;
 			break;
+		case SDLK_UP:
 		case SDLK_q:
 		case SDLK_t:
 			if(menu->selected != 0){
 				menu->selected--;
 			}
 			break;
+		case SDLK_DOWN:
 		case SDLK_w:
 		case SDLK_y:
 			if(menu->selected < MENU_COUNT - 1){
@@ -86,6 +88,11 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		case SDLK_a:
 		case SDLK_z:
 		case SDLK_RETURN:
+			if(*key == SDLK_z){
+				player2->state = PLAYER_READY;
+			} else {
+				player1->state = PLAYER_READY;
+			}
 			if(menu->selected == MENU_NEW_GAME){
 				app->state = STATE_PLAYING;
 			} else if (menu->selected == MENU_QUIT){
