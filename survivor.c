@@ -151,7 +151,7 @@ void gameInit(App *app){
 	Body *p1body = &app->game.player1.body;
 	p1body->ang_vel = 0.3;
 	p1body->max_vel = 5;
-	p1body->angle = 1;
+	p1body->angle = 0;
 	p1body->pos.x = 1204/2+15;
 	p1body->pos.y = 768/2+15;
 
@@ -165,6 +165,13 @@ void gameInit(App *app){
 	p2body->angle = 1;
 	p2body->pos.x = 1204/2+40;
 	p2body->pos.y = 768/2+40;
+  
+  Body *enemybody = &app->game.enemy.body;
+	enemybody->ang_vel = 0.3;
+	enemybody->max_vel = 5;
+	enemybody->angle = 1;
+	enemybody->pos.x = 1204/2-550;
+	enemybody->pos.y = 768/2+80;
 }
 
 int main(int argc, char* args[] )
