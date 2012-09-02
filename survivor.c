@@ -203,6 +203,7 @@ int main(int argc, char* args[] )
 	App app;
 	Menu menu;
 	app.state = STATE_MENU;
+	app.menu.selected = 0;
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
