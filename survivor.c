@@ -31,7 +31,6 @@ void checkGameover(App *app){
 	}
 	int numDeadPlayers = (player1->body.status == BODY_DEAD) + (player2->body.status == BODY_DEAD);
 
-	printf("numero de mortos: %i/%i\n", numDeadPlayers, numCurrentPlayers);
 
 	if(numCurrentPlayers == numDeadPlayers){
 		app->game.kill_count -= numDeadPlayers;
@@ -43,11 +42,26 @@ void gameInit(App *app){
   app->game.start = SDL_GetTicks();
   app->game.spawnTime = app->game.start;
 
-	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = .5;
+	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = 1;
 	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 75;
 	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
 	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].image = IMG_Load("data/bullet_ammo.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].shot_image = IMG_Load("data/bullet_shot.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].freq = 8;
+	app->game.itemtype[ITEM_PLAYER_BULLET].spread = 3;
+	app->game.itemtype[ITEM_PLAYER_BULLET].ammo_total = 1000;
+	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 250;
+	app->game.itemtype[ITEM_PLAYER_FLAME].range = 150;
+	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].hit_image = IMG_Load("data/fire_hit.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].shot_image = IMG_Load("data/fire_shot.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].spread = 40;
+	app->game.itemtype[ITEM_PLAYER_FLAME].freq = 2;
+	app->game.itemtype[ITEM_PLAYER_FLAME].ammo_total = 250;
+	app->game.itemtype[ITEM_HEALTH_PACK].damage = -50;
+	app->game.itemtype[ITEM_HEALTH_PACK].image = IMG_Load("data/health.png");
 
 	/**
 	 * Player 1 init settings
@@ -75,7 +89,6 @@ void gameInit(App *app){
 
 	p2body->status = BODY_ALIVE;
 	app->game.latest_enemy_updated = 0;
-	app->game.item_count = 0;
 
 	app->credits = 0;
   int i;
@@ -122,10 +135,10 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			app->state = STATE_PAUSED;
 			break;
 		case SDLK_s:
-			grab(app, player1);
+			grab(app, &player1->body);
 			break;
 		case SDLK_x:
-			grab(app, player2);
+			grab(app, &player2->body);
 			break;
 	}
 }
@@ -317,6 +330,16 @@ void loadMap(App *app, int map_index) {
 
 int grab(App *app, Body *body)
 {
+	int x = body->pos.x/tileSize;
+	int y = body->pos.y/tileSize;
+	int i = app->game.board.powerup[x][y];
+	if(i && app->game.board.powerups[--i].should_show) {
+		printf("grab %d %d = %d\n", x,y,i);
+		body->item = app->game.board.powerups[i];
+		printf("grab %p %p\n", body->item.type, app->game.board.powerups[i].type);
+		app->game.board.powerups[i].should_show = 0;
+		app->game.board.powerup[x][y] = 0;
+	}
 }
 
 int hit(App *app, Body *source, Body *target){
@@ -344,9 +367,23 @@ int hit(App *app, Body *source, Body *target){
 int draw(App *app, Body *body, int x, int y)
 {
 	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
+#if 0
 		Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
 		p[0] = 0xff;
 		p[1] = 0xff;
+#else
+		if(body->item.type->shot_image && (rand() % (body->item.type->freq)) == 0) {
+			x += (rand() % (body->item.type->spread)) - body->item.type->spread/2;
+			y += (rand() % (body->item.type->spread)) - body->item.type->spread/2;
+			SDL_Rect rect = {
+				x - body->item.type->shot_image->w/2,
+				y - body->item.type->shot_image->h/2,
+				body->item.type->shot_image->w,
+				body->item.type->shot_image->h
+			};
+			SDL_BlitSurface(body->item.type->shot_image, NULL, app->screen, &rect);
+		}
+#endif
 	}
 	int target = is_air(&app->game, body, x, y);
 	if(target) {
@@ -365,8 +402,11 @@ int shoot(App *app, Body *body)
 	int dx, dy, i, e;
 	int incx, incy, inc1, inc2;
 	int x,y;
-	int range = body->item.type->range;
-	if(rand() % 3) return;
+	int range;
+	if(body->item.ammo_used > body->item.type->ammo_total)
+		return;
+
+	range = body->item.type->range;
 
 	x1 = body->pos.x;
 	y1 = body->pos.y;

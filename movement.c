@@ -8,12 +8,12 @@ void movePrepare(App *app)
 	int i;
 	memcpy(app->game.board.crowd, app->game.board.wall, sizeof(app->game.board.wall));
 	memcpy(app->game.board.hittable, app->game.board.air, sizeof(app->game.board.air));
-	if( app->game.player1.state == PLAYER_READY) {
+	if( app->game.player1.body.status == BODY_ALIVE) {
 		int x = app->game.player1.body.pos.x/tileSize;
 		int y = app->game.player1.body.pos.y/tileSize;
 		app->game.board.crowd[x][y] = 2;
 	}
-	if( app->game.player2.state == PLAYER_READY) {
+	if( app->game.player2.body.status == BODY_ALIVE) {
 		int x = app->game.player2.body.pos.x/tileSize;
 		int y = app->game.player2.body.pos.y/tileSize;
 		app->game.board.crowd[x][y] = 3;
@@ -210,8 +210,6 @@ int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y)
 	return 0;
 }
 
-// FIXME powerups aparecendo em cima da mese
-// FIXME powerups aparecendo uns sobre os outros
 int powerup_spawn_pos(Game *game, int *x, int *y) {
 	int i;
 	for(i=0; i< 10; i++) {
