@@ -9,18 +9,42 @@
 #include "app.h"
 #include "render.h"
 
-void move(char* msg){
-  printf("%s\n",msg);
+
+void angle_rotate(int *a0_base, int a1, float f)
+{
+    int a0 = *a0_base;
+    if(fabs(a1 - a0) > 180) {
+        if(a0 < a1)
+            a0 += 360;
+        else
+            a1 += 360;
+    }
+    *a0_base = (int)((720+a0)*(1-f) + f*(720+a1)) % 360;
+}
+
+void body_move(Game *game, Body *body, int angle)
+{
+    if(body->action == ACTION_DEATH){
+	  return;
+	}
+	printf("body: angle: %i", body->angle);
+
+    float v = body->max_vel;
+
+    angle_rotate(&body->angle, angle, body->ang_vel);
+    float a = body->angle * M_PI / 180;
+    body->pos.x += cos(a) * v;
+    body->pos.y -= sin(a) * v;
+    //body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
 void finishHim(App *app){
-  printf("FINISH HIM");
   app->state = STATE_EXIT;
 }
 
 void handleArcadeKeys(App *app, SDLKey *key){
-  Player player1 = app->game.player1;
-  Player player2 = app->game.player2;
+  Player *player1 = &app->game.player1;
+  Player *player2 = &app->game.player2;
   switch(*key){
 	/**
 	 * Player 1 settings:
@@ -29,19 +53,19 @@ void handleArcadeKeys(App *app, SDLKey *key){
 	 * S = SECONDARY ATTACK
 	 * */
 	case SDLK_1:
-	  player1.state = PLAYER_READY;
-	  break;
-	case SDLK_q:
-	  move("up");
+	  player1->state = PLAYER_READY;
 	  break;
 	case SDLK_w:
-	  move("down");
+	  body_move(&app->game, &player1->body, 90);
 	  break;
-	case SDLK_r:
-	  move("right");
+	case SDLK_s:
+	  body_move(&app->game, &player1->body, 270);
 	  break;
-	case SDLK_e:
-	  move("left");
+	case SDLK_a:
+	  body_move(&app->game, &player1->body, 180);
+	  break;
+	case SDLK_d:
+	  body_move(&app->game, &player1->body, 0);
 	  break;
 	/**
 	 * Player 2 settings:
@@ -50,19 +74,19 @@ void handleArcadeKeys(App *app, SDLKey *key){
 	 * S = SECONDARY ATTACK
 	 * */
 	case SDLK_2:
-	  player2.state = PLAYER_READY;
+	  player2->state = PLAYER_READY;
 	  break;
 	case SDLK_t:
-	  move("up");
+	  body_move(&app->game, &player2->body, 0);
 	  break;
 	case SDLK_y:
-	  move("down");
+	  body_move(&app->game, &player2->body, 90);
 	  break;
 	case SDLK_u:
-	  move("right");
+	  body_move(&app->game, &player2->body, 45);
 	  break;
 	case SDLK_i:
-	  move("left");
+	  body_move(&app->game, &player2->body, 180);
 	  break;
 	case SDLK_ESCAPE:
 	  finishHim(app);
@@ -86,7 +110,7 @@ void handleMenu(App *app){
 }
 
 int hasNoReadyPlayers(Game *game) {
-  return game->player1.state == PLAYER_READY || game->player2.state == PLAYER_READY;
+  return !game->player1.state == PLAYER_READY && !game->player2.state == PLAYER_READY;
 }
 
 int main( int argc, char* args[] )
@@ -110,4 +134,5 @@ int main( int argc, char* args[] )
 
 	return 0;
 }
+
 

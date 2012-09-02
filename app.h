@@ -6,14 +6,32 @@ typedef struct {
 } Menu;
 
 typedef enum {
-  PLAYER_READY,
+    ACTION_MOVE=0,
+    ACTION_ATTACK,
+    ACTION_DEATH,
+    ACTION_COUNT
+} Action;
+
+typedef enum {
   PLAYER_IDLE,
+  PLAYER_READY,
 } PlayerStatus;
+
+typedef struct {
+  SDL_Rect pos;
+  Action action;
+  float max_vel;
+  float ang_vel;
+  int angle; // degree
+} Body;
 
 typedef struct{
   PlayerStatus state;
-  SDL_Rect position;
-  SDL_Surface *image;
+  Body body;
+  SDL_Surface *left;
+  SDL_Surface *right;
+  SDL_Surface *up;
+  SDL_Surface *down;
 } Player;
 
 typedef struct{
@@ -28,8 +46,8 @@ typedef struct {
 } Game;
 
 typedef enum {
-  STATE_EXIT,
   STATE_MENU,
+  STATE_EXIT,
 } AppState;
 
 typedef struct {
