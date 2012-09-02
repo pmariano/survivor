@@ -168,6 +168,7 @@ typedef struct {
    * TODO: should be refactored to not use this attr
    */
   AppState stateBeforeCredits;
+  SDL_Surface *logo;
   Menu menu;
 } App;
 

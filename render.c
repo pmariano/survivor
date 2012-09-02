@@ -179,8 +179,8 @@ void renderFinish(App *app){
   SDL_Flip(app->screen);
 }
 
-
 void renderInit(App *app){
+  app->logo = IMG_Load("data/logo.png");
   app->menu.soldier = IMG_Load("data/soldado1_grande.png");
   app->menu.bigZombie = IMG_Load("data/zombie2_grande.png");
   app->menu.zombie = IMG_Load("data/zombie1.png");
@@ -209,6 +209,12 @@ void renderMenu(App *app){
 	SDL_FillRect(app->screen, NULL , color);
 	Menu *menu = &app->menu;
 	SDL_Surface *screen = app->screen;
+
+
+	SDL_Rect logoPos = {-450, -650, screen->w, screen->h};
+	SDL_BlitSurface(app->logo, &logoPos, screen, NULL);
+
+    text_write_raw(screen, -450, -700, "Ola mundo", green, 30);
 
 	SDL_Rect titleCharPos = {-700, -50, screen->w, screen->h};
 	SDL_BlitSurface(menu->zombie, &titleCharPos, screen, NULL);
