@@ -20,7 +20,8 @@ clean:
 
 render.o: survivor.c | app.h render.h
 survivor.o: survivor.c | app.h
+movement.o: survivor.c | movement.h
 
-$(OUTPUT): survivor.o render.o font.o adler.o
+$(OUTPUT): survivor.o render.o font.o adler.o movement.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 
