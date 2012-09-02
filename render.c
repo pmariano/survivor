@@ -50,8 +50,8 @@ void render(App *app){
 void renderMapInit(App *app, int map_index) {
 	char image_path[256];
 	char hit_path[256];
-	sprintf(image_path, "map%d.bmp", map_index);
-	sprintf(hit_path, "map%d_hit.bmp", map_index);
+	sprintf(image_path, "data/map%d.bmp", map_index);
+	sprintf(hit_path, "data/map%d_hit.bmp", map_index);
 	app->game.board.image = IMG_Load(image_path);
 	app->game.board.hit = IMG_Load(hit_path);
 
@@ -59,14 +59,14 @@ void renderMapInit(App *app, int map_index) {
 void renderInit(App *app){
 	renderMapInit(app, 0);
 
-	app->game.player1.up = IMG_Load("soldado1_costas.png");
-	app->game.player1.down = IMG_Load("soldado1.png");
-	app->game.player1.left = IMG_Load("soldado1.png");
-	app->game.player1.right = IMG_Load("soldado1_costas.png");
-	app->game.player2.up = IMG_Load("engenheiro1.png");
-	app->game.player2.down = IMG_Load("engenheiro1.png");
-	app->game.player2.left = IMG_Load("engenheiro1.png");
-	app->game.player2.right = IMG_Load("engenheiro1.png");
+	app->game.player1.up = IMG_Load("data/soldado1_costas.png");
+	app->game.player1.down = IMG_Load("data/soldado1.png");
+	app->game.player1.left = IMG_Load("data/soldado1.png");
+	app->game.player1.right = IMG_Load("data/soldado1_costas.png");
+	app->game.player2.up = IMG_Load("data/engenheiro1.png");
+	app->game.player2.down = IMG_Load("data/engenheiro1.png");
+	app->game.player2.left = IMG_Load("data/engenheiro1.png");
+	app->game.player2.right = IMG_Load("data/engenheiro1.png");
   app->game.enemy.image = IMG_Load("zombie1.png");
 
 	app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
@@ -86,7 +86,6 @@ void renderMenu(App *app){
 	Menu *menu = &app->menu;
 	SDL_Surface *screen = app->screen;
 
-	printf("menu %d\n", menu->selected);
 	text_write(screen, 100, 250, "new game", menu->selected == MENU_NEW_GAME);
 	text_write(screen, 100, 450, "credits", menu->selected == MENU_CREDITS);
 	text_write(screen, 100, 550, "exit", menu->selected == MENU_QUIT);

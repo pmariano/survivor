@@ -3,3 +3,4 @@
 
 void angle_rotate(int *a0_base, int a1, float f);
 void body_move(Game *game, Body *body, int angle);
+void player_move(Game *game, Body *body, int up, int right, int down, int left);

@@ -98,36 +98,25 @@ void bindGameplayKeystate(App *app){
 	 * S = SECONDARY ATTACK
 	 * */
 
-	if (keystate[SDLK_UP] || keystate[SDLK_q] ) {
-		body_move(&app->game, &player1->body, 90);
-	}
-	if (keystate[SDLK_RIGHT] || keystate[SDLK_r]) {
-		body_move(&app->game, &player1->body, 0);
-	}
-	if (keystate[SDLK_DOWN] || keystate[SDLK_w]) {
-		body_move(&app->game, &player1->body, 270);
-	}
-	if (keystate[SDLK_LEFT] || keystate[SDLK_e] ) {
-		body_move(&app->game, &player1->body, 180);
-	}
+	player_move(&app->game, &player1->body, 
+		keystate[SDLK_UP] || keystate[SDLK_q],
+		keystate[SDLK_RIGHT] || keystate[SDLK_r],
+		keystate[SDLK_DOWN] || keystate[SDLK_w],
+		keystate[SDLK_LEFT] || keystate[SDLK_e]
+	);
+
 	/**
 	 * Player 2 settings:
 	 * T = UP; Y = DOWN; U = LEFT;I = RIGHT
 	 * Z = ATTACK
 	 * S = SECONDARY ATTACK
 	 * */
-	if (keystate[SDLK_KP8] || keystate[SDLK_t]) {
-		body_move(&app->game, &player2->body, 90);
-	}
-	if (keystate[SDLK_KP6] || keystate[SDLK_i]) {
-		body_move(&app->game, &player2->body, 0);
-	}
-	if (keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_y] ) {
-		body_move(&app->game, &player2->body, 270);
-	}
-	if (keystate[SDLK_KP4] || keystate[SDLK_u]) {
-		body_move(&app->game, &player2->body, 180);
-	}
+	player_move(&app->game, &player2->body, 
+		keystate[SDLK_KP6] || keystate[SDLK_i],
+		keystate[SDLK_KP8] || keystate[SDLK_t],
+		keystate[SDLK_KP4] || keystate[SDLK_u],
+		keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_y]
+	);
 }
 
 void bindKeyboard(App *app)
