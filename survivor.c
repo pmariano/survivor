@@ -18,6 +18,37 @@ void finishHim(App *app){
 	app->state = STATE_EXIT;
 }
 
+void gameInit(App *app){
+  app->game.start = SDL_GetTicks();
+  app->game.spawnTime = app->game.start;
+	/**
+	 * Player 1 init settings
+	 * */
+	Body *p1body = &app->game.player1.body;
+	p1body->ang_vel = 0.3;
+	p1body->max_vel = 5;
+	p1body->angle = 0;
+	p1body->pos.x = app->screen->w/2+15;
+	p1body->pos.y = app->screen->h/2+15;
+
+	/**
+	 * Player 2 init settings
+	 * */
+	Body *p2body = &app->game.player2.body;
+
+	p2body->ang_vel = 0.3;
+	p2body->max_vel = 5;
+	p2body->angle = 1;
+	p2body->pos.x = app->screen->w/2+40;
+	p2body->pos.y = app->screen->h/2+40;
+  int i = 0;
+  for(;i < ENEMY_COUNT; i++)
+  {
+    app->game.enemies[i].state = ENEMY_DEAD;
+  }
+
+}
+
 void resetApp(App *app){
 	gameInit(app);
 	//reset here other stuffs
@@ -173,46 +204,38 @@ void bindKeyboard(App *app)
 	}
 }
 
-void gameInit(App *app){
-	/**
-	 * Player 1 init settings
-	 * */
-	Body *p1body = &app->game.player1.body;
-	p1body->ang_vel = 0.3;
-	p1body->max_vel = 5;
-	p1body->angle = 0;
-	p1body->pos.x = 1204/2+15;
-	p1body->pos.y = 768/2+15;
-
-	/**
-	 * Player 2 init settings
-	 * */
-	Body *p2body = &app->game.player2.body;
-
-	p2body->ang_vel = 0.3;
-	p2body->max_vel = 5;
-	p2body->angle = 1;
-	p2body->pos.x = 1204/2+40;
-	p2body->pos.y = 768/2+40;
-
-	/**
-	 * Enemy Body
-	 *
-	 * */
-  Body *enemybody = &app->game.enemy.body;
-	enemybody->ang_vel = 0.3;
-	enemybody->max_vel = 5;
-	enemybody->angle = 1;
-	enemybody->pos.x = 1204/2-550;
-	enemybody->pos.y = 768/2+80;
-}
-
 void handleDelay(Uint32 start) {
 	Uint32 end = SDL_GetTicks();
 	int actual_delta = end - start;
 	int expected_delta = 1000/FPS;
 	int delay = MAX(0, expected_delta - actual_delta);
 	SDL_Delay(delay);
+}
+
+void spawnEnemy(App *app)
+{
+  Game *game = &app->game;
+  Enemy *enemy = NULL;
+  int i = 0;
+  for(; i < ENEMY_COUNT; i++)
+  {
+    if(game->enemies[i].state == ENEMY_DEAD)
+    {
+      enemy = &game->enemies[i];
+      enemy->state = ENEMY_LIVE;
+      break;
+    }
+  }
+  if(enemy != NULL)
+  {
+    enemy->image = game->enemy_class_medic.image;
+    Body *enemybody = &enemy->body;
+    enemybody->ang_vel = 0.05;
+    enemybody->max_vel = 2.5;
+    enemybody->angle = 1;
+    enemybody->pos.x = 70;
+    enemybody->pos.y = app->screen->h/2+30;
+  } 
 }
 
 int main(int argc, char* args[] )
@@ -229,20 +252,26 @@ int main(int argc, char* args[] )
   InitializePathfinder();  
 	renderInit(&app);
 	gameInit(&app);
+	moveInit(&app);
 
-  pathStatus[1] = FindPath(1, app.game.enemy.body.pos.x, app.game.enemy.body.pos.y, app.game.player1.body.pos.x, app.game.player1.body.pos.y);
 	while(app.state != STATE_EXIT){
 	  Uint32 startTime = SDL_GetTicks();
 		bindKeyboard(&app);
 
 		if (app.state == STATE_PLAYING){
+      Uint32 elapsed = startTime - app.game.spawnTime;  
+      if(elapsed > 1000)
+      {
+        spawnEnemy(&app);
+        app.game.spawnTime = startTime;
+      }
+      move_enemies(&app);
 			render(&app);
 		} else if (app.state == STATE_CREDITS) {
 			renderCredits(&app);
 		}	else {
 			renderMenu(&app);
 		}
-    enemy_move(&app.game.enemy.body);
 		handleDelay(startTime);
 	}
 

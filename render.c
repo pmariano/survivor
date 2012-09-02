@@ -1,6 +1,7 @@
 #include <SDL_image.h>
 #include "render.h"
 #include "font.h"
+#include "aStarLibrary.h"
 
 SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
@@ -36,7 +37,21 @@ void renderEnemy(SDL_Surface *screen, Enemy *enemy){
 	SDL_BlitSurface(image, NULL, screen, &rect);
 }
 
+void renderEnemies(App *app)
+{
+  int i = 0;
+  for(; i < ENEMY_COUNT; i++)
+  {
+    if(app->game.enemies[i].state == ENEMY_LIVE)
+    {
+      renderEnemy(app->screen, &app->game.enemies[i]);
+    }
+  }
+}
+
 void render(App *app){
+	int x,y;
+
 	Game game = app->game;
 
 	Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
@@ -44,9 +59,19 @@ void render(App *app){
 
 	SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
 
+
+	//for (x=0; x < mapWidth;x++) {
+	//	for (y=0; y < mapHeight;y++) {
+	//		if(walkability[x][y]) {
+	//			SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
+	//			SDL_FillRect(app->screen, &rect , 0xffffff);
+	//		}
+	//	}
+	//}
+
 	renderPlayer(app->screen, &game.player1);
 	renderPlayer(app->screen, &game.player2);
-  renderEnemy(app->screen, &game.enemy);
+  renderEnemies(app);
 	//SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 	SDL_Flip(app->screen);
 }
@@ -71,7 +96,8 @@ void renderInit(App *app){
 	app->game.player2.down = IMG_Load("data/engenheiro1.png");
 	app->game.player2.left = IMG_Load("data/engenheiro1.png");
 	app->game.player2.right = IMG_Load("data/engenheiro1.png");
-	app->game.enemy.image = IMG_Load("data/zombie2.png");
+  app->game.enemy_class_medic.image = IMG_Load("data/zombie2.png");
+  app->game.enemy_class_soldier.image = IMG_Load("data/zombie2.png");
 
 	app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }

@@ -47,10 +47,21 @@ typedef struct{
   SDL_Surface *down;
 } Player;
 
+typedef enum {
+  ENEMY_LIVE,
+  ENEMY_DEAD,
+} EnemyState;
+
+typedef struct{
+  SDL_Surface *image;
+} EnemyClass;
+
 typedef struct{
   Body body;
   SDL_Surface *image;
+  EnemyState state;
 } Enemy;
+
 
 typedef struct{
   SDL_Surface *image;
@@ -60,8 +71,12 @@ typedef struct{
 typedef struct {
   Player player1;
   Player player2;
-  Enemy enemy;
+  Enemy enemies[ENEMY_COUNT];
   Board board;
+  Uint32 start;  
+  Uint32 spawnTime;  
+  EnemyClass enemy_class_medic;
+  EnemyClass enemy_class_soldier;
 } Game;
 
 typedef enum {
