@@ -5,7 +5,7 @@ char* lastMusic = "";
 Audio a;
 const char* levelMusics[3] = {"ascending.mp3", "arpanauts.mp3", "underclocked.mp3"};
 
-void playMusic(char* path, int qtd){
+void playMusic(const char* path, int qtd){
 	char name[300];
 
 	sprintf(name, "sounds/%s", path);
@@ -27,7 +27,7 @@ void playMusic(char* path, int qtd){
 }
 
 void playRandomMusic(){
-	char* musicName = levelMusics[random()%3];
+	const char* musicName = levelMusics[random()%3];
 	playMusic(musicName, -1);
 }
 
