@@ -20,7 +20,7 @@ void renderPlayer(SDL_Surface *screen, Player *player){
 	else return;
 	SDL_Rect rect = {
 		player->body.pos.x - image->w/2,
-		player->body.pos.y - image->h,
+		player->body.pos.y - image->h*3/4,
 		player->body.pos.w,
 		player->body.pos.h
 	};
@@ -38,7 +38,7 @@ void renderEnemies(App *app)
       SDL_Surface *image = enemy->image;
       SDL_Rect rect = {
         enemy->body.pos.x - image->w/2,
-        enemy->body.pos.y - image->h/2,
+        enemy->body.pos.y - image->h*3/4,
         enemy->body.pos.w,
         enemy->body.pos.h
       };

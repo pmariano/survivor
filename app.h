@@ -2,7 +2,7 @@
 #define _APP_H
 #include <SDL.h>
 
-#define ENEMY_COUNT 1
+#define ENEMY_COUNT 666
 #include "aStarLibrary.h"
 
 typedef enum {

@@ -156,8 +156,10 @@ void player_move(Game *game, Body *body, int up, int right, int down, int left)
 int enemy_spawn_pos(Game *game, int *x, int *y) {
 	if(!game->board.spawn_count) return 0;
 	int i = rand() % game->board.spawn_count;
-	*x = game->board.spawn[i].x+tileSize/2;
-	*y = game->board.spawn[i].y+tileSize/2;
+	// printf("%d %d\n", i, rand() % game->board.spawn_count);
+
+	*x = game->board.spawn[i].x*tileSize+tileSize/2;
+	*y = game->board.spawn[i].y*tileSize+tileSize/2;
 	return 1;
 }
 
@@ -189,3 +191,4 @@ int powerup_spawn_pos(Game *game, int *x, int *y) {
 	}
 	return 0;
 }
+

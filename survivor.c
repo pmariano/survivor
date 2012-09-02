@@ -244,7 +244,7 @@ void spawnEnemy(App *app)
     enemybody->max_vel = 2.5;
     enemybody->angle = 1;
     enemybody->pos.x = x;
-    enemybody->pos.y = app->screen->h/2+30;
+    enemybody->pos.y = y;
   }
 }
 
