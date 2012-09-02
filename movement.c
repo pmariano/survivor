@@ -131,14 +131,32 @@ void move_enemies(App *app)
   for(i=0; i < ENEMY_COUNT; i++)
   {
     int id = app->game.latest_enemy_updated = ( app->game.latest_enemy_updated + 1 ) % ENEMY_COUNT;
+    int crazy = id*2;
     if(app->game.enemies[id].state == ENEMY_LIVE)
     {
         Body *enemy_body = &app->game.enemies[id].body;
-        pathStatus[id] = FindPath(id,
+        pathStatus[crazy] = FindPath(crazy,
             enemy_body->pos.x,
             enemy_body->pos.y,
             app->game.player1.body.pos.x,
             app->game.player1.body.pos.y);
+
+        pathStatus[crazy+1] = FindPath(crazy+1,
+            enemy_body->pos.x,
+            enemy_body->pos.y,
+            app->game.player2.body.pos.x,
+            app->game.player2.body.pos.y);
+
+
+        if(pathLength[crazy] < pathLength[crazy+1]){
+          app->game.enemies[id].pathfinder = crazy;
+          app->game.enemies[id].target = &app->game.player1.body;
+        }else{
+          app->game.enemies[id].pathfinder = crazy+1;
+          app->game.enemies[id].target = &app->game.player2.body;
+        }
+
+
         break;
     }
   }
@@ -148,25 +166,16 @@ void move_enemies(App *app)
     if(app->game.enemies[i].state == ENEMY_LIVE)
     {
         Body *enemy_body = &app->game.enemies[i].body;
-        if(app->game.latest_enemy_updated+1 == i)
-        {
-          pathStatus[i] = FindPath(i,
-              enemy_body->pos.x,
-              enemy_body->pos.y,
-              app->game.player1.body.pos.x,
-              app->game.player1.body.pos.y);
-          app->game.latest_enemy_updated = i;
-        }
         if(pathStatus[i] == found)
         {
-          int reach = ReadPath(i, enemy_body->pos.x, enemy_body->pos.y, 1);
-          int dx = xPath[i] - enemy_body->pos.x;
-          int dy = yPath[i] - enemy_body->pos.y;
+          int reach = ReadPath(app->game.enemies[i].pathfinder, enemy_body->pos.x, enemy_body->pos.y, 1);
+          int dx = xPath[app->game.enemies[i].pathfinder] - enemy_body->pos.x;
+          int dy = yPath[app->game.enemies[i].pathfinder] - enemy_body->pos.y;
           float angle = ATAN2(dx,dy);
           body_move(&app->game, enemy_body, angle);
 
 		  if(reach){
-			  hit(app, enemy_body, &app->game.player1.body);
+			  hit(app, enemy_body, app->game.enemies[i].target);
 		  }
 		}
 	}

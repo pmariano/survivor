@@ -118,6 +118,9 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 		case SDLK_0:
 			app->debug ^= 1;
 			break;
+		case SDLK_9:
+			spawnEnemy(app);
+			break;
 		case SDLK_ESCAPE:
 			app->state = STATE_PAUSED;
 			break;
@@ -176,6 +179,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 			} else {
 				printf("player 1 is ready\n");
 				player1->state = PLAYER_READY;
+				player2->state = PLAYER_READY;
 			}
 
 			if(menu->selected == MENU_NEW_GAME){
@@ -443,7 +447,7 @@ int main(int argc, char* args[] )
 		if (app.state == STATE_PLAYING){
 			playRandomMusic();
 			Uint32 elapsed = startTime - app.game.spawnTime;
-			if(elapsed > 1000)
+			if(elapsed > 500)
 			{
 				spawnEnemy(&app);
 				app.game.spawnTime = startTime;
