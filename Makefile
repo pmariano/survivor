@@ -10,7 +10,7 @@ else
   OUTPUT=survivor
 endif
 
-all: $(OUTPUT)
+all: clean $(OUTPUT)
 
 clean:
 	rm -fv survivor survivor.exe *.o

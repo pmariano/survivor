@@ -26,14 +26,12 @@ typedef struct {
 } Menu;
 
 typedef enum {
-  ACTION_MOVE=0,
-  ACTION_ATTACK,
-  ACTION_DEATH,
-  ACTION_COUNT
-} Action;
+  BODY_ALIVE = 0,
+  BODY_DEAD
+} BodyStatus;
 
 typedef enum {
-  PLAYER_IDLE,
+  PLAYER_IDLE = 0,
   PLAYER_DEAD,
   PLAYER_READY,
 } PlayerStatus;
@@ -59,7 +57,7 @@ typedef struct {
   float life;
   int ammo;
   Item item;
-  Action action;
+  BodyStatus status;
   float max_vel;
   float ang_vel;
   float angle; // degree
@@ -121,6 +119,10 @@ enum {
 	ITEM_PLAYER_BULLET,
 	ITEM_COUNT
 };
+enum {
+  ENEMY_MEDIC,
+  ENEMY_SOLDIER
+};
 
 typedef struct {
   Player player1;
@@ -133,8 +135,10 @@ typedef struct {
   EnemyClass enemy_class_soldier;
   int latest_enemy_updated;
   int item_count;
+  int kill_count;
   HealthPack health_pack;
   ItemType itemtype[ITEM_COUNT];
+  EnemyClass enemy_class[1];
 } Game;
 
 typedef enum {
