@@ -39,10 +39,22 @@ void renderEnemy(SDL_Surface *screen, Enemy *enemy){
 	SDL_BlitSurface(image, NULL, screen, &rect);
 }
 
-void render(App *app){
-  int x,y;
+void renderEnemies(App *app)
+{
+  int i = 0;
+  for(; i < ENEMY_COUNT; i++)
+  {
+    if(app->game.enemies[i].state == ENEMY_LIVE)
+    {
+      renderEnemy(app->screen, &app->game.enemies[i]);
+    }
+  }
+}
 
-  Game game = app->game;
+void render(App *app){
+	int x,y;
+
+	Game game = app->game;
 
   Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
   SDL_FillRect(app->screen, NULL , color);
@@ -82,7 +94,8 @@ void renderInit(App *app){
 	app->game.player2.down = IMG_Load("data/engenheiro1.png");
 	app->game.player2.left = IMG_Load("data/engenheiro1.png");
 	app->game.player2.right = IMG_Load("data/engenheiro1.png");
-	app->game.enemy.image = IMG_Load("data/zombie2.png");
+  app->game.enemy_class_medic.image = IMG_Load("data/zombie2.png");
+  app->game.enemy_class_soldier.image = IMG_Load("data/zombie2.png");
 
 	app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }
