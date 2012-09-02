@@ -81,7 +81,9 @@ void renderInit(App *app){
 	renderMapInit(app, 0);
 
 	app->menu.soldier = IMG_Load("data/soldado1_grande.png");
-	app->menu.zombie = IMG_Load("data/engenheiro1_grande.png");
+	app->menu.zombie = IMG_Load("data/zombie1.png");
+	app->menu.bigZombie = IMG_Load("data/zombie2_grande.png");
+	app->menu.engineer = IMG_Load("data/engenheiro1.png");
 	app->game.player1.up = IMG_Load("data/soldado1_costas.png");
 	app->game.player1.down = IMG_Load("data/soldado1.png");
 	app->game.player1.left = IMG_Load("data/soldado1.png");
@@ -105,11 +107,16 @@ void renderMenu(App *app){
 	Menu *menu = &app->menu;
 	SDL_Surface *screen = app->screen;
 
-	SDL_Rect soldierPos = {-700, -50, screen->w, screen->h};
-    SDL_BlitSurface(menu->soldier, &soldierPos, screen, NULL );
+	SDL_Rect titleCharPos = {-700, -50, screen->w, screen->h};
+	SDL_BlitSurface(menu->engineer, &titleCharPos, screen, NULL );
 
-	SDL_Rect engPos = {-700, -400, screen->w, screen->h};
-    SDL_BlitSurface(menu->zombie, &engPos, screen, NULL );
+	if(app->state == STATE_PAUSED) {
+	  SDL_Rect highlightChar = {-750, -450, screen->w, screen->h};
+	  SDL_BlitSurface(menu->bigZombie, &highlightChar, screen, NULL );
+	} else {
+	  SDL_Rect highlightChar = {-700, -450, screen->w, screen->h};
+	  SDL_BlitSurface(menu->soldier, &highlightChar, screen, NULL );
+	}
 
 	int resumePadding = 0;
 	if(app->state  == STATE_PAUSED){
@@ -131,7 +138,7 @@ void renderCredits(App *app)
 	SDL_Surface *screen = app->screen;
 	SDL_FillRect(screen, NULL , color);
 
-	SDL_Rect zombiePos = {-700, -50, screen->w, screen->h};
+	SDL_Rect zombiePos = {-670, -50, screen->w, screen->h};
     SDL_BlitSurface(app->menu.zombie, &zombiePos, screen, NULL );
 
     text_write_raw(screen, 300, 50, "Credits", red, 96);
