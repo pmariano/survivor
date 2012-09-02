@@ -7,15 +7,16 @@ void movePrepare(App *app)
 {
 	int i;
 	memcpy(app->game.board.crowd, app->game.board.wall, sizeof(app->game.board.wall));
+#if 1
 	if( app->game.player1.state == PLAYER_READY) {
 		int x = app->game.player1.body.pos.x/tileSize;
 		int y = app->game.player1.body.pos.y/tileSize;
-		app->game.board.crowd[x][y] = unwalkable;
+		app->game.board.crowd[x][y] = 2;
 	}
 	if( app->game.player2.state == PLAYER_READY) {
 		int x = app->game.player2.body.pos.x/tileSize;
 		int y = app->game.player2.body.pos.y/tileSize;
-		app->game.board.crowd[x][y] = unwalkable;
+		app->game.board.crowd[x][y] = 3;
 	}
 	for(i=0; i < ENEMY_COUNT; i++)
 	{
@@ -23,10 +24,11 @@ void movePrepare(App *app)
 		{
 			int x = app->game.enemies[i].body.pos.x/tileSize;
 			int y = app->game.enemies[i].body.pos.y/tileSize;
-			app->game.board.crowd[x][y] = unwalkable;
+			app->game.board.crowd[x][y] = 4+i;
 		}
 
 	}
+#endif
 }
 
 
@@ -35,6 +37,7 @@ void moveInit(App *app)
 	int x,y;
 	SDL_Surface *hit = app->game.board.hit;
 	memset(app->game.board.wall, 0, sizeof(app->game.board.wall));
+	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
 	app->game.board.spawn_count = 0;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
@@ -114,11 +117,6 @@ void body_move(Game *game, Body *body, float angle)
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
-void hit(Body *source, Body *target){
-	int damage = source->item.damage;
-	target->life -= source->item.damage;
-}
-
 void move_enemies(App *app)
 {
   int i = 0;
@@ -159,12 +157,12 @@ void move_enemies(App *app)
           float angle = ATAN2(dx,dy);
           body_move(&app->game, enemy_body, angle);
 
-					if(reach){
-						hit(enemy_body, &app->game.player1.body);
-						printf("vida do carinha %f\n", app->game.player1.body.life);
-					}
-        }
-    }
+		  if(reach){
+			  hit(app, enemy_body, &app->game.player1.body);
+			  printf("vida do carinha %f\n", app->game.player1.body.life);
+		  }
+		}
+	}
   }
 }
 
@@ -197,7 +195,7 @@ int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y)
 	for(i=0; i< 100; i++) {
 		int x1 = rand() % mapWidth;
 		int y1 = rand() % mapHeight;
-		if(game->board.crowd[x1][y1] == walkable) {
+		if(!game->board.crowd[x1][y1]) {
 			*x = x1 * tileSize + tileSize/2;
 			*y = y1 * tileSize + tileSize/2;
 			return 1;

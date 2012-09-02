@@ -84,45 +84,6 @@ void flushRender(App *app)
 	}
 }
 
-void render(App *app){
-  int x,y;
-  app->game.board.sprite_count = 0;
-
-  Game game = app->game;
-
-  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
-  SDL_FillRect(app->screen, NULL , color);
-
-  SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
-
-  if(app->debug){
-    for (x=0; x < mapWidth;x++) {
-      for (y=0; y < mapHeight;y++) {
-        if(walkability[x][y]) {
-          SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
-          SDL_FillRect(app->screen, &rect , 0xffffff);
-        }
-      }
-    }
-  }
-
-  renderPlayer(&app->game, &game.player1);
-  renderPlayer(&app->game, &game.player2);
-  renderEnemies(app);
-  showPowerups(app);
-  if(rand() % 300 == 0)
-  {
-    renderPowerups(app, app->game.health_pack.image);
-  }
-  //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
-
-  flushRender(app);
-  renderStats(app->screen, &game.player1, &game.player2);
-
-  SDL_Flip(app->screen);
-}
-
-
 void showPowerups(App *app)
 {
   int i = 0;
@@ -161,6 +122,49 @@ void renderPowerups(App *app)
   int i = app->game.board.sprite_count++;
   app->game.board.sprite[i].image = app->game.health_pack.image;
   app->game.board.sprite[i].rect = rect;
+}
+
+
+
+void render(App *app){
+  int x,y;
+  app->game.board.sprite_count = 0;
+
+  Game game = app->game;
+
+  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
+  SDL_FillRect(app->screen, NULL , color);
+
+  SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
+
+  if(app->debug){
+    for (x=0; x < mapWidth;x++) {
+      for (y=0; y < mapHeight;y++) {
+        //if(walkability[x][y]) {
+        // if(app->game.board.wall[x][y]) {
+        //if(app->game.board.crowd[x][y]) {
+        if(app->game.board.powerup[x][y]) {
+          SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
+          SDL_FillRect(app->screen, &rect , 0xffffff);
+        }
+      }
+    }
+  }
+
+  renderPlayer(&app->game, &game.player1);
+  renderPlayer(&app->game, &game.player2);
+  renderEnemies(app);
+  showPowerups(app);
+  if(rand() % 300 == 0)
+  {
+    renderPowerups(app);
+  }
+  //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
+
+  flushRender(app);
+  renderStats(app->screen, &game.player1, &game.player2);
+
+  SDL_Flip(app->screen);
 }
 
 
