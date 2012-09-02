@@ -86,9 +86,15 @@ void renderMenu(App *app){
 	Menu *menu = &app->menu;
 	SDL_Surface *screen = app->screen;
 
-	text_write(screen, 100, 250, "new game", menu->selected == MENU_NEW_GAME);
-	text_write(screen, 100, 450, "credits", menu->selected == MENU_CREDITS);
-	text_write(screen, 100, 550, "exit", menu->selected == MENU_QUIT);
+	int resumePadding = 0;
+	if(app->state  == STATE_PAUSED){
+	  resumePadding = 100;
+	  text_write(screen, 100, 250, "resume game", menu->selected == MENU_RESUME);
+	}
+
+	text_write(screen, 100, 250 + resumePadding, "new game", menu->selected == MENU_NEW_GAME);
+	text_write(screen, 100, 450 + resumePadding, "credits", menu->selected == MENU_CREDITS);
+	text_write(screen, 100, 550 + resumePadding, "exit", menu->selected == MENU_QUIT);
 
 	SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 }
