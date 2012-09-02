@@ -41,6 +41,7 @@ typedef struct {
   SDL_Surface *image;
   float damage;
   int ammo;
+  int should_show;
 } Item;
 
 typedef struct {
@@ -115,7 +116,7 @@ typedef struct {
   EnemyClass enemy_class_medic;
   EnemyClass enemy_class_soldier;
   int latest_enemy_updated;
-  int item_count,
+  int item_count;
   HealthPack health_pack;
 } Game;
 

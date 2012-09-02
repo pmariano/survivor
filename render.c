@@ -124,18 +124,26 @@ void render(App *app){
 void renderPowerups(App *app, HealthPack health_pack)
 {
   app->game.item_count += 1;
-  int x = 500, y = 300;
-  powerup_spawn_pos(&app->game, &x, &y);
-  SDL_Rect rect = {
-    x,
-    y,
-    health_pack.image->w,
-    health_pack.image->h
-  };
-	int i = app->game.board.sprite_count++;
-	app->game.board.sprite[i].image = health_pack.image;
-	app->game.board.sprite[i].rect = rect;
-  app->game.board.powerups[app->game.item_count] = item;
+  app->game.board.powerups[app->game.item_count].should_show = 1;
+
+  int i = 0;
+  for(; i < POWERUP_COUNT; i++)
+  {
+    if(app->game.board.powerups[i].should_show == 1)
+    {
+      int x = 500, y = 300;
+      powerup_spawn_pos(&app->game, &x, &y);
+      SDL_Rect rect = {
+        x,
+        y,
+        health_pack.image->w,
+        health_pack.image->h
+      };
+      int i = app->game.board.sprite_count++;
+      app->game.board.sprite[i].image = health_pack.image;
+      app->game.board.sprite[i].rect = rect;
+    }
+  }
 }
 
 
