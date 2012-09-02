@@ -45,6 +45,11 @@ typedef struct{
 } Player;
 
 typedef struct{
+  Body body;
+  SDL_Surface *image;
+} Enemy;
+
+typedef struct{
   SDL_Surface *image;
   SDL_Surface *hit;
 } Board;
