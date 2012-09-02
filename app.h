@@ -117,6 +117,11 @@ enum {
 	ITEM_COUNT
 };
 
+enum {
+	ENEMY_MEDIC,
+	ENEMY_SOLDIER
+};
+
 typedef struct {
   Player player1;
   Player player2;
@@ -124,12 +129,11 @@ typedef struct {
   Board board;
   Uint32 start;
   Uint32 spawnTime;
-  EnemyClass enemy_class_medic;
-  EnemyClass enemy_class_soldier;
   int latest_enemy_updated;
   int item_count;
   HealthPack health_pack;
   ItemType itemtype[ITEM_COUNT];
+  EnemyClass enemy_class[1];
 } Game;
 
 typedef enum {

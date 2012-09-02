@@ -170,7 +170,6 @@ void render(App *app){
 
 void renderInit(App *app){
   app->menu.soldier = IMG_Load("data/soldado1_grande.png");
-  app->menu.zombie = IMG_Load("data/zombie1.png");
   app->menu.bigZombie = IMG_Load("data/zombie2_grande.png");
   app->menu.engineer = IMG_Load("data/engenheiro1.png");
   app->game.player1.up = IMG_Load("data/soldado1_costas.png");
@@ -182,8 +181,8 @@ void renderInit(App *app){
   app->game.player2.left = IMG_Load("data/engenheiro1.png");
   app->game.player2.right = IMG_Load("data/engenheiro1.png");
   app->game.health_pack.image = IMG_Load("data/health.png");
-  app->game.enemy_class_medic.image = IMG_Load("data/zombie2.png");
-  app->game.enemy_class_soldier.image = IMG_Load("data/zombie2.png");
+  app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie1.png");
+  app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie2.png");
 
   app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }
