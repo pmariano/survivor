@@ -7,6 +7,24 @@ SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 
+void renderStats(SDL_Surface *screen, Player *player1, Player *player2){
+  if(player1->state == PLAYER_READY){
+    text_write_raw(screen, 5, 30, "Player 1", green, 30);
+	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
+
+	SDL_Rect rect = { 5, 10, player2->body.life *2, 20};
+	SDL_FillRect(screen, &rect, color);
+  }
+
+  if(player2->state == PLAYER_IDLE){
+    text_write_raw(screen, 900, 30, "Player 2", green, 30);
+	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
+
+	SDL_Rect rect = { 830, 10, player2->body.life * 2, 20};
+	SDL_FillRect(screen, &rect, color);
+  }
+}
+
 //TODO unified zsort object render
 
 void renderPlayer(SDL_Surface *screen, Player *player){
@@ -70,8 +88,8 @@ void render(App *app){
 
   renderPlayer(app->screen, &game.player1);
   renderPlayer(app->screen, &game.player2);
+  renderStats(app->screen, &game.player1, &game.player2);
   renderEnemies(app);
-  //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
   SDL_Flip(app->screen);
 }
 
@@ -167,11 +185,10 @@ void renderCredits(App *app)
 	text_write_raw(screen, 100, 500, "http://www.freesound.org/people/LAGtheNoggin/sounds/15545/", white, 26);
 	text_write_raw(screen, 100, 550, "http://www.freesound.org/people/Sparrer/sounds/50506/", white, 26);
 	text_write_raw(screen, 100, 600, "http://www.freesound.org/people/DJ20Chronos/sounds/33380/", white, 26);
-
-
-
   }
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
+
+
 

@@ -72,7 +72,7 @@ int is_solid(Game *game, Body *body, int x, int y)
 {
 	x/=tileSize;
 	y/=tileSize;
-	
+
 	if(body->pos.x/tileSize == x && body->pos.y/tileSize == y)
 		return 0;
 	return game->board.crowd[x][y];
@@ -110,7 +110,7 @@ void body_move(Game *game, Body *body, float angle)
 		}
 	}
 
-	
+
 
 	//printf("body: angle: %f a: %f 2pi:%f y:%f\n", body->angle, a, 2*M_PI, sin(a) * v);
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
@@ -124,14 +124,14 @@ void move_enemies(App *app)
     if(app->game.enemies[i].state == ENEMY_LIVE)
     {
         Body *enemy_body = &app->game.enemies[i].body;
-        pathStatus[i] = FindPath(i, 
-            enemy_body->pos.x, 
-            enemy_body->pos.y, 
-            app->game.player1.body.pos.x, 
+        pathStatus[i] = FindPath(i,
+            enemy_body->pos.x,
+            enemy_body->pos.y,
+            app->game.player1.body.pos.x,
             app->game.player1.body.pos.y);
         if(pathStatus[i] == found)
         {
-          ReadPath(i, enemy_body->pos.x, enemy_body->pos.y, 1);    
+          ReadPath(i, enemy_body->pos.x, enemy_body->pos.y, 1);
           int dx = xPath[i] - enemy_body->pos.x;
           int dy = yPath[i] - enemy_body->pos.y;
           float angle = ATAN2(dx,dy);
