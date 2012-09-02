@@ -29,7 +29,7 @@ void gameInit(App *app){
 	p1body->ang_vel = 0.3;
 	p1body->max_vel = 5;
 	p1body->angle = 0;
-	player_spawn_pos(&p1body->pos.x, &p1body->pos.y);
+	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
 	 * Player 2 init settings
@@ -39,7 +39,7 @@ void gameInit(App *app){
 	p2body->ang_vel = 0.3;
 	p2body->max_vel = 5;
 	p2body->angle = 1;
-	player_spawn_pos(&p2body->pos.x, &p2body->pos.y);
+	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
   int i = 0;
   for(;i < ENEMY_COUNT; i++)
   {

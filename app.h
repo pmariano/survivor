@@ -2,7 +2,7 @@
 #define _APP_H
 #include <SDL.h>
 
-#define ENEMY_COUNT 666
+#define ENEMY_COUNT 1
 #include "aStarLibrary.h"
 
 typedef enum {
@@ -80,6 +80,7 @@ typedef struct{
   SDL_Surface *image;
   SDL_Surface *hit;
   char wall[mapWidth][mapHeight];
+  char crowd[mapWidth][mapHeight];
   char powerup[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;

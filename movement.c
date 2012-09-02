@@ -6,16 +6,16 @@
 void movePrepare(App *app)
 {
 	int i;
-	memcpy(walkability, app->game.board.wall, sizeof(app->game.board.wall));
+	memcpy(app->game.board.crowd, app->game.board.wall, sizeof(app->game.board.wall));
 	if( app->game.player1.state == PLAYER_READY) {
 		int x = app->game.player1.body.pos.x/tileSize;
 		int y = app->game.player1.body.pos.y/tileSize;
-		walkability[x][y] = unwalkable;
+		app->game.board.crowd[x][y] = unwalkable;
 	}
 	if( app->game.player2.state == PLAYER_READY) {
 		int x = app->game.player2.body.pos.x/tileSize;
 		int y = app->game.player2.body.pos.y/tileSize;
-		walkability[x][y] = unwalkable;
+		app->game.board.crowd[x][y] = unwalkable;
 	}
 	for(i=0; i < ENEMY_COUNT; i++)
 	{
@@ -23,7 +23,7 @@ void movePrepare(App *app)
 		{
 			int x = app->game.enemies[i].body.pos.x/tileSize;
 			int y = app->game.enemies[i].body.pos.y/tileSize;
-			walkability[x][y] = unwalkable;
+			app->game.board.crowd[x][y] = unwalkable;
 		}
 
 	}
@@ -39,8 +39,9 @@ void moveInit(App *app)
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
 			Uint8 *p = ((Uint8*)app->game.board.hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch);
-			printf("%d,%d: %d %d %d %d\n", x,y, hit->format->BytesPerPixel,p[0], p[1], p[2]);
+			// printf("%d,%d: %d %d %d %d\n", x,y, hit->format->BytesPerPixel,p[0], p[1], p[2]);
 			app->game.board.wall[x][y] = !p[0];
+			walkability[x][y] = !(p[0]||p[2]);
 			if(p[2]) {
 				app->game.board.spawn[app->game.board.spawn_count].x = x;
 				app->game.board.spawn[app->game.board.spawn_count].y = y;
@@ -67,16 +68,18 @@ void angle_rotate(float *a0_base, float a1, float f)
 	*a0_base = a0;
 }
 
-int is_solid(Body *body, int x, int y)
+int is_solid(Game *game, Body *body, int x, int y)
 {
 	x/=tileSize;
 	y/=tileSize;
-	if(body->pos.x/tileSize == x && body->pos.y/tileSize == y) return 0;
-	return walkability[x][y];
+	
+	if(body->pos.x/tileSize == x && body->pos.y/tileSize == y)
+		return 0;
+	return game->board.crowd[x][y];
 }
-int is_empty(Body *body, int x, int y)
+int is_empty(Game *game, Body *body, int x, int y)
 {
-	return !is_solid(body,x,y);
+	return !is_solid(game, body,x,y);
 }
 
 void body_move(Game *game, Body *body, float angle)
@@ -96,13 +99,13 @@ void body_move(Game *game, Body *body, float angle)
 	int x1 = x0 + dx;
 	int y1 = y0 - dy;
 
-	if(is_empty(body,x1,y1)) {
+	if(is_empty(game, body,x1,y1)) {
 		body->pos.x = x1;
 		body->pos.y = y1;
 	} else {
-		if(is_empty(body,x1,y0)) {
+		if(is_empty(game, body,x1,y0)) {
 			body->pos.x = x1;
-		} else if(is_empty(body,x0,y1)) {
+		} else if(is_empty(game, body,x0,y1)) {
 			body->pos.y = y1;
 		}
 	}
@@ -153,19 +156,18 @@ void player_move(Game *game, Body *body, int up, int right, int down, int left)
 int enemy_spawn_pos(Game *game, int *x, int *y) {
 	if(!game->board.spawn_count) return 0;
 	int i = rand() % game->board.spawn_count;
-	*x = game->board.spawn[i].x;
-	*y = game->board.spawn[i].y;
+	*x = game->board.spawn[i].x+tileSize/2;
+	*y = game->board.spawn[i].y+tileSize/2;
 	return 1;
 }
 
-int player_spawn_pos(Uint16 *x, Uint16 *y)
+int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y)
 {
 	int i;
 	for(i=0; i< 100; i++) {
 		int x1 = rand() % mapWidth;
 		int y1 = rand() % mapHeight;
-		printf("player spawn (%d) %d %d = %d\n", i, x1, y1, walkability[x1][y1]);
-		if(walkability[x1][y1] == walkable) {
+		if(game->board.crowd[x1][y1] == walkable) {
 			*x = x1 * tileSize + tileSize/2;
 			*y = y1 * tileSize + tileSize/2;
 			return 1;
