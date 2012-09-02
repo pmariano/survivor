@@ -238,7 +238,7 @@ void spawnEnemy(App *app)
     enemybody->angle = 1;
     enemybody->pos.x = 70;
     enemybody->pos.y = app->screen->h/2+30;
-  } 
+  }
 }
 
 void loadMap(App *app, int map_index) {
@@ -253,6 +253,7 @@ void loadMap(App *app, int map_index) {
 
 int main(int argc, char* args[] )
 {
+	srand(time(NULL));
 	App app;
 	app.debug = 0;
 	memset(&app, 0, sizeof(app));
@@ -269,13 +270,13 @@ int main(int argc, char* args[] )
 	moveInit(&app);
 	soundInit();
 
-
 	while(app.state != STATE_EXIT){
 	  Uint32 startTime = SDL_GetTicks();
 		bindKeyboard(&app);
 
 		if (app.state == STATE_PLAYING){
-      Uint32 elapsed = startTime - app.game.spawnTime;  
+			playRandomMusic();
+      Uint32 elapsed = startTime - app.game.spawnTime;
       if(elapsed > 1000)
       {
         spawnEnemy(&app);
@@ -287,7 +288,7 @@ int main(int argc, char* args[] )
 			renderCredits(&app);
 		}	else {
 			renderMenu(&app);
-			playMusic("sounds/menu1.mp3");
+			playMusic("menu.mp3", -1);
 		}
 		handleDelay(startTime);
 	}

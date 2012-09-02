@@ -10,3 +10,4 @@ typedef struct{
 void playMenuMusic();
 void soundInit();
 void halt_music();
+void playRandomLevelMusic();
