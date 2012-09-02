@@ -1,4 +1,5 @@
 #include "movement.h"
+#include "aStarLibrary.h"
 
 #define ATAN2(dx,dy) ((int)(360+atan2(-(dy),(dx))*180/M_PI)%360)
 
@@ -43,3 +44,4 @@ void player_move(Game *game, Body *body, int up, int right, int down, int left)
 
     }
 }
+

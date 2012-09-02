@@ -2,6 +2,8 @@
 #define _APP_H
 #include <SDL.h>
 
+#define ENEMY_COUNT 666
+
 typedef enum {
   MENU_NEW_GAME = 0,
   MENU_CREDITS,
@@ -57,6 +59,7 @@ typedef struct{
 typedef struct {
   Player player1;
   Player player2;
+  Enemy enemy;
   Board board;
 } Game;
 

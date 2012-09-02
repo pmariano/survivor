@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "app.h"
 
 /*
 ;===================================================================
@@ -7,39 +8,36 @@
 ;Last updated 06/16/03 -- Visual C++ version
  */
 
-	//Declare constants
-	#define mapWidth  26
-  #define mapHeight 20
-  #define tileSize  40 
-  #define numberPeople 2
-	#define notfinished 0
-  #define notStarted 0// path-related constants
-	#define found 1
-  #define nonexistent 2 
-	#define walkable  0
-  #define unwalkable 1// walkability array constants
-	int onClosedList = 10;
+//Declare constants
+#define notfinished 0
+#define notStarted 0// path-related constants
+#define found 1
+#define nonexistent 2 
+#define walkable  0
+#define unwalkable 1// walkability array constants
 
-	//Create needed arrays
-	char walkability[mapWidth][mapHeight];
-	int openList[mapWidth*mapHeight+2]; //1 dimensional array holding ID# of open list items
-	int whichList[mapWidth+1][mapHeight+1];  //2 dimensional array used to record 
-  //whether a cell is on the open list or on the closed list.
-	int openX[mapWidth*mapHeight+2]; //1d array stores the x location of an item on the open list
-	int openY[mapWidth*mapHeight+2]; //1d array stores the y location of an item on the open list
-	int parentX[mapWidth+1][mapHeight+1]; //2d array to store parent of each cell (x)
-	int parentY[mapWidth+1][mapHeight+1]; //2d array to store parent of each cell (y)
-	int Fcost[mapWidth*mapHeight+2];	//1d array to store F cost of a cell on the open list
-	int Gcost[mapWidth+1][mapHeight+1]; 	//2d array to store G cost for each cell.
-	int Hcost[mapWidth*mapHeight+2];	//1d array to store H cost of a cell on the open list
-	int pathLength[numberPeople+1];     //stores length of the found path for critter
-	int pathLocation[numberPeople+1];   //stores current position along the chosen path for critter		
-	int* pathBank [numberPeople+1];
+int onClosedList = 10;
 
-	//Path reading variables
-	int pathStatus[numberPeople+1];
-	int xPath[numberPeople+1];
-	int yPath[numberPeople+1];
+//Create needed arrays
+char walkability[mapWidth][mapHeight];
+int openList[mapWidth*mapHeight+2]; //1 dimensional array holding ID# of open list items
+int whichList[mapWidth+1][mapHeight+1];  //2 dimensional array used to record 
+//whether a cell is on the open list or on the closed list.
+int openX[mapWidth*mapHeight+2]; //1d array stores the x location of an item on the open list
+int openY[mapWidth*mapHeight+2]; //1d array stores the y location of an item on the open list
+int parentX[mapWidth+1][mapHeight+1]; //2d array to store parent of each cell (x)
+int parentY[mapWidth+1][mapHeight+1]; //2d array to store parent of each cell (y)
+int Fcost[mapWidth*mapHeight+2];	//1d array to store F cost of a cell on the open list
+int Gcost[mapWidth+1][mapHeight+1]; 	//2d array to store G cost for each cell.
+int Hcost[mapWidth*mapHeight+2];	//1d array to store H cost of a cell on the open list
+int pathLength[numberPeople+1];     //stores length of the found path for critter
+int pathLocation[numberPeople+1];   //stores current position along the chosen path for critter		
+int* pathBank [numberPeople+1];
+
+//Path reading variables
+int pathStatus[numberPeople+1];
+int xPath[numberPeople+1];
+int yPath[numberPeople+1];
 
 //-----------------------------------------------------------------------------
 // Function Prototypes: where needed
