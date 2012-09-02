@@ -28,6 +28,7 @@ typedef struct {
 
 typedef enum {
   BODY_ALIVE = 0,
+  BODY_IDLE,
   BODY_DEAD
 } BodyStatus;
 

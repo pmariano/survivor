@@ -46,8 +46,9 @@ void checkGameover(App *app){
 }
 
 void gameInit(App *app){
-  app->game.start = SDL_GetTicks();
-  app->game.spawnTime = app->game.start;
+	app->game.start = SDL_GetTicks();
+	app->game.spawnTime = app->game.start;
+	app->game.kill_count= 0;
 
 	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = 1;
 	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
@@ -66,6 +67,7 @@ void gameInit(App *app){
 	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
 	app->game.itemtype[ITEM_PLAYER_FLAME].hit_image = IMG_Load("data/fire_hit.png");
 	app->game.itemtype[ITEM_PLAYER_FLAME].shot_image = IMG_Load("data/fire_shot.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].sound = Mix_LoadWAV("sounds/flame.wav");
 	app->game.itemtype[ITEM_PLAYER_FLAME].spread = 40;
 	app->game.itemtype[ITEM_PLAYER_FLAME].freq = 2;
 	app->game.itemtype[ITEM_PLAYER_FLAME].ammo_total = 250;
@@ -83,7 +85,7 @@ void gameInit(App *app){
 	p1body->life = 100.0;
 	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
-	p1body->status = BODY_ALIVE;
+	p1body->status = BODY_IDLE;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
@@ -97,11 +99,10 @@ void gameInit(App *app){
 	p2body->angle = 1;
 	p2body->life = 100.0;
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
-	p2body->status = BODY_ALIVE;
+	p2body->status = BODY_IDLE;
 	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
-	p2body->status = BODY_ALIVE;
 	app->game.latest_enemy_updated = 0;
 
 	app->credits = 0;
@@ -204,8 +205,6 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		}
 		break;
 	  }
-
-
 
 	  if(menu->selected == MENU_NEW_GAME){
 		resetApp(app);
@@ -372,7 +371,9 @@ int hit(App *app, Body *source, Body *target){
 		printf("splash %d %d\n", target->pos.x, target->pos.y);
 	}
 
-  playSound(target->onHitSound);
+	if(target->status != BODY_DEAD){
+	  playSound(target->onHitSound);
+	}
 
   if(target->life <= 0){
 	if(target->status != BODY_DEAD){
