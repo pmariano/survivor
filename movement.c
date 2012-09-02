@@ -7,7 +7,7 @@ void movePrepare(App *app)
 {
 	int i;
 	memcpy(app->game.board.crowd, app->game.board.wall, sizeof(app->game.board.wall));
-#if 1
+	memcpy(app->game.board.hittable, app->game.board.air, sizeof(app->game.board.air));
 	if( app->game.player1.state == PLAYER_READY) {
 		int x = app->game.player1.body.pos.x/tileSize;
 		int y = app->game.player1.body.pos.y/tileSize;
@@ -25,10 +25,9 @@ void movePrepare(App *app)
 			int x = app->game.enemies[i].body.pos.x/tileSize;
 			int y = app->game.enemies[i].body.pos.y/tileSize;
 			app->game.board.crowd[x][y] = 4+i;
+			app->game.board.hittable[x][y] = 4+i;
 		}
-
 	}
-#endif
 }
 
 
@@ -37,13 +36,16 @@ void moveInit(App *app)
 	int x,y;
 	SDL_Surface *hit = app->game.board.hit;
 	memset(app->game.board.wall, 0, sizeof(app->game.board.wall));
+	memset(app->game.board.air, 0, sizeof(app->game.board.air));
 	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
+	memset(walkability, 0, sizeof(walkability));
 	app->game.board.spawn_count = 0;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
 			Uint8 *p = ((Uint8*)app->game.board.hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch);
 			// printf("%d,%d: %d %d %d %d\n", x,y, hit->format->BytesPerPixel,p[0], p[1], p[2]);
 			app->game.board.wall[x][y] = !p[0];
+			app->game.board.air[x][y] = !(p[0]||p[1]||p[2]);
 			walkability[x][y] = !(p[0]||p[2]);
 			if(p[2]) {
 				app->game.board.spawn[app->game.board.spawn_count].x = x;
@@ -71,6 +73,12 @@ void angle_rotate(float *a0_base, float a1, float f)
 	*a0_base = a0;
 }
 
+int is_air(Game *game, Body *body, int x, int y)
+{
+	x/=tileSize;
+	y/=tileSize;
+	return game->board.hittable[x][y];
+}
 int is_solid(Game *game, Body *body, int x, int y)
 {
 	x/=tileSize;

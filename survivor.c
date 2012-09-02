@@ -121,6 +121,12 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 		case SDLK_ESCAPE:
 			app->state = STATE_PAUSED;
 			break;
+		case SDLK_s:
+			grab(app, player1);
+			break;
+		case SDLK_x:
+			grab(app, player2);
+			break;
 	}
 }
 
@@ -309,6 +315,10 @@ void loadMap(App *app, int map_index) {
 	moveInit(app);
 }
 
+int grab(App *app, Body *body)
+{
+}
+
 int hit(App *app, Body *source, Body *target){
 	target->life -= source->item.type->damage;
 
@@ -319,7 +329,7 @@ int hit(App *app, Body *source, Body *target){
 			source->item.type->hit_image->w,
 			source->item.type->hit_image->h
 		};
-		SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, NULL);
+		SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, &rect);
 		printf("splash %d %d\n", target->pos.x, target->pos.y);
 	}
 
@@ -333,10 +343,12 @@ int hit(App *app, Body *source, Body *target){
 
 int draw(App *app, Body *body, int x, int y)
 {
-	Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
-	p[0] = 0xff;
-	p[1] = 0xff;
-	int target = is_solid(&app->game, body, x, y);
+	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
+		Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
+		p[0] = 0xff;
+		p[1] = 0xff;
+	}
+	int target = is_air(&app->game, body, x, y);
 	if(target) {
 		if(target>=4) {
 			int i = target - 4;
