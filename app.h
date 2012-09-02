@@ -28,6 +28,7 @@ typedef struct {
 
 typedef enum {
   BODY_ALIVE = 0,
+  BODY_IDLE,
   BODY_DEAD
 } BodyStatus;
 
@@ -91,6 +92,8 @@ typedef struct{
   Body body;
   SDL_Surface *image;
   EnemyState state;
+  int pathfinder;
+  Body *target;
 } Enemy;
 
 typedef struct {

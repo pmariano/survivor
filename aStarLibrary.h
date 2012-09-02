@@ -22,4 +22,4 @@ extern char walkability[mapWidth][mapHeight];
 extern int pathStatus[numberPeople+1];
 extern int xPath[numberPeople+1];
 extern int yPath[numberPeople+1];
-
+extern int pathLength[numberPeople+1];     //stores length of the found path for critter

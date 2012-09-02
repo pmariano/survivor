@@ -16,8 +16,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 	if(player1->state != PLAYER_DEAD){
 
 	  char ammo[256];
-	  //sprintf(kills, "ammo: %i (s)", player1->body.item.ammo_total - player1->body.item.type->ammo);
-	  sprintf(ammo, "ammo: %i", 11);
+	  sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
 	  text_write_raw(screen, 5, 30, ammo, yellow, 20);
 
 	  Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
@@ -36,8 +35,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 
 	if(player2->state != PLAYER_DEAD){
 	  char ammo[256];
-	  //sprintf(kills, "ammo: %i (s)", player1->body.item.ammo_total - player1->body.item.type->ammo);
-	  sprintf(ammo, "ammo: %i", 11);
+	  sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
 	  text_write_raw(screen, 910, 30, ammo, yellow, 20);
 
 	  Uint32 color = SDL_MapRGB(screen->format, "FF", 0,0 );
@@ -140,7 +138,7 @@ void addPowerup(App *app)
 	int x,y;
 	if(powerup_spawn_pos(&app->game, &x, &y)) {
 		for(i=0; i < POWERUP_COUNT; i++) {
-			if(app->game.board.powerups[i].should_show == 0) { 
+			if(app->game.board.powerups[i].should_show == 0) {
 				app->game.board.powerups[i].should_show = 1;
 				app->game.board.powerups[i].ammo_used = 0;
 				app->game.board.powerups[i].type = &app->game.itemtype[rand()%ITEM_PLAYER_COUNT];
@@ -169,8 +167,8 @@ void renderStart(App *app){
       for (y=0; y < mapHeight;y++) {
         //if(walkability[x][y]) {
         // if(app->game.board.wall[x][y]) {
-        //if(app->game.board.crowd[x][y]) {
-        if(app->game.board.powerup[x][y]) {
+        if(app->game.board.crowd[x][y]) {
+        //if(app->game.board.powerup[x][y]) {
           SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
           SDL_FillRect(app->screen, &rect , 0xffffff);
         }
