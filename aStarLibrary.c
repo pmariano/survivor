@@ -8,9 +8,9 @@
  */
 
 	//Declare constants
-	#define mapWidth  80
-  #define mapHeight 60
-  #define tileSize  10 
+	#define mapWidth  26
+  #define mapHeight 20
+  #define tileSize  40 
   #define numberPeople 2
 	#define notfinished 0
   #define notStarted 0// path-related constants
