@@ -22,7 +22,7 @@ void renderInit(App *app){
 
   Body *p1body = &app->game.player1.body;
   Body *p2body = &app->game.player2.body;
-  p1body->ang_vel = 0.5;
+  p1body->ang_vel = 1;
   p1body->max_vel = 2;
   p1body->angle = 1;
 

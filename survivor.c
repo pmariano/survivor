@@ -35,8 +35,6 @@ void body_move(Game *game, Body *body, int angle)
     float a = body->angle * M_PI / 180;
     body->pos.x += cos(a) * v;
     body->pos.y -= sin(a) * v;
-	printf("\nsetting position x: %i y %i\n", body->pos.x);
-	printf("\nsetting position x: %i y %i\n", body->pos.y);
     //body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
@@ -47,7 +45,6 @@ void finishHim(App *app){
 void handleArcadeKeys(App *app, SDLKey *key){
   Player *player1 = &app->game.player1;
   Player *player2 = &app->game.player2;
-  printf("ola");
   switch(*key){
 	/**
 	 * Player 1 settings:
@@ -56,20 +53,19 @@ void handleArcadeKeys(App *app, SDLKey *key){
 	 * S = SECONDARY ATTACK
 	 * */
 	case SDLK_1:
-	  printf("player 1 ready\n");
 	  player1->state = PLAYER_READY;
 	  break;
 	case SDLK_w:
-	  body_move(&app->game, &player1->body, 0);
+	  body_move(&app->game, &player1->body, 90);
 	  break;
 	case SDLK_s:
-	  body_move(&app->game, &player1->body, 180);
-	  break;
-	case SDLK_a:
 	  body_move(&app->game, &player1->body, 270);
 	  break;
+	case SDLK_a:
+	  body_move(&app->game, &player1->body, 180);
+	  break;
 	case SDLK_d:
-	  body_move(&app->game, &player1->body, 90);
+	  body_move(&app->game, &player1->body, 0);
 	  break;
 	/**
 	 * Player 2 settings:
