@@ -86,6 +86,8 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		case SDLK_z:
 		case SDLK_RETURN:
 			if(app->state == STATE_CREDITS){
+				app->state = app->stateBeforeCredits;
+				break;
 			}
 
 			if(*key == SDLK_z){
@@ -100,6 +102,8 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 			} else if (menu->selected == MENU_QUIT){
 				finishHim(app);
 			} else if(menu->selected == MENU_CREDITS){
+				AppState s = app->state;
+				app->stateBeforeCredits = s;
 				app->state = STATE_CREDITS;
 			} else if(menu->selected == MENU_RESUME){
 				app->state = STATE_PLAYING;
@@ -212,7 +216,7 @@ void handleDelay(Uint32 start) {
 int main(int argc, char* args[] )
 {
 	App app;
-	memset(&app, 0,sizeof(app));
+	memset(&app, 0, sizeof(app));
 
 	Menu menu;
 	app.state = STATE_MENU;
