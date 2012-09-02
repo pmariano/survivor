@@ -91,7 +91,6 @@ void renderMenu(App *app){
 	  resumePadding = 100;
 	  text_write(screen, 100, 250, "resume game", menu->selected == MENU_RESUME);
 	}
-
     text_write_raw(screen, 300, 100, "Survivor", red, 96);
 
 	text_write(screen, 100, 250 + resumePadding, "new game", menu->selected == MENU_NEW_GAME);

@@ -76,6 +76,11 @@ typedef struct {
   SDL_Surface *screen;
   Game game;
   AppState state;
+  /**
+   * just to handle if is to show or not the resume page
+   * TODO: should be refactored to not use this attr
+   */
+  AppState stateBeforeCredits;
   Menu menu;
 } App;
 
