@@ -184,6 +184,8 @@ void renderInit(App *app){
   app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }
 
+
+
 /**
  *
  * TODO: refactor this to be part of render func
@@ -206,10 +208,15 @@ void renderMenu(App *app){
 	}
 
 	int resumePadding = 0;
-	if(app->state  == STATE_PAUSED){
+
+	if(app->state == STATE_GAMEOVER){
+	  resumePadding = 100;
+	  text_write_raw(screen, 100, 250, "ACABOUUU", red, 96);
+	} else if(app->state == STATE_PAUSED){
 	  resumePadding = 100;
 	  text_write(screen, 100, 250, "resume game", menu->selected == MENU_RESUME);
 	}
+
     text_write_raw(screen, 300, 50, "Survivor", red, 96);
 
 	text_write(screen, 100, 250 + resumePadding, "new game", menu->selected == MENU_NEW_GAME);

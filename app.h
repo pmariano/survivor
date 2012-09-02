@@ -34,6 +34,7 @@ typedef enum {
 
 typedef enum {
   PLAYER_IDLE,
+  PLAYER_DEAD,
   PLAYER_READY,
 } PlayerStatus;
 
@@ -126,6 +127,7 @@ typedef enum {
   STATE_MENU,
   STATE_PAUSED,
   STATE_PLAYING,
+  STATE_GAMEOVER,
   STATE_CREDITS,
   STATE_EXIT,
 } AppState;
