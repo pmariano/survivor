@@ -3,13 +3,15 @@
 #include <SDL_image.h>
 #include <stdio.h>
 #include <strings.h>
+#include <math.h>
 
 #include "font.h"
 #include "app.h"
 #include "render.h"
 #include "movement.h"
 
-
+#define FPS 140
+#define MAX(a,b) ((a)>(b)?(a):(b))
 
 void finishHim(App *app){
 	app->state = STATE_EXIT;
@@ -98,7 +100,7 @@ void bindGameplayKeystate(App *app){
 	 * S = SECONDARY ATTACK
 	 * */
 
-	player_move(&app->game, &player1->body, 
+	player_move(&app->game, &player1->body,
 		keystate[SDLK_UP] || keystate[SDLK_q],
 		keystate[SDLK_RIGHT] || keystate[SDLK_r],
 		keystate[SDLK_DOWN] || keystate[SDLK_w],
@@ -111,7 +113,7 @@ void bindGameplayKeystate(App *app){
 	 * Z = ATTACK
 	 * S = SECONDARY ATTACK
 	 * */
-	player_move(&app->game, &player2->body, 
+	player_move(&app->game, &player2->body,
 		keystate[SDLK_KP6] || keystate[SDLK_i],
 		keystate[SDLK_KP8] || keystate[SDLK_t],
 		keystate[SDLK_KP4] || keystate[SDLK_u],
@@ -167,6 +169,16 @@ void gameInit(App *app){
 	p2body->pos.y = 768/2+40;
 }
 
+void handleDelay(Uint32 start) {
+    Uint32 end = SDL_GetTicks();
+    int actual_delta = end - start;
+    int expected_delta = 1000/FPS;
+    int delay = MAX(0, expected_delta - actual_delta);
+    SDL_Delay(delay);
+}
+
+
+
 int main(int argc, char* args[] )
 {
 	App app;
@@ -178,7 +190,9 @@ int main(int argc, char* args[] )
 	init_font();
 	renderInit(&app);
 	gameInit(&app);
+
 	while(app.state != STATE_EXIT){
+	  Uint32 startTime = SDL_GetTicks();
 		bindKeyboard(&app);
 
 		if (app.state == STATE_MENU){
@@ -189,6 +203,7 @@ int main(int argc, char* args[] )
 		} else {
 			render(&app);
 		}
+		handleDelay(startTime);
 	}
 
 	return 0;
