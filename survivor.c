@@ -109,11 +109,15 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		case SDLK_a:
 		case SDLK_z:
 		case SDLK_RETURN:
+			if(app->state == STATE_CREDITS){
+			}
+
 			if(*key == SDLK_z){
 				player2->state = PLAYER_READY;
 			} else {
 				player1->state = PLAYER_READY;
 			}
+
 			if(menu->selected == MENU_NEW_GAME){
 				resetApp(app);
 				app->state = STATE_PLAYING;
@@ -121,7 +125,6 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 				finishHim(app);
 			} else if(menu->selected == MENU_CREDITS){
 				app->state = STATE_CREDITS;
-				renderCredits(app);
 			} else if(menu->selected == MENU_RESUME){
 				app->state = STATE_PLAYING;
 			}
@@ -189,10 +192,6 @@ void bindKeyboard(App *app)
 	}
 }
 
-int hasNoReadyPlayers(Game *game) {
-	return !game->player1.state == PLAYER_READY && !game->player2.state == PLAYER_READY;
-}
-
 void handleDelay(Uint32 start) {
     Uint32 end = SDL_GetTicks();
     int actual_delta = end - start;
@@ -204,6 +203,8 @@ void handleDelay(Uint32 start) {
 int main(int argc, char* args[] )
 {
 	App app;
+	memset(&app, 0,sizeof(app));
+
 	Menu menu;
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
@@ -219,7 +220,9 @@ int main(int argc, char* args[] )
 
 		if (app.state == STATE_PLAYING){
 			render(&app);
-		} else {
+		} else if (app.state == STATE_CREDITS) {
+			renderCredits(&app);
+		}	else {
 			renderMenu(&app);
 		}
 		handleDelay(startTime);

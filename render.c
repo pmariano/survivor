@@ -2,6 +2,9 @@
 #include "render.h"
 #include "font.h"
 
+SDL_Color red = {0xFF, 0X00, 0x00};
+SDL_Color white = {0xFF, 0XFF, 0xFF};
+
 void renderPlayer(SDL_Surface *screen, Player *player){
 	if(player->state != PLAYER_READY) return;
 	printf("blitting on X: %i/Y: %i\n", player->body.pos.x, player->body.pos.y);
@@ -17,18 +20,6 @@ void renderPlayer(SDL_Surface *screen, Player *player){
 		player->body.pos.y - image->h/2,
 		player->body.pos.w,
 		player->body.pos.h
-	};
-	SDL_BlitSurface(image, NULL, screen, &rect);
-}
-
-void renderEnemy(SDL_Surface *screen, Enemy *enemy){
-	int a = enemy->body.angle;
-	SDL_Surface *image = enemy->image;
-	SDL_Rect rect = {
-		enemy->body.pos.x - image->w/2,
-		enemy->body.pos.y - image->h/2,
-		enemy->body.pos.w,
-		enemy->body.pos.h
 	};
 	SDL_BlitSurface(image, NULL, screen, &rect);
 }
@@ -67,14 +58,10 @@ void renderInit(App *app){
 	app->game.player2.down = IMG_Load("data/engenheiro1.png");
 	app->game.player2.left = IMG_Load("data/engenheiro1.png");
 	app->game.player2.right = IMG_Load("data/engenheiro1.png");
-  app->game.enemy.image = IMG_Load("zombie1.png");
 
 	app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }
 
-void renderCredits(App *app){
-
-}
 
 /**
  *
@@ -92,11 +79,29 @@ void renderMenu(App *app){
 	  text_write(screen, 100, 250, "resume game", menu->selected == MENU_RESUME);
 	}
 
+    text_write_raw(screen, 300, 100, "Survivor", red, 96);
+
 	text_write(screen, 100, 250 + resumePadding, "new game", menu->selected == MENU_NEW_GAME);
 	text_write(screen, 100, 450 + resumePadding, "credits", menu->selected == MENU_CREDITS);
 	text_write(screen, 100, 550 + resumePadding, "exit", menu->selected == MENU_QUIT);
 
-	SDL_UpdateRect(app->screen, 0, 0, 0, 0);
+  SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 }
 
+void renderCredits(App *app)
+{
+	Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
+	SDL_Surface *screen = app->screen;
+	SDL_FillRect(screen, NULL , color);
+
+    text_write_raw(screen, 300, 100, "CREDITS", red, 96);
+    text_write_raw(screen, 200, 250, "team", red, 36);
+    text_write_raw(screen, 200, 300, "Carlo \"zED\" Caputo", white, 26);
+    text_write_raw(screen, 200, 350, "Pedro Mariano", white, 26);
+    text_write_raw(screen, 200, 400, "Caires Vinicius", white, 26);
+
+    text_write_raw(screen, 200, 500, "music", red, 36);
+
+  SDL_UpdateRect(screen, 0, 0, 0, 0);
+}
 
