@@ -22,7 +22,8 @@ render.o: render.c | app.h render.h
 survivor.o: survivor.c | app.h
 movement.o: movement.c | movement.h app.h aStarLibrary.h
 aStarLibrary.o: aStarLibrary.c | aStarLibrary.h app.h
+sound.o: sound.c | sound.h
 
-$(OUTPUT): survivor.o render.o font.o adler.o movement.o aStarLibrary.o
+$(OUTPUT): survivor.o render.o font.o adler.o movement.o aStarLibrary.o sound.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 

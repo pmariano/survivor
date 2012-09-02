@@ -7,8 +7,10 @@
 
 #include "font.h"
 #include "app.h"
+#include "sound.h"
 #include "render.h"
 #include "movement.h"
+#include "aStarLibrary.h"
 
 #define FPS 40
 #define MAX(a,b) ((a)>(b)?(a):(b))
@@ -236,8 +238,8 @@ void spawnEnemy(App *app)
     enemybody->max_vel = 2.5;
     enemybody->angle = 1;
     enemybody->pos.x = x;
-    enemybody->pos.y = y;
-  } 
+    enemybody->pos.y = app->screen->h/2+30;
+  }
 }
 
 void loadMap(App *app, int map_index) {
@@ -252,10 +254,10 @@ void loadMap(App *app, int map_index) {
 
 int main(int argc, char* args[] )
 {
+	srand(time(NULL));
 	App app;
 	app.debug = 0;
 	memset(&app, 0, sizeof(app));
-	srand(time(NULL));
 
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
@@ -265,6 +267,7 @@ int main(int argc, char* args[] )
   InitializePathfinder();
 	renderInit(&app);
 	loadMap(&app, 0); // calls moveInit
+	soundInit();
 
 	while(app.state != STATE_EXIT){
 	  Uint32 startTime = SDL_GetTicks();
@@ -272,7 +275,8 @@ int main(int argc, char* args[] )
 		bindKeyboard(&app);
 
 		if (app.state == STATE_PLAYING){
-      Uint32 elapsed = startTime - app.game.spawnTime;  
+			playRandomMusic();
+      Uint32 elapsed = startTime - app.game.spawnTime;
       if(elapsed > 1000)
       {
         spawnEnemy(&app);
@@ -284,6 +288,7 @@ int main(int argc, char* args[] )
 			renderCredits(&app);
 		}	else {
 			renderMenu(&app);
+			playMusic("menu.mp3", -1);
 		}
 		handleDelay(startTime);
 	}

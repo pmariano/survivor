@@ -27,6 +27,7 @@ void renderPlayer(SDL_Surface *screen, Player *player){
 	SDL_BlitSurface(image, NULL, screen, &rect);
 }
 
+<<<<<<< HEAD
 void renderEnemy(SDL_Surface *screen, Enemy *enemy){
 	SDL_Surface *image = enemy->image;
 	SDL_Rect rect = {
@@ -38,6 +39,8 @@ void renderEnemy(SDL_Surface *screen, Enemy *enemy){
 	SDL_BlitSurface(image, NULL, screen, &rect);
 }
 
+=======
+>>>>>>> 90e051a1b43794e51dea79685733867b150f5679
 void renderEnemies(App *app)
 {
   int i = 0;
@@ -45,7 +48,15 @@ void renderEnemies(App *app)
   {
     if(app->game.enemies[i].state == ENEMY_LIVE)
     {
-      renderEnemy(app->screen, &app->game.enemies[i]);
+      Enemy *enemy = &app->game.enemies[i];
+      SDL_Surface *image = enemy->image;
+      SDL_Rect rect = {
+        enemy->body.pos.x - image->w/2,
+        enemy->body.pos.y - image->h/2,
+        enemy->body.pos.w,
+        enemy->body.pos.h
+      };
+      SDL_BlitSurface(image, NULL, app->screen, &rect);
     }
   }
 }
@@ -73,13 +84,16 @@ void render(App *app){
 
   renderPlayer(app->screen, &game.player1);
   renderPlayer(app->screen, &game.player2);
+<<<<<<< HEAD
+=======
+  renderEnemies(app);
+>>>>>>> 90e051a1b43794e51dea79685733867b150f5679
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
   SDL_Flip(app->screen);
 }
 
 
 void renderInit(App *app){
-
 	app->menu.soldier = IMG_Load("data/soldado1_grande.png");
 	app->menu.zombie = IMG_Load("data/zombie1.png");
 	app->menu.bigZombie = IMG_Load("data/zombie2_grande.png");
@@ -109,7 +123,7 @@ void renderMenu(App *app){
 	SDL_Surface *screen = app->screen;
 
 	SDL_Rect titleCharPos = {-700, -50, screen->w, screen->h};
-	SDL_BlitSurface(menu->engineer, &titleCharPos, screen, NULL );
+	SDL_BlitSurface(menu->zombie, &titleCharPos, screen, NULL );
 
 	if(app->state == STATE_PAUSED) {
 	  SDL_Rect highlightChar = {-750, -450, screen->w, screen->h};
@@ -139,8 +153,8 @@ void renderCredits(App *app)
 	SDL_Surface *screen = app->screen;
 	SDL_FillRect(screen, NULL , color);
 
-	SDL_Rect zombiePos = {-670, -50, screen->w, screen->h};
-    SDL_BlitSurface(app->menu.zombie, &zombiePos, screen, NULL );
+	SDL_Rect charPos = {-670, -50, screen->w, screen->h};
+    SDL_BlitSurface(app->menu.engineer, &charPos, screen, NULL );
 
     text_write_raw(screen, 300, 50, "Credits", red, 96);
     text_write_raw(screen, 100, 150, "team", green, 36);
