@@ -46,7 +46,6 @@ void soundInit() {
   }
 
   Mix_QuerySpec(&a.rate, &a.format, &a.channels);
-  Mix_Volume(-1, 20);
 }
 
 void halt_music(){
