@@ -28,3 +28,6 @@ Sound:
 Reloading: GtheNoggin, http://www.freesound.org/people/LAGtheNoggin/sounds/15545/
 Door broked: Sparrer, http://www.freesound.org/people/Sparrer/sounds/50506/
 Explosion, DJ Chronos, http://www.freesound.org/people/DJ%20Chronos/sounds/33380/
+Ouch, http://soundjax.com/ouch-4.html
+Flame, http://www.freesound.org/people/scarbelly25/sounds/33943/
+

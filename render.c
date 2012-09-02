@@ -8,21 +8,29 @@ SDL_Color trueRed = {0XFF, 0x00, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 
-void renderStats(SDL_Surface *screen, Player *player1, Player *player2){
-  if(player1->state == PLAYER_READY){
+void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2){
+  if(player1->state != PLAYER_IDLE){
     text_write_raw(screen, 5, 30, "Player 1", green, 30);
-	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
 
-	SDL_Rect rect = { 5, 10, player1->body.life * 2, 20};
-	SDL_FillRect(screen, &rect, color);
+	if(player1->state != PLAYER_DEAD){
+	  Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
+	  SDL_Rect rect = { 5, 10, player1->body.life*2, 20};
+	  SDL_FillRect(screen, &rect, color);
+	}
   }
 
-  if(player2->state == PLAYER_IDLE){
-    text_write_raw(screen, 900, 30, "Player 2", green, 30);
-	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
+  char kills[256];
+  sprintf(kills, "%i kill(s)", app->game.kill_count);
+  text_write_raw(screen, 400, 30, kills, white, 50);
 
-	SDL_Rect rect = { 830, 10, player2->body.life * 2, 20};
-	SDL_FillRect(screen, &rect, color);
+  if(player2->state != PLAYER_IDLE){
+    text_write_raw(screen, 900, 30, "Player 2", green, 30);
+
+	if(player2->state != PLAYER_DEAD){
+	  Uint32 color = SDL_MapRGB(screen->format, "FF", 0,0 );
+	  SDL_Rect rect = { 830, 10, player2->body.life*2, 20};
+	  SDL_FillRect(screen, &rect, color);
+	}
   }
 }
 
@@ -173,13 +181,13 @@ void renderFinish(App *app){
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 
   flushRender(app);
-  renderStats(app->screen, &game.player1, &game.player2);
+  renderStats(app, app->screen, &game.player1, &game.player2);
 
   SDL_Flip(app->screen);
 }
 
-
 void renderInit(App *app){
+  app->logo = IMG_Load("data/logo.png");
   app->menu.soldier = IMG_Load("data/soldado1_grande.png");
   app->menu.bigZombie = IMG_Load("data/zombie2_grande.png");
   app->menu.zombie = IMG_Load("data/zombie1.png");
@@ -207,6 +215,12 @@ void renderMenu(App *app){
 	SDL_FillRect(app->screen, NULL , color);
 	Menu *menu = &app->menu;
 	SDL_Surface *screen = app->screen;
+
+
+	SDL_Rect logoPos = {-450, -650, screen->w, screen->h};
+	SDL_BlitSurface(app->logo, &logoPos, screen, NULL);
+
+    text_write_raw(screen, -450, -700, "Ola mundo", green, 30);
 
 	SDL_Rect titleCharPos = {-700, -50, screen->w, screen->h};
 	SDL_BlitSurface(menu->zombie, &titleCharPos, screen, NULL);
