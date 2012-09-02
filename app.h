@@ -1,6 +1,7 @@
 #ifndef _APP_H
 #define _APP_H
 #include <SDL.h>
+#include <SDL_mixer.h>
 
 #define ENEMY_COUNT 666
 #define POWERUP_COUNT 32
@@ -39,6 +40,7 @@ typedef enum {
 typedef struct {
   SDL_Surface *hit_image;
   SDL_Surface *image;
+  Mix_Chunk *sound;
   float damage;
   float range;
   int ammo_total;
@@ -61,6 +63,7 @@ typedef struct {
   float max_vel;
   float ang_vel;
   float angle; // degree
+  Mix_Chunk *onHitSound;
 } Body;
 
 typedef struct{
