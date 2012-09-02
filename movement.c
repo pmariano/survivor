@@ -3,6 +3,18 @@
 
 #define ATAN2(dx,dy) ((int)(360+atan2(-(dy),(dx))*180/M_PI)%360)
 
+void moveInit(App *app)
+{
+	int x,y;
+
+	memset(walkability, 0, sizeof(walkability));
+	for (x=0; x < mapWidth;x++) {
+		for (y=0; y < mapHeight;y++) {
+			if((rand() % 3) == 0) walkability[x][y] = 1;
+		}
+	}
+}
+
 void angle_rotate(float *a0_base, float a1, float f)
 {
 	float a0 = *a0_base;
@@ -34,15 +46,17 @@ void body_move(Game *game, Body *body, float angle)
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
-void enemy_move(Body *enemy_body)
+void enemy_move(Game *game, Body *enemy_body)
 {
   if(pathStatus[1] == found)
   {
     printf("ronaldo : %d \n", enemy_body->pos.x);
     ReadPath(1, enemy_body->pos.x, enemy_body->pos.y, 1);    
     printf("caires : %d \n", xPath[1]);
-    enemy_body->pos.x = xPath[1];
-    enemy_body->pos.y = yPath[1];
+    int dx=xPath[1]  - enemy_body->pos.x;
+    int dy=yPath[1]  - enemy_body->pos.y;
+	float angle = ATAN2(dx,dy);
+	body_move(game, enemy_body, angle);
   }
 }
 
