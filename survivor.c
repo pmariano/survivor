@@ -258,7 +258,7 @@ void spawnEnemy(App *app)
 
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
-    enemy->image = game->enemy_class_medic.image;
+    enemy->image = game->enemy_class[rand() % 2 == 0 ? ENEMY_MEDIC : ENEMY_SOLDIER].image;
     Body *enemybody = &enemy->body;
     enemybody->ang_vel = 0.05;
     enemybody->max_vel = 2.5;
