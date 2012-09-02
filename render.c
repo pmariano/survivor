@@ -27,7 +27,7 @@ void renderStats(SDL_Surface *screen, Player *player1, Player *player2){
 
 //TODO unified zsort object render
 
-void renderPlayer(SDL_Surface *screen, Player *player){
+void renderPlayer(Game *game, Player *player){
 	if(player->state != PLAYER_READY) return;
 	int a = player->body.angle;
 	SDL_Surface *image;
@@ -42,7 +42,9 @@ void renderPlayer(SDL_Surface *screen, Player *player){
 		player->body.pos.w,
 		player->body.pos.h
 	};
-	SDL_BlitSurface(image, NULL, screen, &rect);
+	int i = game->board.sprite_count++;
+	game->board.sprite[i].image = image;
+	game->board.sprite[i].rect = rect;
 }
 
 void renderEnemies(App *app)
@@ -60,13 +62,33 @@ void renderEnemies(App *app)
         enemy->body.pos.w,
         enemy->body.pos.h
       };
-      SDL_BlitSurface(image, NULL, app->screen, &rect);
+		int i = app->game.board.sprite_count++;
+		app->game.board.sprite[i].image = image;
+		app->game.board.sprite[i].rect = rect;
     }
   }
 }
 
+int sprite_zsort(const void *a, const void *b)
+{
+	Sprite *aa = (Sprite *)a;
+	Sprite *bb = (Sprite *)b;
+	return aa->rect.y - bb->rect.y;
+}
+
+void flushRender(App *app)
+{
+	int i;
+	qsort(app->game.board.sprite, app->game.board.sprite_count, sizeof(Sprite), sprite_zsort);
+
+	for(i=0; i< app->game.board.sprite_count; i++) {
+		SDL_BlitSurface(app->game.board.sprite[i].image, NULL, app->screen, &app->game.board.sprite[i].rect);
+	}
+}
+
 void render(App *app){
   int x,y;
+  app->game.board.sprite_count = 0;
 
   Game game = app->game;
 
@@ -86,10 +108,12 @@ void render(App *app){
 	}
   }
 
-  renderPlayer(app->screen, &game.player1);
-  renderPlayer(app->screen, &game.player2);
-  renderStats(app->screen, &game.player1, &game.player2);
+  renderPlayer(&app->game, &game.player1);
+  renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
+  flushRender(app);
+  renderStats(app->screen, &game.player1, &game.player2);
+
   SDL_Flip(app->screen);
 }
 

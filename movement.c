@@ -116,7 +116,6 @@ void body_move(Game *game, Body *body, float angle)
 
 void hit(Body *source, Body *target){
 	int damage = source->item.damage;
-	printf("damage %f, enemey: %f\n",source->item.damage, source->life);
 	target->life -= source->item.damage;
 }
 

@@ -3,6 +3,10 @@
 #include <SDL.h>
 
 #define ENEMY_COUNT 666
+#define POWERUP_COUNT 32
+#define PLAYER_COUNT 2
+#define SHOT_COUNT 666
+#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+SHOT_COUNT+POWERUP_COUNT)
 #include "aStarLibrary.h"
 
 typedef enum {
@@ -92,6 +96,8 @@ typedef struct{
   char powerup[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;
+  Sprite sprite[SPRITE_COUNT];
+  int sprite_count;
 } Board;
 
 typedef struct {
