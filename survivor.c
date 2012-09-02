@@ -42,13 +42,7 @@ void gameInit(App *app){
 	p2body->angle = 1;
 	p2body->life = 100.0;
   app->game.latest_enemy_updated = 0;
-<<<<<<< HEAD
   app->game.item_count = 0;
-  printf("caires  %d\n\n\n", app->game.latest_enemy_updated);
-  
-=======
-
->>>>>>> eb0bc2442e41b320bff0bdcaaec7793dd03f14dd
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
   int i = 0;
   for(;i < ENEMY_COUNT; i++)
