@@ -91,8 +91,8 @@ typedef struct {
   Player player2;
   Enemy enemies[ENEMY_COUNT];
   Board board;
-  Uint32 start;  
-  Uint32 spawnTime;  
+  Uint32 start;
+  Uint32 spawnTime;
   EnemyClass enemy_class_medic;
   EnemyClass enemy_class_soldier;
 } Game;
@@ -105,9 +105,15 @@ typedef enum {
   STATE_EXIT,
 } AppState;
 
+typedef enum {
+  CREDITS_TEAM = 0,
+  CREDITS_SOUND
+} Credits;
+
 typedef struct {
   SDL_Surface *screen;
   Game game;
+  Credits credits;
   int debug;
   AppState state;
   /**

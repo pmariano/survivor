@@ -48,9 +48,9 @@ void renderEnemies(App *app)
 }
 
 void render(App *app){
-	int x,y;
+  int x,y;
 
-	Game game = app->game;
+  Game game = app->game;
 
   Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
   SDL_FillRect(app->screen, NULL , color);
@@ -77,22 +77,22 @@ void render(App *app){
 
 
 void renderInit(App *app){
-	app->menu.soldier = IMG_Load("data/soldado1_grande.png");
-	app->menu.zombie = IMG_Load("data/zombie1.png");
-	app->menu.bigZombie = IMG_Load("data/zombie2_grande.png");
-	app->menu.engineer = IMG_Load("data/engenheiro1.png");
-	app->game.player1.up = IMG_Load("data/soldado1_costas.png");
-	app->game.player1.down = IMG_Load("data/soldado1.png");
-	app->game.player1.left = IMG_Load("data/soldado1.png");
-	app->game.player1.right = IMG_Load("data/soldado1_costas.png");
-	app->game.player2.up = IMG_Load("data/engenheiro1.png");
-	app->game.player2.down = IMG_Load("data/engenheiro1.png");
-	app->game.player2.left = IMG_Load("data/engenheiro1.png");
-	app->game.player2.right = IMG_Load("data/engenheiro1.png");
+  app->menu.soldier = IMG_Load("data/soldado1_grande.png");
+  app->menu.zombie = IMG_Load("data/zombie1.png");
+  app->menu.bigZombie = IMG_Load("data/zombie2_grande.png");
+  app->menu.engineer = IMG_Load("data/engenheiro1.png");
+  app->game.player1.up = IMG_Load("data/soldado1_costas.png");
+  app->game.player1.down = IMG_Load("data/soldado1.png");
+  app->game.player1.left = IMG_Load("data/soldado1.png");
+  app->game.player1.right = IMG_Load("data/soldado1_costas.png");
+  app->game.player2.up = IMG_Load("data/engenheiro1.png");
+  app->game.player2.down = IMG_Load("data/engenheiro1.png");
+  app->game.player2.left = IMG_Load("data/engenheiro1.png");
+  app->game.player2.right = IMG_Load("data/engenheiro1.png");
   app->game.enemy_class_medic.image = IMG_Load("data/zombie2.png");
   app->game.enemy_class_soldier.image = IMG_Load("data/zombie2.png");
 
-	app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
+  app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }
 
 /**
@@ -132,27 +132,45 @@ void renderMenu(App *app){
 
 void renderCredits(App *app)
 {
-	Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
-	SDL_Surface *screen = app->screen;
-	SDL_FillRect(screen, NULL , color);
+  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
+  SDL_Surface *screen = app->screen;
+  SDL_FillRect(screen, NULL , color);
 
-	SDL_Rect charPos = {-670, -50, screen->w, screen->h};
-    SDL_BlitSurface(app->menu.engineer, &charPos, screen, NULL );
+  SDL_Rect charPos = {-670, -50, screen->w, screen->h};
+  SDL_BlitSurface(app->menu.engineer, &charPos, screen, NULL );
 
-    text_write_raw(screen, 300, 50, "Credits", red, 96);
-    text_write_raw(screen, 100, 150, "team", green, 36);
-    text_write_raw(screen, 100, 200, "Carlo \"zED\" Caputo", white, 26);
-    text_write_raw(screen, 100, 250, "Pedro Mariano", white, 26);
-    text_write_raw(screen, 100, 300, "Caires Vinicius", white, 26);
+  text_write_raw(screen, 300, 50, "Credits", red, 96);
 
-    text_write_raw(screen, 100, 350, "chars", green, 36);
-    text_write_raw(screen, 100, 400, "based on http://pixelblock.tumblr.com", white, 26);
-    text_write_raw(screen, 100, 450, "modified by Pedro Jatoba", white, 26);
+  if(app->credits == CREDITS_TEAM){
+	text_write_raw(screen, 100, 150, "team", green, 36);
+	text_write_raw(screen, 100, 200, "Carlo \"zED\" Caputo", white, 26);
+	text_write_raw(screen, 100, 250, "Pedro Mariano", white, 26);
+	text_write_raw(screen, 100, 300, "Caires Vinicius", white, 26);
 
-    text_write_raw(screen, 100, 500, "tileset", green, 36);
-    text_write_raw(screen, 100, 550, "lost garden", white, 26);
-    text_write_raw(screen, 400, 500, "font", green, 36);
-    text_write_raw(screen, 400, 550, "Pixelsix, 2005 by Cal Henderson", white, 26);
+	text_write_raw(screen, 100, 350, "chars", green, 36);
+	text_write_raw(screen, 100, 400, "based on http://pixelblock.tumblr.com", white, 26);
+	text_write_raw(screen, 100, 450, "modified by Pedro Jatoba", white, 26);
+
+	text_write_raw(screen, 100, 500, "tileset", green, 36);
+	text_write_raw(screen, 100, 550, "lost garden", white, 26);
+	text_write_raw(screen, 400, 500, "font", green, 36);
+	text_write_raw(screen, 400, 550, "Pixelsix, 2005 by Cal Henderson", white, 26);
+  } else {
+	text_write_raw(screen, 100, 150, "Musics", green, 36);
+	text_write_raw(screen, 100, 200, "cluck, Computer Savvy - The J Arthut Keenes band", white, 26);
+	text_write_raw(screen, 100, 250, "Come and Find Us Remix, Resistor Anthems - Eric Skiff", white, 26);
+	text_write_raw(screen, 100, 300, "Arpanauts, Resistor Anthems - Eric Skiff", white, 26);
+	text_write_raw(screen, 100, 350, "Underclocked (mix), Resistor Anthems - Eric Skiff", white, 26);
+
+	text_write_raw(screen, 100, 450, "Sounds", green, 36);
+
+	text_write_raw(screen, 100, 500, "http://www.freesound.org/people/LAGtheNoggin/sounds/15545/", white, 26);
+	text_write_raw(screen, 100, 550, "http://www.freesound.org/people/Sparrer/sounds/50506/", white, 26);
+	text_write_raw(screen, 100, 600, "http://www.freesound.org/people/DJ20Chronos/sounds/33380/", white, 26);
+
+
+
+  }
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
