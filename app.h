@@ -1,8 +1,18 @@
 #ifndef _APP_H
 #define _APP_H
 #include <SDL.h>
-typedef struct {
 
+typedef enum {
+  MENU_NEW_GAME = 0,
+  MENU_CREDITS,
+  MENU_QUIT,
+  MENU_COUNT
+} MenuItem;
+
+typedef struct {
+  MenuItem selected;
+  SDL_Surface *pointerImage;
+  SDL_Surface *background;
 } Menu;
 
 typedef enum {
@@ -38,6 +48,8 @@ typedef struct {
 
 typedef enum {
   STATE_MENU,
+  STATE_PLAYING,
+  STATE_CREDITS,
   STATE_EXIT,
 } AppState;
 
