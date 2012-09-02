@@ -113,7 +113,7 @@ void renderCredits(App *app)
     text_write_raw(screen, 100, 300, "Caires Vinicius", white, 26);
 
     text_write_raw(screen, 100, 350, "chars", green, 36);
-    text_write_raw(screen, 100, 400, "based on http://pixelblock.tumblr.com/post/27489446059/its-team-fortress-2-all-of-the-classes-from", white, 26);
+    text_write_raw(screen, 100, 400, "based on http://pixelblock.tumblr.com", white, 26);
     text_write_raw(screen, 100, 450, "modified by Pedro Jatoba", white, 26);
 
     text_write_raw(screen, 100, 500, "tileset", green, 36);
