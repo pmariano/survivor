@@ -75,16 +75,16 @@ void handleArcadeKeystate(App *app){
    * S = SECONDARY ATTACK
    * */
 
-  if (keystate[SDLK_w] ) {
+  if (keystate[SDLK_UP] || keystate[SDLK_q] ) {
 	body_move(&app->game, &player1->body, 90);
   }
-  if (keystate[SDLK_d] ) {
+  if (keystate[SDLK_RIGHT] || keystate[SDLK_r]) {
 	body_move(&app->game, &player1->body, 0);
   }
-  if (keystate[SDLK_s] ) {
+  if (keystate[SDLK_DOWN] || keystate[SDLK_w]) {
 	body_move(&app->game, &player1->body, 270);
   }
-  if (keystate[SDLK_a] ) {
+  if (keystate[SDLK_LEFT] || keystate[SDLK_e] ) {
 	body_move(&app->game, &player1->body, 180);
   }
   /**
@@ -93,16 +93,16 @@ void handleArcadeKeystate(App *app){
    * Z = ATTACK
    * S = SECONDARY ATTACK
    * */
-  if (keystate[SDLK_UP]) {
+  if (keystate[SDLK_KP8] || keystate[SDLK_t]) {
 	body_move(&app->game, &player2->body, 90);
   }
-  if (keystate[SDLK_RIGHT] ) {
+  if (keystate[SDLK_KP6] || keystate[SDLK_i]) {
 	body_move(&app->game, &player2->body, 0);
   }
-  if (keystate[SDLK_DOWN] ) {
+  if (keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_y] ) {
 	body_move(&app->game, &player2->body, 270);
   }
-  if (keystate[SDLK_LEFT] ) {
+  if (keystate[SDLK_KP4] || keystate[SDLK_u]) {
 	body_move(&app->game, &player2->body, 180);
   }
 }
