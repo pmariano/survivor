@@ -4,6 +4,7 @@
 #include "aStarLibrary.h"
 
 SDL_Color red = {0xAA, 0X55, 0x00};
+SDL_Color trueRed = {0XFF, 0x00, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 
@@ -171,6 +172,7 @@ void render(App *app){
 void renderInit(App *app){
   app->menu.soldier = IMG_Load("data/soldado1_grande.png");
   app->menu.bigZombie = IMG_Load("data/zombie2_grande.png");
+  app->menu.zombie = IMG_Load("data/zombie1.png");
   app->menu.engineer = IMG_Load("data/engenheiro1.png");
   app->game.player1.up = IMG_Load("data/soldado1_costas.png");
   app->game.player1.down = IMG_Load("data/soldado1.png");
@@ -187,8 +189,6 @@ void renderInit(App *app){
   app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }
 
-
-
 /**
  *
  * TODO: refactor this to be part of render func
@@ -200,21 +200,24 @@ void renderMenu(App *app){
 	SDL_Surface *screen = app->screen;
 
 	SDL_Rect titleCharPos = {-700, -50, screen->w, screen->h};
-	SDL_BlitSurface(menu->zombie, &titleCharPos, screen, NULL );
+	SDL_BlitSurface(menu->zombie, &titleCharPos, screen, NULL);
 
-	if(app->state == STATE_PAUSED) {
+	if(app->state == STATE_GAMEOVER) {
 	  SDL_Rect highlightChar = {-750, -450, screen->w, screen->h};
-	  SDL_BlitSurface(menu->bigZombie, &highlightChar, screen, NULL );
+	  SDL_BlitSurface(menu->bigZombie, &highlightChar, screen, NULL);
 	} else {
 	  SDL_Rect highlightChar = {-700, -450, screen->w, screen->h};
-	  SDL_BlitSurface(menu->soldier, &highlightChar, screen, NULL );
+	  SDL_BlitSurface(menu->soldier, &highlightChar, screen, NULL);
 	}
 
 	int resumePadding = 0;
 
 	if(app->state == STATE_GAMEOVER){
 	  resumePadding = 100;
-	  text_write_raw(screen, 100, 250, "ACABOUUU", red, 96);
+
+	  char kills[256];
+	  sprintf(kills, "You died. Zombies killed: %i", app->game.kill_count);
+	  text_write_raw(screen, 100, 250, kills, trueRed, 50);
 	} else if(app->state == STATE_PAUSED){
 	  resumePadding = 100;
 	  text_write(screen, 100, 250, "resume game", menu->selected == MENU_RESUME);
@@ -240,7 +243,7 @@ void renderCredits(App *app)
 
   text_write_raw(screen, 300, 50, "Credits", red, 96);
 
-  if(app->credits == CREDITS_TEAM){
+  if(app->credits != CREDITS_SOUND){
 	text_write_raw(screen, 100, 150, "team", green, 36);
 	text_write_raw(screen, 100, 200, "Carlo \"zED\" Caputo", white, 26);
 	text_write_raw(screen, 100, 250, "Pedro Mariano", white, 26);

@@ -34,6 +34,7 @@ void checkGameover(App *app){
 	printf("numero de mortos: %i/%i\n", numDeadPlayers, numCurrentPlayers);
 
 	if(numCurrentPlayers == numDeadPlayers){
+		app->game.kill_count -= numDeadPlayers;
 		app->state = STATE_GAMEOVER;
 	}
 }
@@ -65,6 +66,7 @@ void gameInit(App *app){
 
   app->game.latest_enemy_updated = 0;
   app->game.item_count = 0;
+	app->credits = 0;
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
   int i;
   for(i=0;i < ENEMY_COUNT; i++)
@@ -303,7 +305,7 @@ int hit(App *app, Body *source, Body *target){
 	SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, &rect);
 	if(target->life <= 0){
 		target->status = 1;
-		printf("MORREUUU\n");
+		app->game.kill_count++;
 		return 1;
 	}
 	return 0;
@@ -397,7 +399,6 @@ int main(int argc, char* args[] )
 
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
-	app.credits = CREDITS_TEAM;
 	app.game.itemtype[ITEM_ENEMY_MEDIC].damage = .5;
 	app.game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
 
