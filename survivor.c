@@ -135,6 +135,7 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 	  break;
 	case SDLK_ESCAPE:
 	  app->state = STATE_PAUSED;
+	  app->menu.selected = MENU_RESUME;
 	  break;
   }
 }
