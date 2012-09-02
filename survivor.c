@@ -23,15 +23,21 @@ void checkGameover(App *app){
 	Player *player1 = &app->game.player1;
 	Player *player2 = &app->game.player2;
 
-	int numCurrentPlayers = (player1->state == PLAYER_READY) + (player2->state == PLAYER_READY);
+	int numCurrentPlayers = (player1->state != PLAYER_IDLE) + (player2->state != PLAYER_IDLE);
 
 	if(numCurrentPlayers == 0 ){
 		//there is no player
 		return;
 	}
-	int numDeadPlayers = (player1->body.status == BODY_DEAD) + (player2->body.status == BODY_DEAD);
-
-	printf("numero de mortos: %i/%i\n", numDeadPlayers, numCurrentPlayers);
+	int numDeadPlayers = 0;
+	if(player1->body.status == BODY_DEAD){
+	  player1->state = PLAYER_DEAD;
+	  numDeadPlayers++;
+	}
+	if(player2->body.status == BODY_DEAD){
+	  player2->state = PLAYER_DEAD;
+	  numDeadPlayers++;
+	}
 
 	if(numCurrentPlayers == numDeadPlayers){
 		app->game.kill_count -= numDeadPlayers;
@@ -48,11 +54,13 @@ void gameInit(App *app){
 	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 150;
 	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
 	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.kill_count = 0;
 
 	/**
 	 * Player 1 init settings
 	 * */
 	Body *p1body = &app->game.player1.body;
+	app->game.player1.state = PLAYER_IDLE;
 	p1body->ang_vel = 0.3;
 	p1body->max_vel = 5;
 	p1body->angle = 0;
@@ -65,11 +73,13 @@ void gameInit(App *app){
 	 * Player 2 init settings
 	 * */
 	Body *p2body = &app->game.player2.body;
+	app->game.player2.state = PLAYER_IDLE;
 
 	p2body->ang_vel = 0.3;
 	p2body->max_vel = 5;
 	p2body->angle = 1;
 	p2body->life = 100.0;
+	p2body->status = BODY_ALIVE;
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
@@ -171,12 +181,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 				break;
 			}
 
-			if(*key == SDLK_z){
-				player2->state = PLAYER_READY;
-			} else {
-				printf("player 1 is ready\n");
-				player1->state = PLAYER_READY;
-			}
+
 
 			if(menu->selected == MENU_NEW_GAME){
 				resetApp(app);
@@ -189,6 +194,12 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 				app->state = STATE_CREDITS;
 			} else if(menu->selected == MENU_RESUME){
 				app->state = STATE_PLAYING;
+			}
+			if(*key == SDLK_z){
+				player2->state = PLAYER_READY;
+			} else {
+				printf("player 1 is ready\n");
+				player1->state = PLAYER_READY;
 			}
 			break;
 		case SDLK_ESCAPE:
@@ -234,7 +245,7 @@ void bindGameplayKeystate(App *app){
 		keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_y]
 	);
 
-	if(keystate[SDLK_a]) 
+	if(keystate[SDLK_a])
 		shoot(app, &player1->body);
 	if(keystate[SDLK_z])
 		shoot(app, &player2->body);
@@ -324,8 +335,10 @@ int hit(App *app, Body *source, Body *target){
 	}
 
 	if(target->life <= 0){
-		target->status = 1;
-		app->game.kill_count++;
+		if(target->status != BODY_DEAD){
+		  app->game.kill_count++;
+		}
+		target->status = BODY_DEAD;
 		return 1;
 	}
 	return 0;

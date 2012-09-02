@@ -9,20 +9,26 @@ SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 
 void renderStats(SDL_Surface *screen, Player *player1, Player *player2){
-  if(player1->state == PLAYER_READY){
+  if(player1->state != PLAYER_IDLE){
     text_write_raw(screen, 5, 30, "Player 1", green, 30);
-	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
 
-	SDL_Rect rect = { 5, 10, player1->body.life * 2, 20};
-	SDL_FillRect(screen, &rect, color);
+	if(player1->state != PLAYER_DEAD){
+	  Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
+	  SDL_Rect rect = { 5, 10, player1->body.life*2, 20};
+	  SDL_FillRect(screen, &rect, color);
+	}
+
   }
 
-  if(player2->state == PLAYER_IDLE){
+  if(player2->state != PLAYER_IDLE){
     text_write_raw(screen, 900, 30, "Player 2", green, 30);
-	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
 
-	SDL_Rect rect = { 830, 10, player2->body.life * 2, 20};
-	SDL_FillRect(screen, &rect, color);
+	if(player2->state != PLAYER_DEAD){
+	  Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
+	  SDL_Rect rect = { 830, 10, player2->body.life*2, 20};
+	  SDL_FillRect(screen, &rect, color);
+	}
+
   }
 }
 
