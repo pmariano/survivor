@@ -7,6 +7,8 @@ SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 
+//TODO unified zsort object render
+
 void renderPlayer(SDL_Surface *screen, Player *player){
 	if(player->state != PLAYER_READY) return;
 	printf("blitting on X: %i/Y: %i\n", player->body.pos.x, player->body.pos.y);
@@ -19,7 +21,7 @@ void renderPlayer(SDL_Surface *screen, Player *player){
 	else return;
 	SDL_Rect rect = {
 		player->body.pos.x - image->w/2,
-		player->body.pos.y - image->h/2,
+		player->body.pos.y - image->h,
 		player->body.pos.w,
 		player->body.pos.h
 	};
@@ -30,7 +32,7 @@ void renderEnemy(SDL_Surface *screen, Enemy *enemy){
 	SDL_Surface *image = enemy->image;
 	SDL_Rect rect = {
 		enemy->body.pos.x - image->w/2,
-		enemy->body.pos.y - image->h/2,
+		enemy->body.pos.y - image->h,
 		enemy->body.pos.w,
 		enemy->body.pos.h
 	};

@@ -30,6 +30,15 @@ void angle_rotate(float *a0_base, float a1, float f)
 	*a0_base = a0 > 360 ? a0 - 360 : a0;
 }
 
+int is_solid(int x, int y)
+{
+	return walkability[x/tileSize][y/tileSize];
+}
+int is_empty(int x, int y)
+{
+	return !is_solid(x,y);
+}
+
 void body_move(Game *game, Body *body, float angle)
 {
 	if(body->action == ACTION_DEATH){
@@ -42,9 +51,25 @@ void body_move(Game *game, Body *body, float angle)
 	float a = body->angle * M_PI / 180.;
 	float dx = (int)(cos(a) * v * 100)/100.;
 	float dy = (int)(sin(a) * v * 100)/100.;
-	body->pos.x += dx;
-	body->pos.y -= dy;
-	printf("body: angle: %f a: %f 2pi:%f y:%f\n", body->angle, a, 2*M_PI, sin(a) * v);
+	int x0 = body->pos.x;
+	int y0 = body->pos.y;
+	int x1 = x0 + dx;
+	int y1 = y0 - dy;
+
+	if(is_empty(x1,y1)) {
+		body->pos.x = x1;
+		body->pos.y = y1;
+	} else {
+		if(is_empty(x1,y0)) {
+			body->pos.x = x1;
+		} else if(is_empty(x0,y1)) {
+			body->pos.y = y1;
+		}
+	}
+
+	
+
+	//printf("body: angle: %f a: %f 2pi:%f y:%f\n", body->angle, a, 2*M_PI, sin(a) * v);
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
