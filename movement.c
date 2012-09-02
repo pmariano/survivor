@@ -6,11 +6,13 @@
 void moveInit(App *app)
 {
 	int x,y;
-
+	SDL_Surface *hit = app->game.board.hit;
 	memset(walkability, 0, sizeof(walkability));
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
-			if((rand() % 3) == 0) walkability[x][y] = 1;
+			Uint8 *p = ((Uint8*)app->game.board.hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch);
+			printf("%d,%d: %d %d %d %d\n", x,y, hit->format->BytesPerPixel,p[0], p[1], p[2]);
+			walkability[x][y] = !(p[0]||p[2]);
 		}
 	}
 }
@@ -71,3 +73,11 @@ void player_move(Game *game, Body *body, int up, int right, int down, int left)
     }
 }
 
+
+void enemy_spawn_pos(int *x, int *y) {
+
+}
+
+void powerup_spawn_pos(int *x, int *y) {
+
+}

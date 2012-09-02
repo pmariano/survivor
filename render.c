@@ -65,17 +65,8 @@ void render(App *app){
   SDL_Flip(app->screen);
 }
 
-void renderMapInit(App *app, int map_index) {
-	char image_path[256];
-	char hit_path[256];
-	sprintf(image_path, "data/map%d.bmp", map_index);
-	sprintf(hit_path, "data/map%d_hit.bmp", map_index);
-	app->game.board.image = IMG_Load(image_path);
-	app->game.board.hit = IMG_Load(hit_path);
 
-}
 void renderInit(App *app){
-	renderMapInit(app, 0);
 
 	app->menu.soldier = IMG_Load("data/soldado1_grande.png");
 	app->menu.zombie = IMG_Load("data/zombie1.png");

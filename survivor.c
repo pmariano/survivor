@@ -218,6 +218,16 @@ void handleDelay(Uint32 start) {
 	SDL_Delay(delay);
 }
 
+void loadMap(App *app, int map_index) {
+	char image_path[256];
+	char hit_path[256];
+	sprintf(image_path, "data/map%d.bmp", map_index);
+	sprintf(hit_path, "data/map%d_hit.bmp", map_index);
+	app->game.board.image = IMG_Load(image_path);
+	app->game.board.hit = IMG_Load(hit_path);
+	moveInit(app);
+}
+
 int main(int argc, char* args[] )
 {
 	App app;
@@ -231,8 +241,8 @@ int main(int argc, char* args[] )
 	init_font();
   InitializePathfinder();
 	renderInit(&app);
+	loadMap(&app, 0); // calls moveInit
 	gameInit(&app);
-	moveInit(&app);
 
 	while(app.state != STATE_EXIT){
 	  Uint32 startTime = SDL_GetTicks();
