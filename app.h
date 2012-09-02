@@ -26,10 +26,10 @@ typedef struct {
 } Menu;
 
 typedef enum {
-    ACTION_MOVE=0,
-    ACTION_ATTACK,
-    ACTION_DEATH,
-    ACTION_COUNT
+  ACTION_MOVE=0,
+  ACTION_ATTACK,
+  ACTION_DEATH,
+  ACTION_COUNT
 } Action;
 
 typedef enum {
@@ -38,7 +38,16 @@ typedef enum {
 } PlayerStatus;
 
 typedef struct {
+  SDL_Surface *image;
+  float damage;
+  int ammo;
+} Item;
+
+typedef struct {
   SDL_Rect pos;
+  float life;
+  int ammo;
+  Item item;
   Action action;
   float max_vel;
   float ang_vel;
@@ -69,7 +78,6 @@ typedef struct{
   EnemyState state;
 } Enemy;
 
-
 typedef struct {
 	int x,y;
 	int open;
@@ -90,7 +98,12 @@ typedef struct{
   int spawn_count;
   Sprite sprite[SPRITE_COUNT];
   int sprite_count;
+  Item powerups[POWERUP_COUNT];
 } Board;
+
+typedef struct {
+  SDL_Surface *image;
+} HealthPack;
 
 typedef struct {
   Player player1;
@@ -102,6 +115,8 @@ typedef struct {
   EnemyClass enemy_class_medic;
   EnemyClass enemy_class_soldier;
   int latest_enemy_updated;
+  int item_count,
+  HealthPack health_pack;
 } Game;
 
 typedef enum {

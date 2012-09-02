@@ -15,7 +15,7 @@ int onClosedList = 10;
 //Create needed arrays
 char walkability[mapWidth][mapHeight];
 int openList[mapWidth*mapHeight+2]; //1 dimensional array holding ID# of open list items
-int whichList[mapWidth+1][mapHeight+1];  //2 dimensional array used to record 
+int whichList[mapWidth+1][mapHeight+1];  //2 dimensional array used to record
 //whether a cell is on the open list or on the closed list.
 int openX[mapWidth*mapHeight+2]; //1d array stores the x location of an item on the open list
 int openY[mapWidth*mapHeight+2]; //1d array stores the y location of an item on the open list
@@ -25,7 +25,7 @@ int Fcost[mapWidth*mapHeight+2];	//1d array to store F cost of a cell on the ope
 int Gcost[mapWidth+1][mapHeight+1]; 	//2d array to store G cost for each cell.
 int Hcost[mapWidth*mapHeight+2];	//1d array to store H cost of a cell on the open list
 int pathLength[numberPeople+1];     //stores length of the found path for critter
-int pathLocation[numberPeople+1];   //stores current position along the chosen path for critter		
+int pathLocation[numberPeople+1];   //stores current position along the chosen path for critter
 int* pathBank [numberPeople+1];
 
 //Path reading variables
@@ -81,7 +81,7 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 
 //1. Convert location data (in pixels) to coordinates in the walkability array.
 	int startX = startingX/tileSize;
-	int startY = startingY/tileSize;	
+	int startY = startingY/tileSize;
 	targetX = targetX/tileSize;
 	targetY = targetY/tileSize;
 
@@ -106,7 +106,7 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 			for (; y < mapHeight;y++)
 				whichList [x][y] = 0;
 		}
-		onClosedList = 10;	
+		onClosedList = 10;
 	}
 	onClosedList = onClosedList+2; //changing the values of onOpenList and onClosed list is faster than redimming whichList() array
 	onOpenList = onClosedList-1;
@@ -136,8 +136,8 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 //	Open List = Binary Heap: Delete this item from the open list, which
 //  is maintained as a binary heap. For more information on binary heaps, see:
 //	http://www.policyalmanac.org/games/binaryHeaps.htm
-	numberOfOpenListItems = numberOfOpenListItems - 1;//reduce number of open list items by 1	
-		
+	numberOfOpenListItems = numberOfOpenListItems - 1;//reduce number of open list items by 1
+
 //	Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
 	openList[1] = openList[numberOfOpenListItems+1];//move the last item in the heap up to slot #1
 	v = 1;
@@ -145,22 +145,22 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 //	Repeat the following until the new item in slot #1 sinks to its proper spot in the heap.
 	do
 	{
-	u = v;		
+	u = v;
 	if (2*u+1 <= numberOfOpenListItems) //if both children exist
 	{
 	 	//Check if the F cost of the parent is greater than each child.
 		//Select the lowest of the two children.
-		if (Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+		if (Fcost[openList[u]] >= Fcost[openList[2*u]])
 			v = 2*u;
-		if (Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
-			v = 2*u+1;		
+		if (Fcost[openList[v]] >= Fcost[openList[2*u+1]])
+			v = 2*u+1;
 	}
 	else
 	{
 		if (2*u <= numberOfOpenListItems) //if only child #1 exists
 		{
-	 	//Check if the F cost of the parent is greater than child #1	
-			if (Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+	 	//Check if the F cost of the parent is greater than child #1
+			if (Fcost[openList[u]] >= Fcost[openList[2*u]])
 				v = 2*u;
 		}
 	}
@@ -169,11 +169,11 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 	{
 		temp = openList[u];
 		openList[u] = openList[v];
-		openList[v] = temp;			
+		openList[v] = temp;
 	}
 	else
 		break; //otherwise, exit loop
-		
+
 	}
 	while (1);//reorder the binary heap
 
@@ -192,15 +192,15 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 	if (a != -1 && b != -1 && a != mapWidth && b != mapHeight){
 
 //	If not already on the closed list (items on the closed list have
-//	already been considered and can now be ignored).			
-	if (whichList[a][b] != onClosedList) { 
-	
+//	already been considered and can now be ignored).
+	if (whichList[a][b] != onClosedList) {
+
 //	If not a wall/obstacle square.
-	if (walkability [a][b] != unwalkable) { 
-		
+	if (walkability [a][b] != unwalkable) {
+
 //	Don't cut across corners
-	corner = walkable;	
-	if (a == parentXval-1) 
+	corner = walkable;
+	if (a == parentXval-1)
 	{
 		if (b == parentYval-1)
 		{
@@ -211,30 +211,30 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 		else if (b == parentYval+1)
 		{
 			if (walkability[parentXval][parentYval+1] == unwalkable
-				|| walkability[parentXval-1][parentYval] == unwalkable) 
-				corner = unwalkable; 
+				|| walkability[parentXval-1][parentYval] == unwalkable)
+				corner = unwalkable;
 		}
 	}
 	else if (a == parentXval+1)
 	{
 		if (b == parentYval-1)
 		{
-			if (walkability[parentXval][parentYval-1] == unwalkable 
-				|| walkability[parentXval+1][parentYval] == unwalkable) 
+			if (walkability[parentXval][parentYval-1] == unwalkable
+				|| walkability[parentXval+1][parentYval] == unwalkable)
 				corner = unwalkable;
 		}
 		else if (b == parentYval+1)
 		{
-			if (walkability[parentXval+1][parentYval] == unwalkable 
+			if (walkability[parentXval+1][parentYval] == unwalkable
 				|| walkability[parentXval][parentYval+1] == unwalkable)
-				corner = unwalkable; 
+				corner = unwalkable;
 		}
-	}	
+	}
 	if (corner == walkable) {
-	
-//	If not already on the open list, add it to the open list.			
-	if (whichList[a][b] != onOpenList) 
-	{	
+
+//	If not already on the open list, add it to the open list.
+	if (whichList[a][b] != onOpenList)
+	{
 
 		//Create a new open list item in the binary heap.
 		newOpenListItemID = newOpenListItemID + 1; //each new item has a unique ID #
@@ -245,23 +245,23 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 
 		//Figure out its G cost
 		if (abs(a-parentXval) == 1 && abs(b-parentYval) == 1)
-			addedGCost = 14;//cost of going to diagonal squares	
-		else	
-			addedGCost = 10;//cost of going to non-diagonal squares				
+			addedGCost = 14;//cost of going to diagonal squares
+		else
+			addedGCost = 10;//cost of going to non-diagonal squares
 		Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost;
 
 		//Figure out its H and F costs and parent
 		Hcost[openList[m]] = 10*(abs(a - targetX) + abs(b - targetY));
 		Fcost[openList[m]] = Gcost[a][b] + Hcost[openList[m]];
-		parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
+		parentX[a][b] = parentXval ; parentY[a][b] = parentYval;
 
 		//Move the new open list item to the proper place in the binary heap.
 		//Starting at the bottom, successively compare to parent items,
 		//swapping as needed until the item finds its place in the heap
 		//or bubbles all the way to the top (if it has the lowest F cost).
-		while (m != 1) //While item hasn't bubbled to the top (m=1)	
+		while (m != 1) //While item hasn't bubbled to the top (m=1)
 		{
-			//Check if child's F cost is < parent's F cost. If so, swap them.	
+			//Check if child's F cost is < parent's F cost. If so, swap them.
 			if (Fcost[openList[m]] <= Fcost[openList[m/2]])
 			{
 				temp = openList[m/2];
@@ -278,26 +278,26 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 		whichList[a][b] = onOpenList;
 	}
 
-//8.If adjacent cell is already on the open list, check to see if this 
-//	path to that cell from the starting location is a better one. 
-//	If so, change the parent of the cell and its G and F costs.	
+//8.If adjacent cell is already on the open list, check to see if this
+//	path to that cell from the starting location is a better one.
+//	If so, change the parent of the cell and its G and F costs.
 	else //If whichList(a,b) = onOpenList
 	{
-	
+
 		//Figure out the G cost of this possible new path
 		if (abs(a-parentXval) == 1 && abs(b-parentYval) == 1)
-			addedGCost = 14;//cost of going to diagonal tiles	
-		else	
-			addedGCost = 10;//cost of going to non-diagonal tiles				
+			addedGCost = 14;//cost of going to diagonal tiles
+		else
+			addedGCost = 10;//cost of going to non-diagonal tiles
 		tempGcost = Gcost[parentXval][parentYval] + addedGCost;
-		
+
 		//If this path is shorter (G cost is lower) then change
-		//the parent cell, G cost and F cost. 		
+		//the parent cell, G cost and F cost.
 		if (tempGcost < Gcost[a][b]) //if G cost is less,
 		{
 			parentX[a][b] = parentXval; //change the square's parent
 			parentY[a][b] = parentYval;
-			Gcost[a][b] = tempGcost;//change the G cost			
+			Gcost[a][b] = tempGcost;//change the G cost
 
 			//Because changing the G cost also changes the F cost, if
 			//the item is on the open list we need to change the item's
@@ -309,12 +309,12 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 			if (openX[openList[x]] == a && openY[openList[x]] == b) //item found
 			{
 				Fcost[openList[x]] = Gcost[a][b] + Hcost[openList[x]];//change the F cost
-				
+
 				//See if changing the F score bubbles the item up from it's current location in the heap
 				m = x;
-				while (m != 1) //While item hasn't bubbled to the top (m=1)	
+				while (m != 1) //While item hasn't bubbled to the top (m=1)
 				{
-					//Check if child is < parent. If so, swap them.	
+					//Check if child is < parent. If so, swap them.
 					if (Fcost[openList[m]] < Fcost[openList[m/2]])
 					{
 						temp = openList[m/2];
@@ -324,27 +324,27 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 					}
 					else
 						break;
-				} 
+				}
 				break; //exit for x = loop
 			} //If openX(openList(x)) = a
 			} //For x = 1 To numberOfOpenListItems
 		}//If tempGcost < Gcost(a,b)
 
-	}//else If whichList(a,b) = onOpenList	
+	}//else If whichList(a,b) = onOpenList
 	}//If not cutting a corner
 	}//If not a wall/obstacle square.
-	}//If not already on the closed list 
+	}//If not already on the closed list
 	}//If not off the map
 	}//for (a = parentXval-1; a <= parentXval+1; a++){
 	}//for (b = parentYval-1; b <= parentYval+1; b++){
 
 	}//if (numberOfOpenListItems != 0)
 
-//9.If open list is empty then there is no path.	
+//9.If open list is empty then there is no path.
 	else
 	{
 		path = nonexistent; break;
-	}  
+	}
 
 	//If target is added to open list then path has been found.
 	if (whichList[targetX][targetY] == onOpenList)
@@ -364,8 +364,8 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 	pathX = targetX; pathY = targetY;
 	do
 	{
-		//Look up the parent of the current cell.	
-		tempx = parentX[pathX][pathY];		
+		//Look up the parent of the current cell.
+		tempx = parentX[pathX][pathY];
 		pathY = parentY[pathX][pathY];
 		pathX = tempx;
 
@@ -384,21 +384,21 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 //	a properly ordered set of path data, from the first step to the
 //	last.
 	pathX = targetX ; pathY = targetY;
-	cellPosition = pathLength[pathfinderID]*2;//start at the end	
+	cellPosition = pathLength[pathfinderID]*2;//start at the end
 	do
 	{
 	cellPosition = cellPosition - 2;//work backwards 2 integers
 	pathBank[pathfinderID] [cellPosition] = pathX;
 	pathBank[pathfinderID] [cellPosition+1] = pathY;
 
-//d.Look up the parent of the current cell.	
-	tempx = parentX[pathX][pathY];		
+//d.Look up the parent of the current cell.
+	tempx = parentX[pathX][pathY];
 	pathY = parentY[pathX][pathY];
 	pathX = tempx;
 
-//e.If we have reached the starting square, exit the loop.	
+//e.If we have reached the starting square, exit the loop.
 	}
-	while (pathX != startX || pathY != startY);	
+	while (pathX != startX || pathY != startY);
 
 //11.Read the first path step into xPath/yPath arrays
 	ReadPath(pathfinderID,startingX,startingY,1);
@@ -422,7 +422,7 @@ noPath:
 //==========================================================
 //READ PATH DATA: These functions read the path data and convert
 //it to screen pixel coordinates.
-void ReadPath(int pathfinderID,int currentX,int currentY,
+int ReadPath(int pathfinderID,int currentX,int currentY,
 			  int pixelsPerFrame)
 {
 /*
@@ -431,15 +431,15 @@ void ReadPath(int pathfinderID,int currentX,int currentY,
 ;	parameter is used to determine if the pathfinder has gotten close
 ;	enough to the center of a given path square to warrant looking up
 ;	the next step on the path.
-;	 
+;
 ;	This is needed because the speed of certain sprites can
 ;	make reaching the exact center of a path square impossible.
 ;	In Demo #2, the chaser has a velocity of 3 pixels per frame. Our
 ;	tile size is 50 pixels, so the center of a tile will be at location
 ;	25, 75, 125, etc. Some of these are not evenly divisible by 3, so
 ;	our pathfinder has to know how close is close enough to the center.
-;	It calculates this by seeing if the pathfinder is less than 
-;	pixelsPerFrame # of pixels from the center of the square. 
+;	It calculates this by seeing if the pathfinder is less than
+;	pixelsPerFrame # of pixels from the center of the square.
 
 ;	This could conceivably cause problems if you have a *really* fast
 ;	sprite and/or really small tiles, in which case you may need to
@@ -455,38 +455,40 @@ void ReadPath(int pathfinderID,int currentX,int currentY,
 	if (pathStatus[ID] == found)
 	{
 
-		//If path finder is just starting a new path or has reached the 
+		//If path finder is just starting a new path or has reached the
 		//center of the current path square (and the end of the path
 		//hasn't been reached), look up the next path square.
 		if (pathLocation[ID] < pathLength[ID])
 		{
 			//if just starting or if close enough to center of square
-			if (pathLocation[ID] == 0 || 
+			if (pathLocation[ID] == 0 ||
 				(abs(currentX - xPath[ID]) < pixelsPerFrame && abs(currentY - yPath[ID]) < pixelsPerFrame))
 					pathLocation[ID] = pathLocation[ID] + 1;
 		}
 
-		//Read the path data.		
+		//Read the path data.
 		xPath[ID] = ReadPathX(ID,pathLocation[ID]);
 		yPath[ID] = ReadPathY(ID,pathLocation[ID]);
 
-		//If the center of the last path square on the path has been 
+		//If the center of the last path square on the path has been
 		//reached then reset.
-		if (pathLocation[ID] == pathLength[ID]) 
+		if (pathLocation[ID] == pathLength[ID])
 		{
-			if (abs(currentX - xPath[ID]) < pixelsPerFrame 
+			if (abs(currentX - xPath[ID]) < pixelsPerFrame
 				&& abs(currentY - yPath[ID]) < pixelsPerFrame) //if close enough to center of square
-					pathStatus[ID] = notStarted; 
+					pathStatus[ID] = notStarted;
+			return 1;
 		}
 	}
 
 	//If there is no path for this pathfinder, simply stay in the current
  	//location.
 	else
-	{	
+	{
 		xPath[ID] = currentX;
 		yPath[ID] = currentY;
 	}
+	return 0;
 }
 
 
@@ -513,10 +515,10 @@ int ReadPathX(int pathfinderID,int pathLocation)
 	//sprites that are centered -- i.e., with the midHandle command.
 	//Otherwise you will want to adjust this.
 	x = tileSize*x + .5*tileSize;
-	
+
 	}
 	return x;
-}	
+}
 
 
 //-----------------------------------------------------------------------------
@@ -537,11 +539,11 @@ int ReadPathY(int pathfinderID,int pathLocation)
 	//sprites that are centered -- i.e., with the midHandle command.
 	//Otherwise you will want to adjust this.
 	y = tileSize*y + .5*tileSize;
-	
+
 	}
 	return y;
 }
 
 
-	
+
 

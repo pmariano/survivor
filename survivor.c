@@ -29,6 +29,7 @@ void gameInit(App *app){
 	p1body->ang_vel = 0.3;
 	p1body->max_vel = 5;
 	p1body->angle = 0;
+	p1body->life = 100.0;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
@@ -39,9 +40,9 @@ void gameInit(App *app){
 	p2body->ang_vel = 0.3;
 	p2body->max_vel = 5;
 	p2body->angle = 1;
+	p2body->life = 100.0;
   app->game.latest_enemy_updated = 0;
-  printf("caires  %d\n\n\n", app->game.latest_enemy_updated);
-  
+  app->game.item_count = 0;
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
   int i = 0;
   for(;i < ENEMY_COUNT; i++)
@@ -227,7 +228,7 @@ void spawnEnemy(App *app)
   Game *game = &app->game;
   Enemy *enemy = NULL;
   int x,y;
-  
+
   int i = 0;
   for(; i < ENEMY_COUNT; i++)
   {
@@ -238,7 +239,7 @@ void spawnEnemy(App *app)
       break;
     }
   }
-  
+
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
     enemy->image = game->enemy_class_medic.image;
@@ -248,6 +249,8 @@ void spawnEnemy(App *app)
     enemybody->angle = 1;
     enemybody->pos.x = x;
     enemybody->pos.y = y;
+		enemybody->life = 100.0;
+		enemybody->item.damage = 0.5;
   }
 }
 

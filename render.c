@@ -7,7 +7,23 @@ SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 
+void renderStats(SDL_Surface *screen, Player *player1, Player *player2){
+  if(player1->state == PLAYER_READY){
+    text_write_raw(screen, 5, 30, "Player 1", green, 30);
+	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
 
+	SDL_Rect rect = { 5, 10, player1->body.life * 2, 20};
+	SDL_FillRect(screen, &rect, color);
+  }
+
+  if(player2->state == PLAYER_IDLE){
+    text_write_raw(screen, 900, 30, "Player 2", green, 30);
+	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
+
+	SDL_Rect rect = { 830, 10, player2->body.life * 2, 20};
+	SDL_FillRect(screen, &rect, color);
+  }
+}
 
 void renderPlayer(Game *game, Player *player){
 	if(player->state != PLAYER_READY) return;
@@ -80,23 +96,46 @@ void render(App *app){
   SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
 
   if(app->debug){
-	for (x=0; x < mapWidth;x++) {
-	  for (y=0; y < mapHeight;y++) {
-		if(walkability[x][y]) {
-		  SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
-		  SDL_FillRect(app->screen, &rect , 0xffffff);
-		}
-	  }
-	}
+    for (x=0; x < mapWidth;x++) {
+      for (y=0; y < mapHeight;y++) {
+        if(walkability[x][y]) {
+          SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
+          SDL_FillRect(app->screen, &rect , 0xffffff);
+        }
+      }
+    }
   }
 
   renderPlayer(&app->game, &game.player1);
   renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
+  if(rand() % 100 == 0)
+  {
+    renderPowerups(app, app->game.health_pack.image);
+  }
+  //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 
   flushRender(app);
+  renderStats(app->screen, &game.player1, &game.player2);
 
   SDL_Flip(app->screen);
+}
+
+void renderPowerups(App *app, HealthPack health_pack)
+{
+  app->game.item_count += 1;
+  int x = 500, y = 300;
+  powerup_spawn_pos(&app->game, &x, &y);
+  SDL_Rect rect = {
+    x,
+    y,
+    health_pack.image->w,
+    health_pack.image->h
+  };
+	int i = app->game.board.sprite_count++;
+	app->game.board.sprite[i].image = health_pack.image;
+	app->game.board.sprite[i].rect = rect;
+  app->game.board.powerups[app->game.item_count] = item;
 }
 
 
@@ -113,6 +152,7 @@ void renderInit(App *app){
   app->game.player2.down = IMG_Load("data/engenheiro1.png");
   app->game.player2.left = IMG_Load("data/engenheiro1.png");
   app->game.player2.right = IMG_Load("data/engenheiro1.png");
+  app->game.health_pack.image = IMG_Load("data/health.png");
   app->game.enemy_class_medic.image = IMG_Load("data/zombie2.png");
   app->game.enemy_class_soldier.image = IMG_Load("data/zombie2.png");
 
@@ -191,11 +231,10 @@ void renderCredits(App *app)
 	text_write_raw(screen, 100, 500, "http://www.freesound.org/people/LAGtheNoggin/sounds/15545/", white, 26);
 	text_write_raw(screen, 100, 550, "http://www.freesound.org/people/Sparrer/sounds/50506/", white, 26);
 	text_write_raw(screen, 100, 600, "http://www.freesound.org/people/DJ20Chronos/sounds/33380/", white, 26);
-
-
-
   }
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
+
+
 
