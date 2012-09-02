@@ -78,7 +78,7 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			app->debug ^= 1;
 			break;
 		case SDLK_ESCAPE:
-			finishHim(app);
+			app->state = STATE_PAUSED;
 			break;
 	}
 }
@@ -121,7 +121,13 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		case SDLK_z:
 		case SDLK_RETURN:
 			if(app->state == STATE_CREDITS){
-				app->state = app->stateBeforeCredits;
+				if(app->credits == CREDITS_SOUND){
+					app->state = app->stateBeforeCredits;
+					app->credits = CREDITS_TEAM;
+				} else{
+					app->credits = CREDITS_SOUND;
+				}
+
 				break;
 			}
 
@@ -145,7 +151,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 			}
 			break;
 		case SDLK_ESCAPE:
-			finishHim(app);
+			app->state = STATE_PAUSED;
 			break;
 	}
 }
@@ -260,6 +266,7 @@ int main(int argc, char* args[] )
 
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
+	app.credits = CREDITS_TEAM;
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
