@@ -155,9 +155,6 @@ void move_enemies(App *app)
           app->game.enemies[id].pathfinder = crazy+1;
           app->game.enemies[id].target = &app->game.player2.body;
         }
-
-
-        break;
     }
   }
 
