@@ -13,8 +13,46 @@
 #define FPS 140
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
+void gameInit(App *app){
+	/**
+	 * Player 1 init settings
+	 * */
+	Body *p1body = &app->game.player1.body;
+	p1body->ang_vel = 0.3;
+	p1body->max_vel = 5;
+	p1body->angle = 1;
+	p1body->pos.x = 1204/2+15;
+	p1body->pos.y = 768/2+15;
+
+	/**
+	 * Player 2 init settings
+	 * */
+	Body *p2body = &app->game.player2.body;
+
+	p2body->ang_vel = 0.3;
+	p2body->max_vel = 5;
+	p2body->angle = 1;
+	p2body->pos.x = 1204/2+40;
+	p2body->pos.y = 768/2+40;
+}
+
+
 void finishHim(App *app){
 	app->state = STATE_EXIT;
+}
+
+void resetApp(App *app){
+	gameInit(app);
+	//reset here other stuffs
+}
+
+void pauseOrJoinTheGame(App *app, Player *player){
+	if(player->state == PLAYER_READY){
+		app->state = STATE_PAUSED;
+		app->menu.selected = MENU_RESUME;
+	} else{
+		player->state = PLAYER_READY;
+	}
 }
 
 void bindGameplayKeysDown(App *app, SDLKey *key){
@@ -23,10 +61,10 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 
 	switch(*key){
 		case SDLK_1:
-			player1->state = PLAYER_READY;
+			pauseOrJoinTheGame(app, player1);
 			break;
 		case SDLK_2:
-			player2->state = PLAYER_READY;
+			pauseOrJoinTheGame(app, player2);
 			break;
 		case SDLK_ESCAPE:
 			finishHim(app);
@@ -38,6 +76,14 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 	Player *player1 = &app->game.player1;
 	Player *player2 = &app->game.player2;
 	Menu *menu = &app->menu;
+	int firstMenu = MENU_NEW_GAME;
+
+	/**
+	 * when game is paused there is more menu options
+	 * */
+	if(app->state == STATE_PAUSED){
+		firstMenu = MENU_RESUME;
+	}
 
 	switch(*key){
 		case SDLK_1:
@@ -49,7 +95,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		case SDLK_UP:
 		case SDLK_q:
 		case SDLK_t:
-			if(menu->selected != 0){
+			if(menu->selected != firstMenu){
 				menu->selected--;
 			}
 			break;
@@ -69,12 +115,15 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 				player1->state = PLAYER_READY;
 			}
 			if(menu->selected == MENU_NEW_GAME){
+				resetApp(app);
 				app->state = STATE_PLAYING;
 			} else if (menu->selected == MENU_QUIT){
 				finishHim(app);
 			} else if(menu->selected == MENU_CREDITS){
 				app->state = STATE_CREDITS;
 				renderCredits(app);
+			} else if(menu->selected == MENU_RESUME){
+				app->state = STATE_PLAYING;
 			}
 			break;
 		case SDLK_ESCAPE:
@@ -127,46 +176,21 @@ void bindKeyboard(App *app)
 	while(SDL_PollEvent(&event)){
 		switch(event.type) {
 			case SDL_KEYDOWN:
-				if (app->state == STATE_MENU){
-					bindMenuKeysDown(app, &event.key.keysym.sym);
-				} else{
+				if (app->state == STATE_PLAYING){
 					bindGameplayKeysDown(app, &event.key.keysym.sym);
+				} else{
+					bindMenuKeysDown(app, &event.key.keysym.sym);
 				}
 		}
 	}
 
-	if (app->state != STATE_MENU){
+	if (app->state == STATE_PLAYING){
 		bindGameplayKeystate(app);
 	}
 }
 
 int hasNoReadyPlayers(Game *game) {
 	return !game->player1.state == PLAYER_READY && !game->player2.state == PLAYER_READY;
-}
-
-void gameInit(App *app){
-	app->game.player1.state = PLAYER_IDLE;
-
-	/**
-	 * Player 1 init settings
-	 * */
-	Body *p1body = &app->game.player1.body;
-	p1body->ang_vel = 0.3;
-	p1body->max_vel = 5;
-	p1body->angle = 1;
-	p1body->pos.x = 1204/2+15;
-	p1body->pos.y = 768/2+15;
-
-	/**
-	 * Player 2 init settings
-	 * */
-	Body *p2body = &app->game.player2.body;
-
-	p2body->ang_vel = 0.3;
-	p2body->max_vel = 5;
-	p2body->angle = 1;
-	p2body->pos.x = 1204/2+40;
-	p2body->pos.y = 768/2+40;
 }
 
 void handleDelay(Uint32 start) {
@@ -177,14 +201,12 @@ void handleDelay(Uint32 start) {
     SDL_Delay(delay);
 }
 
-
-
 int main(int argc, char* args[] )
 {
 	App app;
 	Menu menu;
 	app.state = STATE_MENU;
-	app.menu.selected = 0;
+	app.menu.selected = MENU_NEW_GAME;
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
@@ -195,13 +217,10 @@ int main(int argc, char* args[] )
 	  Uint32 startTime = SDL_GetTicks();
 		bindKeyboard(&app);
 
-		if (app.state == STATE_MENU){
-			if(hasNoReadyPlayers(&app.game)){
-				printf("No players at moment \n");
-			}
-			renderMenu(&app);
-		} else {
+		if (app.state == STATE_PLAYING){
 			render(&app);
+		} else {
+			renderMenu(&app);
 		}
 		handleDelay(startTime);
 	}
