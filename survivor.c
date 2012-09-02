@@ -338,7 +338,7 @@ int draw(App *app, Body *body, int x, int y)
 	p[1] = 0xff;
 	int target = is_solid(&app->game, body, x, y);
 	if(target) {
-		if(target>4) {
+		if(target>=4) {
 			int i = target - 4;
 			hit(app, body, &app->game.enemies[i].body);
 		}
