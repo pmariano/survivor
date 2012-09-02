@@ -27,7 +27,7 @@ void body_move(Game *game, Body *body, int angle)
     if(body->action == ACTION_DEATH){
 	  return;
 	}
-	printf("body: angle: %i", body->angle);
+	printf("body: angle: %i\n", body->angle);
 
     float v = body->max_vel;
 
@@ -42,55 +42,68 @@ void finishHim(App *app){
   app->state = STATE_EXIT;
 }
 
-void handleArcadeKeys(App *app, SDLKey *key){
+void handleArcadeKeysDown(App *app, SDLKey *key){
   Player *player1 = &app->game.player1;
   Player *player2 = &app->game.player2;
   switch(*key){
-	/**
-	 * Player 1 settings:
-	 * Q = UP; W = DOWN; E = LEFT; R = RIGHT
-	 * A = ATTACK
-	 * S = SECONDARY ATTACK
-	 * */
 	case SDLK_1:
 	  player1->state = PLAYER_READY;
 	  break;
-	case SDLK_w:
-	  body_move(&app->game, &player1->body, 90);
-	  break;
-	case SDLK_s:
-	  body_move(&app->game, &player1->body, 270);
-	  break;
-	case SDLK_a:
-	  body_move(&app->game, &player1->body, 180);
-	  break;
-	case SDLK_d:
-	  body_move(&app->game, &player1->body, 0);
-	  break;
-	/**
-	 * Player 2 settings:
-	 * T = UP; Y = DOWN; U = LEFT;I = RIGHT
-	 * Z = ATTACK
-	 * S = SECONDARY ATTACK
-	 * */
 	case SDLK_2:
 	  player2->state = PLAYER_READY;
-	  break;
-	case SDLK_t:
-	  body_move(&app->game, &player2->body, 0);
-	  break;
-	case SDLK_y:
-	  body_move(&app->game, &player2->body, 90);
-	  break;
-	case SDLK_u:
-	  body_move(&app->game, &player2->body, 45);
-	  break;
-	case SDLK_i:
-	  body_move(&app->game, &player2->body, 180);
 	  break;
 	case SDLK_ESCAPE:
 	  finishHim(app);
 	  break;
+  }
+
+ }
+/**
+ * Keystate is responsible to handle pressed keys
+ */
+void handleArcadeKeystate(App *app){
+  Player *player1 = &app->game.player1;
+  Player *player2 = &app->game.player2;
+
+  Uint8 *keystate;
+  keystate = SDL_GetKeyState(NULL);
+
+  /**
+   * Player 1 settings:
+   * Q = UP; W = DOWN; E = LEFT; R = RIGHT
+   * A = ATTACK
+   * S = SECONDARY ATTACK
+   * */
+
+  if (keystate[SDLK_w] ) {
+	body_move(&app->game, &player1->body, 90);
+  }
+  if (keystate[SDLK_d] ) {
+	body_move(&app->game, &player1->body, 0);
+  }
+  if (keystate[SDLK_s] ) {
+	body_move(&app->game, &player1->body, 270);
+  }
+  if (keystate[SDLK_a] ) {
+	body_move(&app->game, &player1->body, 180);
+  }
+  /**
+   * Player 2 settings:
+   * T = UP; Y = DOWN; U = LEFT;I = RIGHT
+   * Z = ATTACK
+   * S = SECONDARY ATTACK
+   * */
+  if (keystate[SDLK_UP]) {
+	body_move(&app->game, &player2->body, 90);
+  }
+  if (keystate[SDLK_RIGHT] ) {
+	body_move(&app->game, &player2->body, 0);
+  }
+  if (keystate[SDLK_DOWN] ) {
+	body_move(&app->game, &player2->body, 270);
+  }
+  if (keystate[SDLK_LEFT] ) {
+	body_move(&app->game, &player2->body, 180);
   }
 }
 
@@ -100,9 +113,10 @@ void handleArcadeKeyboard(App *app)
   while(SDL_PollEvent(&event)){
 	switch(event.type) {
 	  case SDL_KEYDOWN:
-		handleArcadeKeys(app, &event.key.keysym.sym);
+		handleArcadeKeysDown(app, &event.key.keysym.sym);
 	}
   }
+  handleArcadeKeystate(app);
 }
 
 void handleMenu(App *app){
@@ -111,6 +125,33 @@ void handleMenu(App *app){
 
 int hasNoReadyPlayers(Game *game) {
   return !game->player1.state == PLAYER_READY && !game->player2.state == PLAYER_READY;
+}
+
+void gameInit(App *app){
+
+  app->game.player1.state = PLAYER_IDLE;
+
+  /**
+   * Player 1 init settings
+   * */
+  Body *p1body = &app->game.player1.body;
+  p1body->ang_vel = 0.3;
+  p1body->max_vel = 5;
+  p1body->angle = 1;
+  p1body->pos.x = 1204/2+15;
+  p1body->pos.y = 768/2+15;
+
+  /**
+   * Player 2 init settings
+   * */
+  Body *p2body = &app->game.player2.body;
+
+  p2body->ang_vel = 0.3;
+  p2body->max_vel = 5;
+  p2body->angle = 1;
+  p2body->pos.x = 1204/2+40;
+  p2body->pos.y = 768/2+40;
+
 }
 
 int main( int argc, char* args[] )
@@ -122,6 +163,7 @@ int main( int argc, char* args[] )
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 
 	renderInit(&app);
+	gameInit(&app);
 	while(app.state != STATE_EXIT){
 	  if (app.state == STATE_MENU){
 		handleMenu(&app);
