@@ -38,6 +38,9 @@ typedef enum {
 } PlayerStatus;
 
 typedef struct {
+  int spread;
+  int freq;
+  SDL_Surface *shot_image;
   SDL_Surface *hit_image;
   SDL_Surface *image;
   Mix_Chunk *sound;
@@ -106,7 +109,9 @@ typedef struct{
   SDL_Surface *image;
   SDL_Surface *hit;
   int wall[mapWidth][mapHeight];
+  int air[mapWidth][mapHeight];
   int crowd[mapWidth][mapHeight];
+  int hittable[mapWidth][mapHeight];
   int powerup[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;
@@ -120,8 +125,11 @@ typedef struct {
 } HealthPack;
 
 enum {
-	ITEM_ENEMY_MEDIC,
+	ITEM_HEALTH_PACK,
 	ITEM_PLAYER_BULLET,
+	ITEM_PLAYER_FLAME,
+	ITEM_PLAYER_COUNT,
+	ITEM_ENEMY_MEDIC,
 	ITEM_COUNT
 };
 enum {
@@ -138,7 +146,6 @@ typedef struct {
   Uint32 start;
   Uint32 spawnTime;
   int latest_enemy_updated;
-  int item_count;
   int kill_count;
   HealthPack health_pack;
   ItemType itemtype[ITEM_COUNT];

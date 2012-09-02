@@ -49,50 +49,62 @@ void gameInit(App *app){
   app->game.start = SDL_GetTicks();
   app->game.spawnTime = app->game.start;
 
-  app->game.itemtype[ITEM_ENEMY_MEDIC].damage = .5;
-  app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
-  app->game.itemtype[ITEM_PLAYER_BULLET].sound = Mix_LoadWAV("sounds/ouch.wav");
+	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = 1;
+	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.itemtype[ITEM_ENEMY_MEDIC].sound = Mix_LoadWAV("sounds/ouch.wav");
+	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 75;
+	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
+	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].image = IMG_Load("data/bullet_ammo.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].shot_image = IMG_Load("data/bullet_shot.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].freq = 8;
+	app->game.itemtype[ITEM_PLAYER_BULLET].spread = 3;
+	app->game.itemtype[ITEM_PLAYER_BULLET].ammo_total = 1000;
+	app->game.itemtype[ITEM_PLAYER_BULLET].sound = Mix_LoadWAV("sounds/machinegun.wav");
+	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 250;
+	app->game.itemtype[ITEM_PLAYER_FLAME].range = 150;
+	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].hit_image = IMG_Load("data/fire_hit.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].shot_image = IMG_Load("data/fire_shot.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].spread = 40;
+	app->game.itemtype[ITEM_PLAYER_FLAME].freq = 2;
+	app->game.itemtype[ITEM_PLAYER_FLAME].ammo_total = 250;
+	app->game.itemtype[ITEM_HEALTH_PACK].damage = -50;
+	app->game.itemtype[ITEM_HEALTH_PACK].image = IMG_Load("data/health.png");
 
-  app->game.itemtype[ITEM_PLAYER_BULLET].damage = 75;
-  app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
-  app->game.itemtype[ITEM_PLAYER_BULLET].sound = Mix_LoadWAV("sounds/machinegun.wav");
-  app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
-  app->game.kill_count = 0;
+	/**
+	 * Player 1 init settings
+	 * */
+	Body *p1body = &app->game.player1.body;
+	app->game.player1.state = PLAYER_IDLE;
+	p1body->ang_vel = 0.2;
+	p1body->max_vel = 5;
+	p1body->angle = 0;
+	p1body->life = 100.0;
+	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
+	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
+	p1body->status = BODY_ALIVE;
+	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
-  /**
-   * Player 1 init settings
-   * */
-  Body *p1body = &app->game.player1.body;
-  app->game.player1.state = PLAYER_IDLE;
-  p1body->ang_vel = 0.2;
-  p1body->max_vel = 5;
-  p1body->angle = 0;
-  p1body->life = 100.0;
-  p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
-  p1body->status = BODY_ALIVE;
-  p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
-  player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
+	/**
+	 * Player 2 init settings
+	 * */
+	Body *p2body = &app->game.player2.body;
+	app->game.player2.state = PLAYER_IDLE;
 
-  /**
-   * Player 2 init settings
-   * */
-  Body *p2body = &app->game.player2.body;
-  app->game.player2.state = PLAYER_IDLE;
+	p2body->ang_vel = 0.4;
+	p2body->max_vel = 5;
+	p2body->angle = 1;
+	p2body->life = 100.0;
+	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
+	p2body->status = BODY_ALIVE;
+	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
+	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
-  p2body->ang_vel = 0.4;
-  p2body->max_vel = 5;
-  p2body->angle = 1;
-  p2body->life = 100.0;
-  p2body->status = BODY_ALIVE;
-  p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
-  p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
-  player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
+	p2body->status = BODY_ALIVE;
+	app->game.latest_enemy_updated = 0;
 
-  p2body->status = BODY_ALIVE;
-  app->game.latest_enemy_updated = 0;
-  app->game.item_count = 0;
-
-  app->credits = 0;
+	app->credits = 0;
   int i;
   for(i=0;i < ENEMY_COUNT; i++)
   {
@@ -120,24 +132,30 @@ void pauseOrJoinTheGame(App *app, Player *player){
 }
 
 void bindGameplayKeysDown(App *app, SDLKey *key){
-  Player *player1 = &app->game.player1;
-  Player *player2 = &app->game.player2;
+	Player *player1 = &app->game.player1;
+	Player *player2 = &app->game.player2;
 
-  switch(*key){
-	case SDLK_1:
-	  pauseOrJoinTheGame(app, player1);
-	  break;
-	case SDLK_2:
-	  pauseOrJoinTheGame(app, player2);
-	  break;
-	case SDLK_0:
-	  app->debug ^= 1;
-	  break;
-	case SDLK_ESCAPE:
-	  app->state = STATE_PAUSED;
-	  app->menu.selected = MENU_RESUME;
-	  break;
-  }
+	switch(*key){
+		case SDLK_1:
+			pauseOrJoinTheGame(app, player1);
+			break;
+		case SDLK_2:
+			pauseOrJoinTheGame(app, player2);
+			break;
+		case SDLK_0:
+			app->debug ^= 1;
+			break;
+		case SDLK_ESCAPE:
+			app->state = STATE_PAUSED;
+			app->menu.selected = MENU_RESUME;
+			break;
+		case SDLK_s:
+			grab(app, &player1->body);
+			break;
+		case SDLK_x:
+			grab(app, &player2->body);
+			break;
+	}
 }
 
 void bindMenuKeysDown(App *app, SDLKey *key){
@@ -326,19 +344,33 @@ void loadMap(App *app, int map_index) {
   moveInit(app);
 }
 
-int hit(App *app, Body *source, Body *target){
-  target->life -= source->item.type->damage;
+int grab(App *app, Body *body)
+{
+	int x = body->pos.x/tileSize;
+	int y = body->pos.y/tileSize;
+	int i = app->game.board.powerup[x][y];
+	if(i && app->game.board.powerups[--i].should_show) {
+		printf("grab %d %d = %d\n", x,y,i);
+		body->item = app->game.board.powerups[i];
+		printf("grab %p %p\n", body->item.type, app->game.board.powerups[i].type);
+		app->game.board.powerups[i].should_show = 0;
+		app->game.board.powerup[x][y] = 0;
+	}
+}
 
-  if(source->item.type->hit_image) {
-	SDL_Rect rect = {
-	  target->pos.x - source->item.type->hit_image->w/2,
-	  target->pos.y - source->item.type->hit_image->h/2,
-	  source->item.type->hit_image->w,
-	  source->item.type->hit_image->h
-	};
-	SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, NULL);
-	printf("splash %d %d\n", target->pos.x, target->pos.y);
-  }
+int hit(App *app, Body *source, Body *target){
+	target->life -= source->item.type->damage;
+
+	if(source->item.type->hit_image) {
+		SDL_Rect rect = {
+			target->pos.x - source->item.type->hit_image->w/2,
+			target->pos.y - source->item.type->hit_image->h/2,
+			source->item.type->hit_image->w,
+			source->item.type->hit_image->h
+		};
+		SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, &rect);
+		printf("splash %d %d\n", target->pos.x, target->pos.y);
+	}
 
   playSound(target->onHitSound);
 
@@ -354,55 +386,75 @@ int hit(App *app, Body *source, Body *target){
 
 int draw(App *app, Body *body, int x, int y)
 {
-  Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
-  p[0] = 0xff;
-  p[1] = 0xff;
-  int target = is_solid(&app->game, body, x, y);
-  if(target) {
-	if(target>=4) {
-	  int i = target - 4;
-	  hit(app, body, &app->game.enemies[i].body);
+	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
+#if 0
+		Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
+		p[0] = 0xff;
+		p[1] = 0xff;
+#else
+		if(body->item.type->shot_image && (rand() % (body->item.type->freq)) == 0) {
+			x += (rand() % (body->item.type->spread)) - body->item.type->spread/2;
+			y += (rand() % (body->item.type->spread)) - body->item.type->spread/2;
+			SDL_Rect rect = {
+				x - body->item.type->shot_image->w/2,
+				y - body->item.type->shot_image->h/2,
+				body->item.type->shot_image->w,
+				body->item.type->shot_image->h
+			};
+			SDL_BlitSurface(body->item.type->shot_image, NULL, app->screen, &rect);
+		}
+#endif
 	}
-  }
+	int target = is_air(&app->game, body, x, y);
+	if(target) {
+		if(target>=4) {
+			int i = target - 4;
+			hit(app, body, &app->game.enemies[i].body);
+		}
+	}
   return target;
 }
 
 
 int shoot(App *app, Body *body)
 {
-  int x1, y1, x2, y2;
-  int dx, dy, i, e;
-  int incx, incy, inc1, inc2;
-  int x,y;
-  int range = body->item.type->range;
+	int x1, y1, x2, y2;
+	int dx, dy, i, e;
+	int incx, incy, inc1, inc2;
+	int x,y;
+	int range;
+	if(body->item.ammo_used > body->item.type->ammo_total)
+		return;
 
-  playSound(body->item.type->sound, -1);
-  x1 = body->pos.x;
-  y1 = body->pos.y;
-  float a = (int)(body->angle + ((rand()%9)-5))%360;
-  x2 = x1 + cos(a * M_PI / 180.) * range;
-  y2 = y1 - sin(a * M_PI / 180.) * range;
+	range = body->item.type->range;
+	playSound(body->item.type->sound, -1);
 
-  dx = x2 - x1;
-  dy = y2 - y1;
+	x1 = body->pos.x;
+	y1 = body->pos.y;
+	float a = (int)(body->angle + ((rand()%9)-5))%360;
+	x2 = x1 + cos(a * M_PI / 180.) * range;
+	y2 = y1 - sin(a * M_PI / 180.) * range;
 
-  if(dx < 0) dx = -dx;
-  if(dy < 0) dy = -dy;
-  incx = 1;
-  if(x2 < x1) incx = -1;
-  incy = 1;
-  if(y2 < y1) incy = -1;
-  x=x1;
-  y=y1;
+	dx = x2 - x1;
+	dy = y2 - y1;
 
-  if(dx > dy)
-  {
-	if(draw(app,body,x,y)) return 1;
-	e = 2*dy - dx;
-	inc1 = 2*( dy -dx);
-	inc2 = 2*dy;
-	for(i = 0; i < dx; i++)
+	if(dx < 0) dx = -dx;
+	if(dy < 0) dy = -dy;
+	incx = 1;
+	if(x2 < x1) incx = -1;
+	incy = 1;
+	if(y2 < y1) incy = -1;
+	x=x1;
+	y=y1;
+
+	if(dx > dy)
 	{
+	  if(draw(app,body,x,y)) return 1;
+      e = 2*dy - dx;
+      inc1 = 2*( dy -dx);
+      inc2 = 2*dy;
+      for(i = 0; i < dx; i++)
+      {
 	  if(e >= 0)
 	  {
 		y += incy;

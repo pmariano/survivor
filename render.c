@@ -62,9 +62,16 @@ void renderPlayer(Game *game, Player *player){
 		player->body.pos.w,
 		player->body.pos.h
 	};
-	int i = game->board.sprite_count++;
-	game->board.sprite[i].image = image;
-	game->board.sprite[i].rect = rect;
+	int j = game->board.sprite_count++;
+	game->board.sprite[j].image = image;
+	game->board.sprite[j].rect = rect;
+
+	rect.y++;
+	rect.x+=image->w/2;
+	j = game->board.sprite_count++;
+	game->board.sprite[j].image = player->body.item.type->image;
+	printf("item %p\n", player->body.item.type);
+	game->board.sprite[j].rect = rect;
 }
 
 void renderEnemies(App *app)
@@ -106,7 +113,7 @@ void flushRender(App *app)
 	}
 }
 
-void showPowerups(App *app)
+void renderPowerups(App *app)
 {
   int i = 0;
   for(; i < POWERUP_COUNT; i++)
@@ -116,34 +123,34 @@ void showPowerups(App *app)
       SDL_Rect rect = {
         app->game.board.powerups[i].x,
         app->game.board.powerups[i].y,
-        app->game.health_pack.image->w,
-        app->game.health_pack.image->h
+        app->game.board.powerups[i].type->image->w,
+        app->game.board.powerups[i].type->image->h
       };
-      int i = app->game.board.sprite_count++;
-      app->game.board.sprite[i].image = app->game.health_pack.image;
-      app->game.board.sprite[i].rect = rect;
+      int j = app->game.board.sprite_count++;
+      app->game.board.sprite[j].image = app->game.board.powerups[i].type->image;
+      app->game.board.sprite[j].rect = rect;
     }
   }
 
 }
 
-void renderPowerups(App *app)
+void addPowerup(App *app)
 {
-  app->game.item_count += 1;
-  app->game.board.powerups[app->game.item_count].should_show = 1;
-  int x = 500, y = 300;
-  powerup_spawn_pos(&app->game, &x, &y);
-  SDL_Rect rect = {
-    x,
-    y,
-    app->game.health_pack.image->w,
-    app->game.health_pack.image->h
-  };
-  app->game.board.powerups[app->game.item_count].x = x;
-  app->game.board.powerups[app->game.item_count].y = y;
-  int i = app->game.board.sprite_count++;
-  app->game.board.sprite[i].image = app->game.health_pack.image;
-  app->game.board.sprite[i].rect = rect;
+	int i;
+	int x,y;
+	if(powerup_spawn_pos(&app->game, &x, &y)) {
+		for(i=0; i < POWERUP_COUNT; i++) {
+			if(app->game.board.powerups[i].should_show == 0) { 
+				app->game.board.powerups[i].should_show = 1;
+				app->game.board.powerups[i].ammo_used = 0;
+				app->game.board.powerups[i].type = &app->game.itemtype[rand()%ITEM_PLAYER_COUNT];
+				app->game.board.powerups[i].x = x;
+				app->game.board.powerups[i].y = y;
+				app->game.board.powerup[x/tileSize][y/tileSize] = 1+i;
+				break;
+			}
+		}
+	}
 }
 
 void renderStart(App *app){
@@ -179,11 +186,11 @@ void renderFinish(App *app){
   renderPlayer(&app->game, &game.player1);
   renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
-  showPowerups(app);
-  if((rand() % 300) == 0)
+  if((rand() % 30) == 0)
   {
-    renderPowerups(app);
+    addPowerup(app);
   }
+  renderPowerups(app);
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 
   flushRender(app);
@@ -206,7 +213,6 @@ void renderInit(App *app){
   app->game.player2.down = IMG_Load("data/engenheiro1.png");
   app->game.player2.left = IMG_Load("data/engenheiro1.png");
   app->game.player2.right = IMG_Load("data/engenheiro1.png");
-  app->game.health_pack.image = IMG_Load("data/health.png");
   app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie1.png");
   app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie2.png");
 
