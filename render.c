@@ -167,8 +167,8 @@ void renderStart(App *app){
       for (y=0; y < mapHeight;y++) {
         //if(walkability[x][y]) {
         // if(app->game.board.wall[x][y]) {
-        //if(app->game.board.crowd[x][y]) {
-        if(app->game.board.powerup[x][y]) {
+        if(app->game.board.crowd[x][y]) {
+        //if(app->game.board.powerup[x][y]) {
           SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
           SDL_FillRect(app->screen, &rect , 0xffffff);
         }

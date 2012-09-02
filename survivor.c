@@ -517,10 +517,10 @@ int main(int argc, char* args[] )
 	if (app.state == STATE_PLAYING){
 	  playRandomMusic();
 	  Uint32 elapsed = startTime - app.game.spawnTime;
-	  if(elapsed > 1000)
+	  if(elapsed > 500)
 	  {
-		spawnEnemy(&app);
-		app.game.spawnTime = startTime;
+      spawnEnemy(&app);
+      app.game.spawnTime = startTime;
 	  }
 	  move_enemies(&app);
 	  renderFinish(&app);
