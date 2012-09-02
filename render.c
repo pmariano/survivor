@@ -7,7 +7,7 @@ SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 
-void renderPlayer(SDL_Surface *screen, Player *player){
+void renderPlayer(Game *game, Player *player){
 	if(player->state != PLAYER_READY) return;
 	int a = player->body.angle;
 	SDL_Surface *image;
@@ -22,7 +22,9 @@ void renderPlayer(SDL_Surface *screen, Player *player){
 		player->body.pos.w,
 		player->body.pos.h
 	};
-	SDL_BlitSurface(image, NULL, screen, &rect);
+	int i = game->board.sprite_count++;
+	game->board.sprite[i].image = image;
+	game->board.sprite[i].rect = rect;
 }
 
 void renderEnemies(App *app)
@@ -40,13 +42,33 @@ void renderEnemies(App *app)
         enemy->body.pos.w,
         enemy->body.pos.h
       };
-      SDL_BlitSurface(image, NULL, app->screen, &rect);
+		int i = app->game.board.sprite_count++;
+		app->game.board.sprite[i].image = image;
+		app->game.board.sprite[i].rect = rect;
     }
   }
 }
 
+int sprite_zsort(const void *a, const void *b)
+{
+	Sprite *aa = (Sprite *)a;
+	Sprite *bb = (Sprite *)b;
+	return aa->rect.y - bb->rect.y;
+}
+
+void flushRender(App *app)
+{
+	int i;
+	qsort(app->game.board.sprite, app->game.board.sprite_count, sizeof(Sprite), sprite_zsort);
+
+	for(i=0; i< app->game.board.sprite_count; i++) {
+		SDL_BlitSurface(app->game.board.sprite[i].image, NULL, app->screen, &app->game.board.sprite[i].rect);
+	}
+}
+
 void render(App *app){
   int x,y;
+  app->game.board.sprite_count = 0;
 
   Game game = app->game;
 
@@ -66,16 +88,23 @@ void render(App *app){
     }
   }
 
-  renderPlayer(app->screen, &game.player1);
-  renderPlayer(app->screen, &game.player2);
+  renderPlayer(&app->game, &game.player1);
+  renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
-  renderPowerups(app, app->game.health_pack.image);
+  if(rand() % 100 == 0)
+  {
+    renderPowerups(app, app->game.health_pack.image);
+  }
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
+
+  flushRender(app);
+
   SDL_Flip(app->screen);
 }
 
 void renderPowerups(App *app, HealthPack health_pack)
 {
+  app->game.item_count += 1;
   int x = 500, y = 300;
   powerup_spawn_pos(&app->game, &x, &y);
   SDL_Rect rect = {
@@ -84,7 +113,10 @@ void renderPowerups(App *app, HealthPack health_pack)
     health_pack.image->w,
     health_pack.image->h
   };
-  SDL_BlitSurface(health_pack.image, NULL, app->screen, &rect);
+	int i = app->game.board.sprite_count++;
+	app->game.board.sprite[i].image = health_pack.image;
+	app->game.board.sprite[i].rect = rect;
+  app->game.board.powerups[app->game.item_count] = item;
 }
 
 
