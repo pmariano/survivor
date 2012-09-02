@@ -43,6 +43,8 @@ typedef struct {
   float damage;
   int ammo;
   int should_show;
+  int x;
+  int y;
 } Item;
 
 typedef struct {
