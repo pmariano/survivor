@@ -20,6 +20,8 @@ void finishHim(App *app){
 }
 
 void gameInit(App *app){
+  app->game.start = SDL_GetTicks();
+  app->game.spawnTime = app->game.start;
 	/**
 	 * Player 1 init settings
 	 * */
@@ -27,8 +29,8 @@ void gameInit(App *app){
 	p1body->ang_vel = 0.3;
 	p1body->max_vel = 5;
 	p1body->angle = 0;
-	p1body->pos.x = 1204/2+15;
-	p1body->pos.y = 768/2+15;
+	p1body->pos.x = app->screen->w/2+15;
+	p1body->pos.y = app->screen->h/2+15;
 
 	/**
 	 * Player 2 init settings
@@ -38,19 +40,13 @@ void gameInit(App *app){
 	p2body->ang_vel = 0.3;
 	p2body->max_vel = 5;
 	p2body->angle = 1;
-	p2body->pos.x = 1204/2+40;
-	p2body->pos.y = 768/2+40;
-
-	/**
-	 * Enemy Body
-	 *
-	 * */
-  Body *enemybody = &app->game.enemy.body;
-	enemybody->ang_vel = 0.05;
-	enemybody->max_vel = 2.5;
-	enemybody->angle = 1;
-	enemybody->pos.x = 1204/2-550;
-	enemybody->pos.y = 768/2+80;
+	p2body->pos.x = app->screen->w/2+40;
+	p2body->pos.y = app->screen->h/2+40;
+  int i = 0;
+  for(;i < ENEMY_COUNT; i++)
+  {
+    app->game.enemies[i].state = ENEMY_DEAD;
+  }
 }
 
 void resetApp(App *app){
@@ -219,6 +215,42 @@ void handleDelay(Uint32 start) {
 	SDL_Delay(delay);
 }
 
+void spawnEnemy(App *app)
+{
+  Game *game = &app->game;
+  Enemy *enemy = NULL;
+  int i = 0;
+  for(; i < ENEMY_COUNT; i++)
+  {
+    if(game->enemies[i].state == ENEMY_DEAD)
+    {
+      enemy = &game->enemies[i];
+      enemy->state = ENEMY_LIVE;
+      break;
+    }
+  }
+  if(enemy != NULL)
+  {
+    enemy->image = game->enemy_class_medic.image;
+    Body *enemybody = &enemy->body;
+    enemybody->ang_vel = 0.05;
+    enemybody->max_vel = 2.5;
+    enemybody->angle = 1;
+    enemybody->pos.x = 70;
+    enemybody->pos.y = app->screen->h/2+30;
+  } 
+}
+
+void loadMap(App *app, int map_index) {
+	char image_path[256];
+	char hit_path[256];
+	sprintf(image_path, "data/map%d.bmp", map_index);
+	sprintf(hit_path, "data/map%d_hit.bmp", map_index);
+	app->game.board.image = IMG_Load(image_path);
+	app->game.board.hit = IMG_Load(hit_path);
+	moveInit(app);
+}
+
 int main(int argc, char* args[] )
 {
 	App app;
@@ -232,6 +264,7 @@ int main(int argc, char* args[] )
 	init_font();
   InitializePathfinder();
 	renderInit(&app);
+	loadMap(&app, 0); // calls moveInit
 	gameInit(&app);
 	moveInit(&app);
 	soundInit();
@@ -242,12 +275,13 @@ int main(int argc, char* args[] )
 		bindKeyboard(&app);
 
 		if (app.state == STATE_PLAYING){
-			pathStatus[1] = FindPath(1,
-				app.game.enemy.body.pos.x,
-				app.game.enemy.body.pos.y,
-				app.game.player1.body.pos.x,
-				app.game.player1.body.pos.y);
-			enemy_move(&app.game, &app.game.enemy.body);
+      Uint32 elapsed = startTime - app.game.spawnTime;  
+      if(elapsed > 1000)
+      {
+        spawnEnemy(&app);
+        app.game.spawnTime = startTime;
+      }
+      move_enemies(&app);
 			render(&app);
 		} else if (app.state == STATE_CREDITS) {
 			renderCredits(&app);

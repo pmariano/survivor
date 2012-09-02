@@ -6,11 +6,13 @@
 void moveInit(App *app)
 {
 	int x,y;
-
+	SDL_Surface *hit = app->game.board.hit;
 	memset(walkability, 0, sizeof(walkability));
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
-			if((rand() % 3) == 0) walkability[x][y] = 1;
+			Uint8 *p = ((Uint8*)app->game.board.hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch);
+			printf("%d,%d: %d %d %d %d\n", x,y, hit->format->BytesPerPixel,p[0], p[1], p[2]);
+			walkability[x][y] = !(p[0]||p[2]);
 		}
 	}
 }
@@ -46,17 +48,28 @@ void body_move(Game *game, Body *body, float angle)
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
-void enemy_move(Game *game, Body *enemy_body)
+void move_enemies(App *app)
 {
-  if(pathStatus[1] == found)
+  int i = 0;
+  for(; i < ENEMY_COUNT; i++)
   {
-    printf("ronaldo : %d \n", enemy_body->pos.x);
-    ReadPath(1, enemy_body->pos.x, enemy_body->pos.y, 1);    
-    printf("caires : %d \n", xPath[1]);
-    int dx=xPath[1]  - enemy_body->pos.x;
-    int dy=yPath[1]  - enemy_body->pos.y;
-	float angle = ATAN2(dx,dy);
-	body_move(game, enemy_body, angle);
+    if(app->game.enemies[i].state == ENEMY_LIVE)
+    {
+        Body *enemy_body = &app->game.enemies[i].body;
+        pathStatus[i] = FindPath(i, 
+            enemy_body->pos.x, 
+            enemy_body->pos.y, 
+            app->game.player1.body.pos.x, 
+            app->game.player1.body.pos.y);
+        if(pathStatus[i] == found)
+        {
+          ReadPath(i, enemy_body->pos.x, enemy_body->pos.y, 1);    
+          int dx = xPath[i] - enemy_body->pos.x;
+          int dy = yPath[i] - enemy_body->pos.y;
+          float angle = ATAN2(dx,dy);
+          body_move(&app->game, enemy_body, angle);
+        }
+    }
   }
 }
 
@@ -71,3 +84,11 @@ void player_move(Game *game, Body *body, int up, int right, int down, int left)
     }
 }
 
+
+void enemy_spawn_pos(int *x, int *y) {
+
+}
+
+void powerup_spawn_pos(int *x, int *y) {
+
+}
