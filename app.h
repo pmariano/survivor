@@ -87,6 +87,10 @@ typedef struct{
 } Board;
 
 typedef struct {
+  SDL_Surface *image;
+} HealthPack;
+
+typedef struct {
   Player player1;
   Player player2;
   Enemy enemies[ENEMY_COUNT];
@@ -96,6 +100,7 @@ typedef struct {
   EnemyClass enemy_class_medic;
   EnemyClass enemy_class_soldier;
   int latest_enemy_updated;
+  HealthPack health_pack;
 } Game;
 
 typedef enum {

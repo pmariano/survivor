@@ -7,8 +7,6 @@ SDL_Color red = {0xAA, 0X55, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 
-//TODO unified zsort object render
-
 void renderPlayer(SDL_Surface *screen, Player *player){
 	if(player->state != PLAYER_READY) return;
 	int a = player->body.angle;
@@ -58,21 +56,35 @@ void render(App *app){
   SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
 
   if(app->debug){
-	for (x=0; x < mapWidth;x++) {
-	  for (y=0; y < mapHeight;y++) {
-		if(walkability[x][y]) {
-		  SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
-		  SDL_FillRect(app->screen, &rect , 0xffffff);
-		}
-	  }
-	}
+    for (x=0; x < mapWidth;x++) {
+      for (y=0; y < mapHeight;y++) {
+        if(walkability[x][y]) {
+          SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
+          SDL_FillRect(app->screen, &rect , 0xffffff);
+        }
+      }
+    }
   }
 
   renderPlayer(app->screen, &game.player1);
   renderPlayer(app->screen, &game.player2);
   renderEnemies(app);
+  renderPowerups(app, app->game.health_pack.image);
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
   SDL_Flip(app->screen);
+}
+
+void renderPowerups(App *app, HealthPack health_pack)
+{
+  int x = 500, y = 300;
+  powerup_spawn_pos(&app->game, &x, &y);
+  SDL_Rect rect = {
+    x,
+    y,
+    health_pack.image->w,
+    health_pack.image->h
+  };
+  SDL_BlitSurface(health_pack.image, NULL, app->screen, &rect);
 }
 
 
@@ -89,6 +101,7 @@ void renderInit(App *app){
   app->game.player2.down = IMG_Load("data/engenheiro1.png");
   app->game.player2.left = IMG_Load("data/engenheiro1.png");
   app->game.player2.right = IMG_Load("data/engenheiro1.png");
+  app->game.health_pack.image = IMG_Load("data/health.png");
   app->game.enemy_class_medic.image = IMG_Load("data/zombie2.png");
   app->game.enemy_class_soldier.image = IMG_Load("data/zombie2.png");
 
