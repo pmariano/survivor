@@ -7,6 +7,7 @@
 
 #include "font.h"
 #include "app.h"
+#include "sound.h"
 #include "render.h"
 #include "movement.h"
 #include "aStarLibrary.h"
@@ -233,6 +234,8 @@ int main(int argc, char* args[] )
 	renderInit(&app);
 	gameInit(&app);
 	moveInit(&app);
+	soundInit();
+
 
 	while(app.state != STATE_EXIT){
 	  Uint32 startTime = SDL_GetTicks();
@@ -250,6 +253,7 @@ int main(int argc, char* args[] )
 			renderCredits(&app);
 		}	else {
 			renderMenu(&app);
+			playMusic("sounds/menu1.mp3");
 		}
 		handleDelay(startTime);
 	}
