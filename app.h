@@ -101,6 +101,7 @@ typedef struct {
   Uint32 spawnTime;
   EnemyClass enemy_class_medic;
   EnemyClass enemy_class_soldier;
+  int latest_enemy_updated;
 } Game;
 
 typedef enum {
