@@ -124,9 +124,7 @@ void renderPowerups(App *app)
   app->game.board.sprite[i].rect = rect;
 }
 
-
-
-void render(App *app){
+void renderStart(App *app){
   int x,y;
   app->game.board.sprite_count = 0;
 
@@ -150,6 +148,11 @@ void render(App *app){
       }
     }
   }
+
+}
+
+void renderFinish(App *app){
+  Game game = app->game;
 
   renderPlayer(&app->game, &game.player1);
   renderPlayer(&app->game, &game.player2);

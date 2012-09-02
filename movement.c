@@ -119,8 +119,16 @@ void body_move(Game *game, Body *body, float angle)
 
 void move_enemies(App *app)
 {
-  int i = 0;
-  for(; i < ENEMY_COUNT; i++)
+  int i;
+  for(i=0; i < ENEMY_COUNT; i++)
+  {
+    if(app->game.enemies[i].state == ENEMY_LIVE
+	&& app->game.enemies[i].body.life <= 0) {
+		app->game.enemies[i].state = ENEMY_DEAD;
+	}
+  }
+
+  for(i=0; i < ENEMY_COUNT; i++)
   {
     int id = app->game.latest_enemy_updated = ( app->game.latest_enemy_updated + 1 ) % ENEMY_COUNT;
     if(app->game.enemies[id].state == ENEMY_LIVE)
@@ -159,7 +167,6 @@ void move_enemies(App *app)
 
 		  if(reach){
 			  hit(app, enemy_body, &app->game.player1.body);
-			  printf("vida do carinha %f\n", app->game.player1.body.life);
 		  }
 		}
 	}
@@ -204,14 +211,16 @@ int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y)
 	return 0;
 }
 
+// FIXME powerups aparecendo em cima da mese
+// FIXME powerups aparecendo uns sobre os outros
 int powerup_spawn_pos(Game *game, int *x, int *y) {
 	int i;
 	for(i=0; i< 10; i++) {
 		int x1 = rand() % mapWidth;
 		int y1 = rand() % mapHeight;
 		if(!game->board.wall[x1][y1] && !game->board.powerup[x1][y1]) {
-			*x = x1 * tileSize + tileSize/2;
-			*y = y1 * tileSize + tileSize/2;
+			*x = x1 * tileSize + (rand() % tileSize);
+			*y = y1 * tileSize + (rand() % tileSize);
 			return 1;
 		}
 	}

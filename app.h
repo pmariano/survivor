@@ -42,11 +42,13 @@ typedef struct {
   SDL_Surface *hit_image;
   SDL_Surface *image;
   float damage;
+  float range;
+  int ammo_total;
 } ItemType;
 
 typedef struct {
   ItemType *type;
-  int ammo;
+  int ammo_used;
   int should_show;
   int x;
   int y;
@@ -116,6 +118,7 @@ typedef struct {
 
 enum {
 	ITEM_ENEMY_MEDIC,
+	ITEM_PLAYER_BULLET,
 	ITEM_COUNT
 };
 

@@ -33,6 +33,13 @@ void checkGameover(App *app){
 void gameInit(App *app){
   app->game.start = SDL_GetTicks();
   app->game.spawnTime = app->game.start;
+
+	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = .5;
+	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 150;
+	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
+	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
+
 	/**
 	 * Player 1 init settings
 	 * */
@@ -41,6 +48,7 @@ void gameInit(App *app){
 	p1body->max_vel = 5;
 	p1body->angle = 0;
 	p1body->life = 100.0;
+	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
@@ -52,9 +60,11 @@ void gameInit(App *app){
 	p2body->max_vel = 5;
 	p2body->angle = 1;
 	p2body->life = 100.0;
+	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
+	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
+
   app->game.latest_enemy_updated = 0;
   app->game.item_count = 0;
-	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
   int i;
   for(i=0;i < ENEMY_COUNT; i++)
   {
@@ -210,6 +220,11 @@ void bindGameplayKeystate(App *app){
 		keystate[SDLK_KP4] || keystate[SDLK_u],
 		keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_y]
 	);
+
+	if(keystate[SDLK_a]) 
+		shoot(app, &player1->body);
+	if(keystate[SDLK_z])
+		shoot(app, &player2->body);
 }
 
 void bindKeyboard(App *app)
@@ -265,8 +280,8 @@ void spawnEnemy(App *app)
     enemybody->angle = 1;
     enemybody->pos.x = x;
     enemybody->pos.y = y;
-		enemybody->life = 100.0;
-		enemybody->item.type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
+	enemybody->life = 100.0;
+	enemybody->item.type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
   }
 }
 
@@ -283,23 +298,26 @@ void loadMap(App *app, int map_index) {
 int hit(App *app, Body *source, Body *target){
 	target->life -= source->item.type->damage;
 
-	SDL_Rect rect = {
-		target->pos.x - source->item.type->hit_image->w/2,
-		target->pos.y - source->item.type->hit_image->h/2,
-		source->item.type->hit_image->w,
-		source->item.type->hit_image->h
-	};
-	SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, &rect);
+	if(source->item.type->hit_image) {
+		SDL_Rect rect = {
+			target->pos.x - source->item.type->hit_image->w/2,
+			target->pos.y - source->item.type->hit_image->h/2,
+			source->item.type->hit_image->w,
+			source->item.type->hit_image->h
+		};
+		SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, NULL);
+		printf("splash %d %d\n", target->pos.x, target->pos.y);
+	}
 
 	return target->life <= 0;
 }
 
-int trace_bullet_shot(App *app, Body *body, int x, int y)
+int draw(App *app, Body *body, int x, int y)
 {
 	Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
 	p[0] = 0xff;
 	p[1] = 0xff;
-	int target = app->game.board.crowd[x/tileSize][y/tileSize];
+	int target = is_solid(&app->game, body, x, y);
 	if(target) {
 		if(target>4) {
 			int i = target - 4;
@@ -312,17 +330,20 @@ int trace_bullet_shot(App *app, Body *body, int x, int y)
 
 
 
-int trace(App *app, Body *body, int range, int (*draw)(App *app, Body *body, int x, int y))
+int shoot(App *app, Body *body)
 {
 	int x1, y1, x2, y2;
 	int dx, dy, i, e;
 	int incx, incy, inc1, inc2;
 	int x,y;
+	int range = body->item.type->range;
+	if(rand() % 3) return;
 
 	x1 = body->pos.x;
 	y1 = body->pos.y;
-	x2 = x1 + sin(body->angle) * range;
-	y2 = y1 + sin(body->angle) * range;
+	float a = (int)(body->angle + ((rand()%9)-5))%360;
+	x2 = x1 + cos(a * M_PI / 180.) * range;
+	y2 = y1 - sin(a * M_PI / 180.) * range;
 
 	dx = x2 - x1;
 	dy = y2 - y1;
@@ -386,9 +407,6 @@ int main(int argc, char* args[] )
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
 	app.credits = CREDITS_TEAM;
-	app.game.itemtype[ITEM_ENEMY_MEDIC].damage = .5;
-	app.game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
-
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
@@ -398,20 +416,23 @@ int main(int argc, char* args[] )
 	soundInit();
 
 	while(app.state != STATE_EXIT){
-	  Uint32 startTime = SDL_GetTicks();
+		Uint32 startTime = SDL_GetTicks();
 		movePrepare(&app);
+		if (app.state == STATE_PLAYING) {
+			renderStart(&app);
+		}
 		bindKeyboard(&app);
 
 		if (app.state == STATE_PLAYING){
 			playRandomMusic();
-      Uint32 elapsed = startTime - app.game.spawnTime;
-      if(elapsed > 1000)
-      {
-        spawnEnemy(&app);
-        app.game.spawnTime = startTime;
-      }
-      move_enemies(&app);
-			render(&app);
+			Uint32 elapsed = startTime - app.game.spawnTime;
+			if(elapsed > 1000)
+			{
+				spawnEnemy(&app);
+				app.game.spawnTime = startTime;
+			}
+			move_enemies(&app);
+			renderFinish(&app);
 			checkGameover(&app);
 		} else if (app.state == STATE_CREDITS) {
 			renderCredits(&app);
