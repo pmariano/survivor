@@ -27,3 +27,15 @@ void body_move(Game *game, Body *body, int angle)
 	body->pos.y -= sin(a) * v;
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
+
+#define ATAN2(dx,dy) ((int)(720+atan2(-(dy),(dx))*180/M_PI)%360)
+void player_move(Game *game, Body *body, int up, int right, int down, int left)
+{
+    float dx=right-left;
+    float dy=down-up;
+    if(fabs(dx)>0.1||fabs(dy)>0.1) {
+        int angle = ATAN2(dx,dy);
+        body_move(game, body, angle);
+
+    }
+}

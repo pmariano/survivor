@@ -102,7 +102,7 @@ void bindGameplayKeystate(App *app){
 		keystate[SDLK_UP] || keystate[SDLK_q],
 		keystate[SDLK_RIGHT] || keystate[SDLK_r],
 		keystate[SDLK_DOWN] || keystate[SDLK_w],
-		keystate[SDLK_LEFT] || keystate[SDLK_e],
+		keystate[SDLK_LEFT] || keystate[SDLK_e]
 	);
 
 	/**
