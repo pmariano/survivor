@@ -32,7 +32,7 @@ typedef struct {
   Action action;
   float max_vel;
   float ang_vel;
-  int angle; // degree
+  float angle; // degree
 } Body;
 
 typedef struct{
