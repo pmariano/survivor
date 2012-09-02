@@ -99,9 +99,9 @@ typedef struct {
 typedef struct{
   SDL_Surface *image;
   SDL_Surface *hit;
-  char wall[mapWidth][mapHeight];
+  int wall[mapWidth][mapHeight];
   int crowd[mapWidth][mapHeight];
-  char powerup[mapWidth][mapHeight];
+  int powerup[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;
   Sprite sprite[SPRITE_COUNT];

@@ -7,6 +7,7 @@ void movePrepare(App *app)
 {
 	int i;
 	memcpy(app->game.board.crowd, app->game.board.wall, sizeof(app->game.board.wall));
+#if 1
 	if( app->game.player1.state == PLAYER_READY) {
 		int x = app->game.player1.body.pos.x/tileSize;
 		int y = app->game.player1.body.pos.y/tileSize;
@@ -27,6 +28,7 @@ void movePrepare(App *app)
 		}
 
 	}
+#endif
 }
 
 
