@@ -186,7 +186,7 @@ void renderFinish(App *app){
   renderPlayer(&app->game, &game.player1);
   renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
-  if((rand() % 30) == 0)
+  if((rand() % 200) == 0)
   {
     addPowerup(app);
   }
@@ -216,7 +216,7 @@ void renderInit(App *app){
   app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie1.png");
   app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie2.png");
 
-  app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
+  app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE|SDL_FULLSCREEN);
 }
 
 /**

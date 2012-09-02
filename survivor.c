@@ -66,7 +66,7 @@ void gameInit(App *app){
 	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
 	app->game.itemtype[ITEM_PLAYER_FLAME].hit_image = IMG_Load("data/fire_hit.png");
 	app->game.itemtype[ITEM_PLAYER_FLAME].shot_image = IMG_Load("data/fire_shot.png");
-	app->game.itemtype[ITEM_PLAYER_FLAME].spread = 40;
+	app->game.itemtype[ITEM_PLAYER_FLAME].spread = 20;
 	app->game.itemtype[ITEM_PLAYER_FLAME].freq = 2;
 	app->game.itemtype[ITEM_PLAYER_FLAME].ammo_total = 250;
 	app->game.itemtype[ITEM_HEALTH_PACK].damage = -50;
@@ -350,9 +350,11 @@ int grab(App *app, Body *body)
 	int y = body->pos.y/tileSize;
 	int i = app->game.board.powerup[x][y];
 	if(i && app->game.board.powerups[--i].should_show) {
-		printf("grab %d %d = %d\n", x,y,i);
-		body->item = app->game.board.powerups[i];
-		printf("grab %p %p\n", body->item.type, app->game.board.powerups[i].type);
+		if(app->game.board.powerups[i].type->damage < 0) {
+			body->life -= app->game.board.powerups[i].type->damage;
+		} else  {
+			body->item = app->game.board.powerups[i];
+		}
 		app->game.board.powerups[i].should_show = 0;
 		app->game.board.powerup[x][y] = 0;
 	}
@@ -393,8 +395,8 @@ int draw(App *app, Body *body, int x, int y)
 		p[1] = 0xff;
 #else
 		if(body->item.type->shot_image && (rand() % (body->item.type->freq)) == 0) {
-			x += (rand() % (body->item.type->spread)) - body->item.type->spread/2;
-			y += (rand() % (body->item.type->spread)) - body->item.type->spread/2;
+			x += (rand() % (body->item.type->spread/2+1)) - body->item.type->spread/4;
+			y += (rand() % (body->item.type->spread/2+1)) - body->item.type->spread/4;
 			SDL_Rect rect = {
 				x - body->item.type->shot_image->w/2,
 				y - body->item.type->shot_image->h/2,
@@ -423,7 +425,9 @@ int shoot(App *app, Body *body)
 	int incx, incy, inc1, inc2;
 	int x,y;
 	int range;
-	if(body->item.ammo_used > body->item.type->ammo_total)
+	if(body->status != BODY_ALIVE)
+		return;
+	if(++body->item.ammo_used > body->item.type->ammo_total)
 		return;
 
 	range = body->item.type->range;
@@ -431,7 +435,8 @@ int shoot(App *app, Body *body)
 
 	x1 = body->pos.x;
 	y1 = body->pos.y;
-	float a = (int)(body->angle + ((rand()%9)-5))%360;
+		
+	float a = (int)(body->angle + ((rand() % (body->item.type->spread+1)) - body->item.type->spread/2))%360;
 	x2 = x1 + cos(a * M_PI / 180.) * range;
 	y2 = y1 - sin(a * M_PI / 180.) * range;
 
