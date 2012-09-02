@@ -33,7 +33,7 @@ typedef struct {
   Action action;
   float max_vel;
   float ang_vel;
-  int angle; // degree
+  float angle; // degree
 } Body;
 
 typedef struct{
@@ -44,6 +44,11 @@ typedef struct{
   SDL_Surface *up;
   SDL_Surface *down;
 } Player;
+
+typedef struct{
+  Body body;
+  SDL_Surface *image;
+} Enemy;
 
 typedef struct{
   SDL_Surface *image;

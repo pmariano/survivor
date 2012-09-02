@@ -21,6 +21,18 @@ void renderPlayer(SDL_Surface *screen, Player *player){
 	SDL_BlitSurface(image, NULL, screen, &rect);
 }
 
+void renderEnemy(SDL_Surface *screen, Enemy *enemy){
+	int a = enemy->body.angle;
+	SDL_Surface *image = enemy->image;
+	SDL_Rect rect = {
+		enemy->body.pos.x - image->w/2,
+		enemy->body.pos.y - image->h/2,
+		enemy->body.pos.w,
+		enemy->body.pos.h
+	};
+	SDL_BlitSurface(image, NULL, screen, &rect);
+}
+
 void render(App *app){
 	Game game = app->game;
 
@@ -55,6 +67,7 @@ void renderInit(App *app){
 	app->game.player2.down = IMG_Load("data/engenheiro1.png");
 	app->game.player2.left = IMG_Load("data/engenheiro1.png");
 	app->game.player2.right = IMG_Load("data/engenheiro1.png");
+  app->game.enemy.image = IMG_Load("zombie1.png");
 
 	app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);
 }
