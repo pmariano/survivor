@@ -38,8 +38,13 @@ typedef enum {
 } PlayerStatus;
 
 typedef struct {
+  SDL_Surface *hit_image;
   SDL_Surface *image;
   float damage;
+} ItemType;
+
+typedef struct {
+  ItemType *type;
   int ammo;
 } Item;
 
@@ -105,6 +110,11 @@ typedef struct {
   SDL_Surface *image;
 } HealthPack;
 
+enum {
+	ITEM_ENEMY_MEDIC,
+	ITEM_COUNT
+};
+
 typedef struct {
   Player player1;
   Player player2;
@@ -115,8 +125,9 @@ typedef struct {
   EnemyClass enemy_class_medic;
   EnemyClass enemy_class_soldier;
   int latest_enemy_updated;
-  int item_count,
+  int item_count;
   HealthPack health_pack;
+  ItemType itemtype[ITEM_COUNT];
 } Game;
 
 typedef enum {
@@ -145,5 +156,7 @@ typedef struct {
   AppState stateBeforeCredits;
   Menu menu;
 } App;
+
+int hit(App *app, Body *source, Body *target);
 
 #endif

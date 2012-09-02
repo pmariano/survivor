@@ -250,7 +250,7 @@ void spawnEnemy(App *app)
     enemybody->pos.x = x;
     enemybody->pos.y = y;
 		enemybody->life = 100.0;
-		enemybody->item.damage = 0.5;
+		enemybody->item.type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
   }
 }
 
@@ -264,37 +264,49 @@ void loadMap(App *app, int map_index) {
 	moveInit(app);
 }
 
+int hit(App *app, Body *source, Body *target){
+	target->life -= source->item.type->damage;
+
+	SDL_Rect rect = {
+		target->pos.x - source->item.type->hit_image->w/2,
+		target->pos.y - source->item.type->hit_image->h/2,
+		source->item.type->hit_image->w,
+		source->item.type->hit_image->h
+	};
+	SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, &rect);
+
+	return target->life <= 0;
+}
+
 int trace_bullet_shot(App *app, Body *body, int x, int y)
 {
 	Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
 	p[0] = 0xff;
 	p[1] = 0xff;
-	int hit = app->game.board.crowd[x/tileSize][y/tileSize];
-	if(hit) {
-		if(hit>4) {
-			int i = hit - 4;
-			hit(body, &app->game.enemies[i].body);
+	int target = app->game.board.crowd[x/tileSize][y/tileSize];
+	if(target) {
+		if(target>4) {
+			int i = target - 4;
+			hit(app, body, &app->game.enemies[i].body);
 
-			// move to hit()
-			SDL_Rect rect = {
-				x - body->item.hit_image.w/2,
-				y - body->item.hit_image.h/2,
-				body->item.hit_image.w,
-				body->item.hit_image.h
-			};
-			SDL_BlitSurface(body->item.hit_image, NULL, app->screen, &rect);
 		}
 	}
-	return hit;
+	return target;
 }
 
 
-int trace(App *app, Body *body, int range, int (*draw)(App *app, int x, int y))
+
+int trace(App *app, Body *body, int range, int (*draw)(App *app, Body *body, int x, int y))
 {
-	int x1,int y1,int x2,int y2;
+	int x1, y1, x2, y2;
 	int dx, dy, i, e;
 	int incx, incy, inc1, inc2;
 	int x,y;
+
+	x1 = body->pos.x;
+	y1 = body->pos.y;
+	x2 = x1 + sin(body->angle) * range;
+	y2 = y1 + sin(body->angle) * range;
 
 	dx = x2 - x1;
 	dy = y2 - y1;
@@ -358,6 +370,9 @@ int main(int argc, char* args[] )
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
 	app.credits = CREDITS_TEAM;
+	app.game.itemtype[ITEM_ENEMY_MEDIC].damage = .5;
+	app.game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
+
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();

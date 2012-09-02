@@ -84,6 +84,24 @@ void flushRender(App *app)
 	}
 }
 
+void renderPowerups(App *app, HealthPack *health_pack)
+{
+  app->game.item_count += 1;
+  int x = 500, y = 300;
+  powerup_spawn_pos(&app->game, &x, &y);
+  SDL_Rect rect = {
+    x,
+    y,
+    health_pack->image->w,
+    health_pack->image->h
+  };
+	int i = app->game.board.sprite_count++;
+	app->game.board.sprite[i].image = health_pack->image;
+	app->game.board.sprite[i].rect = rect;
+  //app->game.board.powerups[app->game.item_count] = item;
+}
+
+
 void render(App *app){
   int x,y;
   app->game.board.sprite_count = 0;
@@ -111,7 +129,7 @@ void render(App *app){
   renderEnemies(app);
   if(rand() % 100 == 0)
   {
-    renderPowerups(app, app->game.health_pack.image);
+    renderPowerups(app, &app->game.health_pack);
   }
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 
@@ -119,23 +137,6 @@ void render(App *app){
   renderStats(app->screen, &game.player1, &game.player2);
 
   SDL_Flip(app->screen);
-}
-
-void renderPowerups(App *app, HealthPack health_pack)
-{
-  app->game.item_count += 1;
-  int x = 500, y = 300;
-  powerup_spawn_pos(&app->game, &x, &y);
-  SDL_Rect rect = {
-    x,
-    y,
-    health_pack.image->w,
-    health_pack.image->h
-  };
-	int i = app->game.board.sprite_count++;
-	app->game.board.sprite[i].image = health_pack.image;
-	app->game.board.sprite[i].rect = rect;
-  app->game.board.powerups[app->game.item_count] = item;
 }
 
 

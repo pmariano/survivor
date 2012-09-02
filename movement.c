@@ -115,11 +115,6 @@ void body_move(Game *game, Body *body, float angle)
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
 }
 
-void hit(Body *source, Body *target){
-	int damage = source->item.damage;
-	target->life -= source->item.damage;
-}
-
 void move_enemies(App *app)
 {
   int i = 0;
@@ -160,12 +155,12 @@ void move_enemies(App *app)
           float angle = ATAN2(dx,dy);
           body_move(&app->game, enemy_body, angle);
 
-					if(reach){
-						hit(enemy_body, &app->game.player1.body);
-						printf("vida do carinha %f\n", app->game.player1.body.life);
-					}
-        }
-    }
+		  if(reach){
+			  hit(app, enemy_body, &app->game.player1.body);
+			  printf("vida do carinha %f\n", app->game.player1.body.life);
+		  }
+		}
+	}
   }
 }
 
@@ -220,18 +215,3 @@ int powerup_spawn_pos(Game *game, int *x, int *y) {
 	}
 	return 0;
 }
-
-int powerup_spawn_pos(Game *game, int *x, int *y) {
-	int i;
-	for(i=0; i< 10; i++) {
-		int x1 = rand() % mapWidth;
-		int y1 = rand() % mapHeight;
-		if(!game->board.wall[x1][y1] && !game->board.powerup[x1][y1]) {
-			*x = x1 * tileSize + tileSize/2;
-			*y = y1 * tileSize + tileSize/2;
-			return 1;
-		}
-	}
-	return 0;
-}
-
