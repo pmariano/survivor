@@ -12,7 +12,7 @@ void renderStats(SDL_Surface *screen, Player *player1, Player *player2){
     text_write_raw(screen, 5, 30, "Player 1", green, 30);
 	Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
 
-	SDL_Rect rect = { 5, 10, player2->body.life *2, 20};
+	SDL_Rect rect = { 5, 10, player1->body.life * 2, 20};
 	SDL_FillRect(screen, &rect, color);
   }
 

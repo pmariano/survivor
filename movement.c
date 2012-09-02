@@ -110,10 +110,14 @@ void body_move(Game *game, Body *body, float angle)
 		}
 	}
 
-
-
 	//printf("body: angle: %f a: %f 2pi:%f y:%f\n", body->angle, a, 2*M_PI, sin(a) * v);
 	//body->frame = (body->frame+(rand()%2)) % body->sprite->frame_count;
+}
+
+void hit(Body *source, Body *target){
+	int damage = source->item.damage;
+	printf("damage %f, enemey: %f\n",source->item.damage, source->life);
+	target->life -= source->item.damage;
 }
 
 void move_enemies(App *app)
@@ -121,25 +125,51 @@ void move_enemies(App *app)
   int i = 0;
   for(; i < ENEMY_COUNT; i++)
   {
-    if(app->game.enemies[i].state == ENEMY_LIVE)
+    int id = app->game.latest_enemy_updated = ( app->game.latest_enemy_updated + 1 ) % ENEMY_COUNT;
+    if(app->game.enemies[id].state == ENEMY_LIVE)
     {
-        Body *enemy_body = &app->game.enemies[i].body;
-        pathStatus[i] = FindPath(i,
+        Body *enemy_body = &app->game.enemies[id].body;
+        pathStatus[id] = FindPath(id,
             enemy_body->pos.x,
             enemy_body->pos.y,
             app->game.player1.body.pos.x,
             app->game.player1.body.pos.y);
+        break;
+    }
+  }
+
+  for(i = 0; i < ENEMY_COUNT; i++)
+  {
+    if(app->game.enemies[i].state == ENEMY_LIVE)
+    {
+        Body *enemy_body = &app->game.enemies[i].body;
+        if(app->game.latest_enemy_updated+1 == i)
+        {
+          pathStatus[i] = FindPath(i,
+              enemy_body->pos.x,
+              enemy_body->pos.y,
+              app->game.player1.body.pos.x,
+              app->game.player1.body.pos.y);
+          app->game.latest_enemy_updated = i;
+        }
         if(pathStatus[i] == found)
         {
-          ReadPath(i, enemy_body->pos.x, enemy_body->pos.y, 1);
+          int reach = ReadPath(i, enemy_body->pos.x, enemy_body->pos.y, 1);
           int dx = xPath[i] - enemy_body->pos.x;
           int dy = yPath[i] - enemy_body->pos.y;
           float angle = ATAN2(dx,dy);
           body_move(&app->game, enemy_body, angle);
+
+					if(reach){
+						hit(enemy_body, &app->game.player1.body);
+						printf("vida do carinha %f\n", app->game.player1.body.life);
+					}
         }
     }
   }
 }
+
+
 
 void player_move(Game *game, Body *body, int up, int right, int down, int left)
 {
@@ -148,7 +178,6 @@ void player_move(Game *game, Body *body, int up, int right, int down, int left)
     if(dx||dy) {
         float angle = ATAN2(dx,dy);
         body_move(game, body, angle);
-
     }
 }
 

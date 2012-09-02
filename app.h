@@ -34,14 +34,14 @@ typedef enum {
 } PlayerStatus;
 
 typedef struct {
-  SDL_Surface *background;
-  int damage;
+  SDL_Surface *image;
+  float damage;
   int ammo;
 } Item;
 
 typedef struct {
   SDL_Rect pos;
-  int life;
+  float life;
   int ammo;
   Item item;
   Action action;
@@ -103,6 +103,7 @@ typedef struct {
   Uint32 spawnTime;
   EnemyClass enemy_class_medic;
   EnemyClass enemy_class_soldier;
+  int latest_enemy_updated;
 } Game;
 
 typedef enum {
