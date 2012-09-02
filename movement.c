@@ -215,3 +215,4 @@ int powerup_spawn_pos(Game *game, int *x, int *y) {
 	}
 	return 0;
 }
+

@@ -44,10 +44,15 @@ void gameInit(App *app){
   app->game.latest_enemy_updated = 0;
   app->game.item_count = 0;
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
-  int i = 0;
-  for(;i < ENEMY_COUNT; i++)
+  int i;
+  for(i=0;i < ENEMY_COUNT; i++)
   {
     app->game.enemies[i].state = ENEMY_DEAD;
+  }
+
+  for(i=0;i<POWERUP_COUNT; i++)
+  {
+    app->game.board.powerups[i].should_show = 0;
   }
 }
 

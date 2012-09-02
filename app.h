@@ -46,6 +46,7 @@ typedef struct {
 typedef struct {
   ItemType *type;
   int ammo;
+  int should_show;
 } Item;
 
 typedef struct {
