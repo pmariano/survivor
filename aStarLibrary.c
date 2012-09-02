@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "aStarLibrary.h"
 
 /*
 ;===================================================================
@@ -8,12 +9,6 @@
  */
 
 //Declare constants
-#define notfinished 0
-#define notStarted 0// path-related constants
-#define found 1
-#define nonexistent 2 
-#define walkable  0
-#define unwalkable 1// walkability array constants
 
 int onClosedList = 10;
 
