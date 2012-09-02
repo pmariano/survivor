@@ -61,9 +61,9 @@ void renderEnemies(App *app)
         enemy->body.pos.w,
         enemy->body.pos.h
       };
-		int i = app->game.board.sprite_count++;
-		app->game.board.sprite[i].image = image;
-		app->game.board.sprite[i].rect = rect;
+		int j = app->game.board.sprite_count++;
+		app->game.board.sprite[j].image = image;
+		app->game.board.sprite[j].rect = rect;
     }
   }
 }
@@ -159,7 +159,7 @@ void renderFinish(App *app){
   renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
   showPowerups(app);
-  if(rand() % 300 == 0)
+  if((rand() % 300) == 0)
   {
     renderPowerups(app);
   }

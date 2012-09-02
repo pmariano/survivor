@@ -20,16 +20,16 @@ void finishHim(App *app){
 }
 
 void checkGameover(App *app){
-	Player player1 = app->game.player1;
-	Player player2 = app->game.player2;
+	Player *player1 = &app->game.player1;
+	Player *player2 = &app->game.player2;
 
-	int numCurrentPlayers = (player1.state == PLAYER_READY) + (player2.state == PLAYER_READY);
+	int numCurrentPlayers = (player1->state == PLAYER_READY) + (player2->state == PLAYER_READY);
 
 	if(numCurrentPlayers == 0 ){
 		//there is no player
 		return;
 	}
-	int numDeadPlayers = (player1.body.status == BODY_DEAD) + (player2.body.status == BODY_DEAD);
+	int numDeadPlayers = (player1->body.status == BODY_DEAD) + (player2->body.status == BODY_DEAD);
 
 	printf("numero de mortos: %i/%i\n", numDeadPlayers, numCurrentPlayers);
 
@@ -57,11 +57,8 @@ void gameInit(App *app){
 	p1body->max_vel = 5;
 	p1body->angle = 0;
 	p1body->life = 100.0;
-<<<<<<< HEAD
 	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
-=======
 	p1body->status = BODY_ALIVE;
->>>>>>> 89cba2ca8c73112d87074bbc441ac26e5ce4c135
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
@@ -73,20 +70,14 @@ void gameInit(App *app){
 	p2body->max_vel = 5;
 	p2body->angle = 1;
 	p2body->life = 100.0;
-<<<<<<< HEAD
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
-  app->game.latest_enemy_updated = 0;
-  app->game.item_count = 0;
-=======
 	p2body->status = BODY_ALIVE;
+	app->game.latest_enemy_updated = 0;
+	app->game.item_count = 0;
 
-  app->game.latest_enemy_updated = 0;
-  app->game.item_count = 0;
 	app->credits = 0;
-	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
->>>>>>> 89cba2ca8c73112d87074bbc441ac26e5ce4c135
   int i;
   for(i=0;i < ENEMY_COUNT; i++)
   {
@@ -282,8 +273,8 @@ void spawnEnemy(App *app)
   Enemy *enemy = NULL;
   int x,y;
 
-  int i = 0;
-  for(; i < ENEMY_COUNT; i++)
+  int i;
+  for(i = 0; i < ENEMY_COUNT; i++)
   {
     if(game->enemies[i].state == ENEMY_DEAD)
     {
@@ -295,7 +286,11 @@ void spawnEnemy(App *app)
 
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
-    enemy->image = game->enemy_class[rand() % 2 == 0 ? ENEMY_MEDIC : ENEMY_SOLDIER].image;
+	int k = rand() % 2;
+	printf(" k %d %p\n" , k, game->enemy_class[k].image);
+	printf(" img %d\n" , game->enemy_class[k].image->w);
+    
+    enemy->image = game->enemy_class[k].image;
     Body *enemybody = &enemy->body;
     enemybody->ang_vel = 0.05;
     enemybody->max_vel = 2.5;
@@ -431,13 +426,7 @@ int main(int argc, char* args[] )
 
 	app.state = STATE_MENU;
 	app.menu.selected = MENU_NEW_GAME;
-<<<<<<< HEAD
 	app.credits = CREDITS_TEAM;
-=======
-	app.game.itemtype[ITEM_ENEMY_MEDIC].damage = .5;
-	app.game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
-
->>>>>>> 89cba2ca8c73112d87074bbc441ac26e5ce4c135
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
 	init_font();
@@ -456,28 +445,15 @@ int main(int argc, char* args[] )
 
 		if (app.state == STATE_PLAYING){
 			playRandomMusic();
-<<<<<<< HEAD
 			Uint32 elapsed = startTime - app.game.spawnTime;
 			if(elapsed > 1000)
 			{
 				spawnEnemy(&app);
 				app.game.spawnTime = startTime;
 			}
-			move_enemies(&app);
+			//move_enemies(&app);
 			renderFinish(&app);
 			checkGameover(&app);
-=======
-      Uint32 elapsed = startTime - app.game.spawnTime;
-      if(elapsed > 1000)
-      {
-        spawnEnemy(&app);
-        app.game.spawnTime = startTime;
-      }
-
-			checkGameover(&app);
-      move_enemies(&app);
-			render(&app);
->>>>>>> 89cba2ca8c73112d87074bbc441ac26e5ce4c135
 		} else if (app.state == STATE_CREDITS) {
 			renderCredits(&app);
 		}	else {

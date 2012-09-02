@@ -121,7 +121,8 @@ enum {
 };
 enum {
   ENEMY_MEDIC,
-  ENEMY_SOLDIER
+  ENEMY_SOLDIER,
+  ENEMY_TYPE_COUNT
 };
 
 typedef struct {
@@ -131,14 +132,12 @@ typedef struct {
   Board board;
   Uint32 start;
   Uint32 spawnTime;
-  EnemyClass enemy_class_medic;
-  EnemyClass enemy_class_soldier;
   int latest_enemy_updated;
   int item_count;
   int kill_count;
   HealthPack health_pack;
   ItemType itemtype[ITEM_COUNT];
-  EnemyClass enemy_class[1];
+  EnemyClass enemy_class[ENEMY_TYPE_COUNT];
 } Game;
 
 typedef enum {
