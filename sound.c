@@ -27,7 +27,7 @@ void playMusic(const char* path, int qtd){
 }
 
 void playRandomMusic(){
-	const char* musicName = levelMusics[random()%3];
+	const char* musicName = levelMusics[rand()%3];
 	playMusic(musicName, -1);
 }
 

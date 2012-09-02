@@ -45,7 +45,7 @@ void gameInit(App *app){
 
 	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = .5;
 	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
-	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 150;
+	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 75;
 	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
 	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
 
@@ -53,7 +53,7 @@ void gameInit(App *app){
 	 * Player 1 init settings
 	 * */
 	Body *p1body = &app->game.player1.body;
-	p1body->ang_vel = 0.3;
+	p1body->ang_vel = 0.2;
 	p1body->max_vel = 5;
 	p1body->angle = 0;
 	p1body->life = 100.0;
@@ -66,7 +66,7 @@ void gameInit(App *app){
 	 * */
 	Body *p2body = &app->game.player2.body;
 
-	p2body->ang_vel = 0.3;
+	p2body->ang_vel = 0.4;
 	p2body->max_vel = 5;
 	p2body->angle = 1;
 	p2body->life = 100.0;
