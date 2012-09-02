@@ -13,30 +13,6 @@
 #define FPS 140
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
-void gameInit(App *app){
-	/**
-	 * Player 1 init settings
-	 * */
-	Body *p1body = &app->game.player1.body;
-	p1body->ang_vel = 0.3;
-	p1body->max_vel = 5;
-	p1body->angle = 1;
-	p1body->pos.x = 1204/2+15;
-	p1body->pos.y = 768/2+15;
-
-	/**
-	 * Player 2 init settings
-	 * */
-	Body *p2body = &app->game.player2.body;
-
-	p2body->ang_vel = 0.3;
-	p2body->max_vel = 5;
-	p2body->angle = 1;
-	p2body->pos.x = 1204/2+40;
-	p2body->pos.y = 768/2+40;
-}
-
-
 void finishHim(App *app){
 	app->state = STATE_EXIT;
 }
@@ -192,6 +168,40 @@ void bindKeyboard(App *app)
 	}
 }
 
+void gameInit(App *app){
+	/**
+	 * Player 1 init settings
+	 * */
+	Body *p1body = &app->game.player1.body;
+	p1body->ang_vel = 0.3;
+	p1body->max_vel = 5;
+	p1body->angle = 0;
+	p1body->pos.x = 1204/2+15;
+	p1body->pos.y = 768/2+15;
+
+	/**
+	 * Player 2 init settings
+	 * */
+	Body *p2body = &app->game.player2.body;
+
+	p2body->ang_vel = 0.3;
+	p2body->max_vel = 5;
+	p2body->angle = 1;
+	p2body->pos.x = 1204/2+40;
+	p2body->pos.y = 768/2+40;
+
+	/**
+	 * Enemy Body
+	 *
+	 * */
+  Body *enemybody = &app->game.enemy.body;
+	enemybody->ang_vel = 0.3;
+	enemybody->max_vel = 5;
+	enemybody->angle = 1;
+	enemybody->pos.x = 1204/2-550;
+	enemybody->pos.y = 768/2+80;
+}
+
 void handleDelay(Uint32 start) {
     Uint32 end = SDL_GetTicks();
     int actual_delta = end - start;
@@ -199,7 +209,6 @@ void handleDelay(Uint32 start) {
     int delay = MAX(0, expected_delta - actual_delta);
     SDL_Delay(delay);
 }
-
 int main(int argc, char* args[] )
 {
 	App app;

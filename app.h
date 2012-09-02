@@ -58,6 +58,7 @@ typedef struct{
 typedef struct {
   Player player1;
   Player player2;
+  Enemy enemy;
   Board board;
 } Game;
 
