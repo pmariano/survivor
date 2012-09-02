@@ -118,17 +118,36 @@ void body_move(Game *game, Body *body, float angle)
 
 void move_enemies(App *app)
 {
-  int i = 0;
+  int i = 0; 
   for(; i < ENEMY_COUNT; i++)
   {
-    if(app->game.enemies[i].state == ENEMY_LIVE)
+    int id = app->game.latest_enemy_updated = ( app->game.latest_enemy_updated + 1 ) % ENEMY_COUNT;
+    if(app->game.enemies[id].state == ENEMY_LIVE)
     {
-        Body *enemy_body = &app->game.enemies[i].body;
-        pathStatus[i] = FindPath(i, 
+        Body *enemy_body = &app->game.enemies[id].body;
+        pathStatus[id] = FindPath(id, 
             enemy_body->pos.x, 
             enemy_body->pos.y, 
             app->game.player1.body.pos.x, 
             app->game.player1.body.pos.y);
+        break;
+    }
+  }
+
+  for(i = 0; i < ENEMY_COUNT; i++)
+  {
+    if(app->game.enemies[i].state == ENEMY_LIVE)
+    {
+        Body *enemy_body = &app->game.enemies[i].body;
+        if(app->game.latest_enemy_updated+1 == i)
+        {
+          pathStatus[i] = FindPath(i, 
+              enemy_body->pos.x, 
+              enemy_body->pos.y, 
+              app->game.player1.body.pos.x, 
+              app->game.player1.body.pos.y);
+          app->game.latest_enemy_updated = i;
+        }
         if(pathStatus[i] == found)
         {
           ReadPath(i, enemy_body->pos.x, enemy_body->pos.y, 1);    
