@@ -143,24 +143,34 @@ void move_enemies(App *app)
     if(app->game.enemies[id].state == ENEMY_LIVE)
     {
         Body *enemy_body = &app->game.enemies[id].body;
-        pathStatus[crazy] = FindPath(crazy,
-            enemy_body->pos.x,
-            enemy_body->pos.y,
-            app->game.player1.body.pos.x,
-            app->game.player1.body.pos.y);
 
-        pathStatus[crazy+1] = FindPath(crazy+1,
-            enemy_body->pos.x,
-            enemy_body->pos.y,
-            app->game.player2.body.pos.x,
-            app->game.player2.body.pos.y);
+		if(app->game.player1.body.status == BODY_ALIVE &&
+			app->game.player1.state == PLAYER_READY)
+			pathStatus[crazy] = FindPath(crazy,
+				enemy_body->pos.x,
+				enemy_body->pos.y,
+				app->game.player1.body.pos.x,
+				app->game.player1.body.pos.y);
+
+		if(app->game.player2.body.status == BODY_ALIVE &&
+			app->game.player2.state == PLAYER_READY)
+			pathStatus[crazy+1] = FindPath(crazy+1,
+				enemy_body->pos.x,
+				enemy_body->pos.y,
+				app->game.player2.body.pos.x,
+				app->game.player2.body.pos.y);
 
 
-        if(pathLength[crazy] < pathLength[crazy+1]){
+        if(
+		(app->game.player2.body.status != BODY_ALIVE ||
+			app->game.player2.state != PLAYER_READY) ||
+			pathLength[crazy] < pathLength[crazy+1]){
           app->game.enemies[id].pathfinder = crazy;
+          app->game.enemies[id].pathfinder_other = crazy+1;
           app->game.enemies[id].target = &app->game.player1.body;
         }else{
           app->game.enemies[id].pathfinder = crazy+1;
+          app->game.enemies[id].pathfinder_other = crazy;
           app->game.enemies[id].target = &app->game.player2.body;
         }
     }
@@ -171,16 +181,19 @@ void move_enemies(App *app)
     if(app->game.enemies[i].state == ENEMY_LIVE)
     {
         Body *enemy_body = &app->game.enemies[i].body;
-        if(pathStatus[i] == found)
+		int crazy = app->game.enemies[i].pathfinder;
+        if(pathStatus[crazy] == found)
         {
-          int reach = ReadPath(app->game.enemies[i].pathfinder, enemy_body->pos.x, enemy_body->pos.y, 1);
-          int dx = xPath[app->game.enemies[i].pathfinder] - enemy_body->pos.x;
-          int dy = yPath[app->game.enemies[i].pathfinder] - enemy_body->pos.y;
+          int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize/2);
+          int dx = xPath[crazy] - enemy_body->pos.x;
+          int dy = yPath[crazy] - enemy_body->pos.y;
           float angle = ATAN2(dx,dy);
           body_move(&app->game, enemy_body, angle);
 
 		  if(reach){
-			  hit(app, enemy_body, app->game.enemies[i].target);
+				printf("reach %d %d %d\n", i, dx, dy);
+				pathStatus[app->game.enemies[i].pathfinder_other] = notStarted;
+				hit(app, enemy_body, app->game.enemies[i].target);
 		  }
 		}
 	}
@@ -205,8 +218,8 @@ int enemy_spawn_pos(Game *game, int *x, int *y) {
 	int i = rand() % game->board.spawn_count;
 	// printf("%d %d\n", i, rand() % game->board.spawn_count);
 
-	*x = game->board.spawn[i].x*tileSize+tileSize/2;
-	*y = game->board.spawn[i].y*tileSize+tileSize/2;
+	*x = game->board.spawn[i].x*tileSize+tileSize*3/4;
+	*y = game->board.spawn[i].y*tileSize+tileSize*3/4;
 	return 1;
 }
 

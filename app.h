@@ -93,6 +93,7 @@ typedef struct{
   SDL_Surface *image;
   EnemyState state;
   int pathfinder;
+  int pathfinder_other;
   Body *target;
 } Enemy;
 

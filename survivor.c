@@ -129,6 +129,7 @@ void pauseOrJoinTheGame(App *app, Player *player){
 	app->menu.selected = MENU_RESUME;
   } else{
 	player->state = PLAYER_READY;
+	player->body.status = BODY_ALIVE;
   }
 }
 
@@ -322,12 +323,13 @@ void spawnEnemy(App *app)
 
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
+	printf("spawn %d\n", i);
 	int k = rand() % ENEMY_TYPE_COUNT;
 	enemy->image = game->enemy_class[k].image;
 	Body *enemybody = &enemy->body;
 	enemybody->ang_vel = 0.05;
 	enemybody->max_vel = 2.5;
-	enemybody->angle = 1;
+	enemybody->angle = 0;
 	enemybody->pos.x = x;
 	enemybody->pos.y = y;
 	enemybody->life = 100.0;
@@ -372,7 +374,7 @@ int hit(App *app, Body *source, Body *target){
 			source->item.type->hit_image->h
 		};
 		SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, &rect);
-		printf("splash %d %d\n", target->pos.x, target->pos.y);
+		// printf("splash %d %d\n", target->pos.x, target->pos.y);
 	}
 
 	if(target->status != BODY_DEAD){

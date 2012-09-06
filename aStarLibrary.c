@@ -475,9 +475,10 @@ int ReadPath(int pathfinderID,int currentX,int currentY,
 		if (pathLocation[ID] == pathLength[ID])
 		{
 			if (abs(currentX - xPath[ID]) < pixelsPerFrame
-				&& abs(currentY - yPath[ID]) < pixelsPerFrame) //if close enough to center of square
+				&& abs(currentY - yPath[ID]) < pixelsPerFrame) {  //if close enough to center of square
 					pathStatus[ID] = notStarted;
-			return 1;
+					return 1;
+				}
 		}
 	}
 

@@ -68,7 +68,7 @@ void renderPlayer(Game *game, Player *player){
 	rect.x+=image->w/2;
 	j = game->board.sprite_count++;
 	game->board.sprite[j].image = player->body.item.type->image;
-	printf("item %p\n", player->body.item.type);
+	// printf("item %p\n", player->body.item.type);
 	game->board.sprite[j].rect = rect;
 }
 
@@ -165,9 +165,9 @@ void renderStart(App *app){
   if(app->debug){
     for (x=0; x < mapWidth;x++) {
       for (y=0; y < mapHeight;y++) {
-        //if(walkability[x][y]) {
+        if(walkability[x][y]) {
         // if(app->game.board.wall[x][y]) {
-        if(app->game.board.crowd[x][y]) {
+        //if(app->game.board.crowd[x][y]) {
         //if(app->game.board.powerup[x][y]) {
           SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
           SDL_FillRect(app->screen, &rect , 0xffffff);
@@ -214,7 +214,7 @@ void renderInit(App *app){
   app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie1.png");
   app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie2.png");
 
-  app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE|SDL_FULLSCREEN);
+  app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);//|SDL_FULLSCREEN);
 }
 
 /**
