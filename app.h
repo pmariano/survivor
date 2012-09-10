@@ -86,6 +86,8 @@ typedef enum {
 
 typedef struct{
   SDL_Surface *image;
+  ItemType *type;
+  float max_life;
 } EnemyClass;
 
 typedef struct{
@@ -133,6 +135,7 @@ enum {
 	ITEM_PLAYER_FLAME,
 	ITEM_PLAYER_COUNT,
 	ITEM_ENEMY_MEDIC,
+	ITEM_ENEMY_SOLDIER,
 	ITEM_COUNT
 };
 enum {

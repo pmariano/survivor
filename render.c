@@ -249,8 +249,6 @@ void renderInit(App *app){
   app->game.player2.down = IMG_Load("data/engenheiro1.png");
   app->game.player2.left = IMG_Load("data/engenheiro1.png");
   app->game.player2.right = IMG_Load("data/engenheiro1.png");
-  app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie1.png");
-  app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie2.png");
 
   app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);//|SDL_FULLSCREEN);
 }

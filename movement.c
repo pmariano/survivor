@@ -6,6 +6,7 @@
 void movePrepare(App *app)
 {
 	int i;
+	memcpy(walkability, app->game.board.wall, sizeof(app->game.board.wall));
 	memcpy(app->game.board.crowd, app->game.board.wall, sizeof(app->game.board.wall));
 	memcpy(app->game.board.hittable, app->game.board.air, sizeof(app->game.board.air));
 	if( app->game.player1.body.status == BODY_ALIVE) {
@@ -26,6 +27,18 @@ void movePrepare(App *app)
 			int y = app->game.enemies[i].body.pos.y/tileSize;
 			app->game.board.crowd[x][y] = 4+i;
 			app->game.board.hittable[x][y] = 4+i;
+			if(rand()%8 == 0) // sometimes take crowd in account, sometimes not
+				walkability[x][y] = unwalkable;
+		}
+	}
+				
+	for(i=0; i < app->game.board.spawn_count; i++)
+	{
+		if(app->game.board.spawn[i].open)
+		{
+			int x = app->game.board.spawn[i].x;
+			int y = app->game.board.spawn[i].y;
+			walkability[x][y] = unwalkable;
 		}
 	}
 }
@@ -39,7 +52,6 @@ void moveInit(App *app)
 	memset(app->game.board.air, 0, sizeof(app->game.board.air));
 	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
 	memset(app->game.board.spawn_map, 0, sizeof(app->game.board.spawn_map));
-	memset(walkability, 0, sizeof(walkability));
 	app->game.board.spawn_count = 0;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
@@ -48,7 +60,6 @@ void moveInit(App *app)
 			SDL_GetRGB(*p, hit->format, &r, &g, &b);
 			app->game.board.wall[x][y] = !(b>r+g);
 			app->game.board.air[x][y] = !(r||g||b);
-			walkability[x][y] = (r+b>g) ? walkable : unwalkable;
 			if(r>b+g) {
 				app->game.board.spawn_map[x][y]=1;
 				app->game.board.spawn[app->game.board.spawn_count].x = x;

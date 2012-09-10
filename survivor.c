@@ -50,36 +50,13 @@ void gameInit(App *app){
 	app->game.spawnTime = app->game.start;
 	app->game.kill_count= 0;
 
-	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = 1;
-	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
-	app->game.itemtype[ITEM_ENEMY_MEDIC].sound = Mix_LoadWAV("sounds/ouch.wav");
-	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 75;
-	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
-	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
-	app->game.itemtype[ITEM_PLAYER_BULLET].image = IMG_Load("data/bullet_ammo.png");
-	app->game.itemtype[ITEM_PLAYER_BULLET].shot_image = IMG_Load("data/bullet_shot.png");
-	app->game.itemtype[ITEM_PLAYER_BULLET].freq = 8;
-	app->game.itemtype[ITEM_PLAYER_BULLET].spread = 3;
-	app->game.itemtype[ITEM_PLAYER_BULLET].ammo_total = 1000;
-	app->game.itemtype[ITEM_PLAYER_BULLET].sound = Mix_LoadWAV("sounds/machinegun.wav");
-	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 250;
-	app->game.itemtype[ITEM_PLAYER_FLAME].range = 150;
-	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
-	app->game.itemtype[ITEM_PLAYER_FLAME].hit_image = IMG_Load("data/fire_hit.png");
-	app->game.itemtype[ITEM_PLAYER_FLAME].shot_image = IMG_Load("data/fire_shot.png");
-	app->game.itemtype[ITEM_PLAYER_FLAME].spread = 20;
-	app->game.itemtype[ITEM_PLAYER_FLAME].sound = Mix_LoadWAV("sounds/flame.wav");
-	app->game.itemtype[ITEM_PLAYER_FLAME].freq = 2;
-	app->game.itemtype[ITEM_PLAYER_FLAME].ammo_total = 250;
-	app->game.itemtype[ITEM_HEALTH_PACK].damage = -50;
-	app->game.itemtype[ITEM_HEALTH_PACK].image = IMG_Load("data/health.png");
 
 	/**
 	 * Player 1 init settings
 	 * */
 	Body *p1body = &app->game.player1.body;
 	app->game.player1.state = PLAYER_IDLE;
-	p1body->ang_vel = 0.2;
+	p1body->ang_vel = 0.1;
 	p1body->max_vel = 5;
 	p1body->angle = 0;
 	p1body->life = 100.0;
@@ -317,7 +294,6 @@ void spawnEnemy(App *app)
 	if(game->enemies[i].state == ENEMY_DEAD)
 	{
 	  enemy = &game->enemies[i];
-	  enemy->state = ENEMY_LIVE;
 	  break;
 	}
   }
@@ -325,16 +301,17 @@ void spawnEnemy(App *app)
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
 	printf("spawn %d\n", i);
+	enemy->state = ENEMY_LIVE;
 	int k = rand() % ENEMY_TYPE_COUNT;
 	enemy->image = game->enemy_class[k].image;
 	Body *enemybody = &enemy->body;
+	enemybody->life = game->enemy_class[k].max_life;
+	enemybody->item.type = game->enemy_class[k].type;
 	enemybody->ang_vel = 0.05;
 	enemybody->max_vel = 2.5;
 	enemybody->angle = 0;
 	enemybody->pos.x = x;
 	enemybody->pos.y = y;
-	enemybody->life = 100.0;
-	enemybody->item.type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
   }
 }
 
@@ -347,6 +324,45 @@ void loadMap(App *app, int map_index) {
   app->game.board.hit = IMG_Load(hit_path);
   moveInit(app);
 }
+
+void loadItems(App *app) {
+	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = 1;
+	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.itemtype[ITEM_ENEMY_MEDIC].sound = Mix_LoadWAV("sounds/ouch.wav");
+	app->game.itemtype[ITEM_ENEMY_SOLDIER].damage = 4;
+	app->game.itemtype[ITEM_ENEMY_SOLDIER].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.itemtype[ITEM_ENEMY_SOLDIER].sound = Mix_LoadWAV("sounds/ouch.wav");
+	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 75;
+	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
+	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].image = IMG_Load("data/bullet_ammo.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].shot_image = IMG_Load("data/bullet_shot.png");
+	app->game.itemtype[ITEM_PLAYER_BULLET].freq = 8;
+	app->game.itemtype[ITEM_PLAYER_BULLET].spread = 3;
+	app->game.itemtype[ITEM_PLAYER_BULLET].ammo_total = 1000;
+	app->game.itemtype[ITEM_PLAYER_BULLET].sound = Mix_LoadWAV("sounds/machinegun.wav");
+	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 250;
+	app->game.itemtype[ITEM_PLAYER_FLAME].range = 150;
+	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].hit_image = IMG_Load("data/fire_hit.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].shot_image = IMG_Load("data/fire_shot.png");
+	app->game.itemtype[ITEM_PLAYER_FLAME].spread = 20;
+	app->game.itemtype[ITEM_PLAYER_FLAME].sound = Mix_LoadWAV("sounds/flame.wav");
+	app->game.itemtype[ITEM_PLAYER_FLAME].freq = 2;
+	app->game.itemtype[ITEM_PLAYER_FLAME].ammo_total = 250;
+	app->game.itemtype[ITEM_HEALTH_PACK].damage = -50;
+	app->game.itemtype[ITEM_HEALTH_PACK].image = IMG_Load("data/health.png");
+}
+
+void loadEnemies(App *app) {
+  app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie1.png");
+  app->game.enemy_class[ENEMY_MEDIC].type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
+  app->game.enemy_class[ENEMY_MEDIC].max_life = 100;
+  app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie2.png");
+  app->game.enemy_class[ENEMY_SOLDIER].type = &app->game.itemtype[ITEM_ENEMY_SOLDIER];
+  app->game.enemy_class[ENEMY_SOLDIER].max_life = 500;
+}
+
 
 int grab(App *app, Body *body)
 {
@@ -516,8 +532,10 @@ int main(int argc, char* args[] )
   init_font();
   InitializePathfinder();
   renderInit(&app);
-  loadMap(&app, 0); // calls moveInit
   soundInit();
+  loadItems(&app);
+  loadEnemies(&app);
+  loadMap(&app, 0); // calls moveInit
 
   while(app.state != STATE_EXIT){
 	Uint32 startTime = SDL_GetTicks();
