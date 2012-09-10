@@ -251,7 +251,7 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 		else
 			addedGCost = 10;//cost of going to non-diagonal squares
 		Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost * cost;
-		printf("gcost [%d][%d] = %d\n", a,b, Gcost[a][b]);
+		// printf("gcost [%d][%d] = %d\n", a,b, Gcost[a][b]);
 
 		//Figure out its H and F costs and parent
 		Hcost[openList[m]] = 10*(abs(a - targetX) + abs(b - targetY));

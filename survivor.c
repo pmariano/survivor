@@ -286,7 +286,7 @@ void spawnEnemy(App *app)
 
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
-	printf("spawn %d\n", i);
+	// printf("spawn %d\n", i);
 	enemy->body.status = BODY_ALIVE;
 	int k = rand() % ENEMY_TYPE_COUNT;
 	enemy->image = game->enemy_class[k].image;
