@@ -244,11 +244,14 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 		openY[newOpenListItemID] = b;//record the x and y coordinates of the new item
 
 		//Figure out its G cost
+		int cost = walkability[a][b];
+		if(cost == 0) cost = 1;
 		if (abs(a-parentXval) == 1 && abs(b-parentYval) == 1)
 			addedGCost = 14;//cost of going to diagonal squares
 		else
 			addedGCost = 10;//cost of going to non-diagonal squares
-		Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost;
+		Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost * cost;
+		printf("gcost [%d][%d] = %d\n", a,b, Gcost[a][b]);
 
 		//Figure out its H and F costs and parent
 		Hcost[openList[m]] = 10*(abs(a - targetX) + abs(b - targetY));

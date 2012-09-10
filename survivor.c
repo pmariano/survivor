@@ -388,8 +388,10 @@ int hit(App *app, Body *source, Body *target){
 
   if(target->life <= 0){
 	if(target->status == BODY_ALIVE){
-		app->game.kill_count += !!target->item.type->score;
-		target->status = BODY_DEAD;
+		if(!app->debug || target->item.type->score) { // player immortal on debug
+			app->game.kill_count += !!target->item.type->score;
+			target->status = BODY_DEAD;
+		}
 	}
 	return 1;
   }
@@ -437,7 +439,7 @@ int shoot(App *app, Body *body)
 	int range;
 	if(body->status != BODY_ALIVE)
 		return;
-	if(++body->item.ammo_used > body->item.type->ammo_total)
+	if(!app->debug && ++body->item.ammo_used > body->item.type->ammo_total) // infinit ammo on debug
 		return;
 
 	range = body->item.type->range;

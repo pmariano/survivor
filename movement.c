@@ -6,19 +6,32 @@
 void movePrepare(App *app)
 {
 	int i;
-	memcpy(walkability, app->game.board.wall, sizeof(app->game.board.wall));
+	memcpy(walkability, app->game.board.wall, sizeof(app->game.board.wall)); // 1 = totaly unwalkable
 	memcpy(app->game.board.crowd, app->game.board.wall, sizeof(app->game.board.wall));
 	memcpy(app->game.board.hittable, app->game.board.air, sizeof(app->game.board.air));
+
+	for(i=0; i < app->game.board.spawn_count; i++)
+	{
+		if(app->game.board.spawn[i].open)
+		{
+			int x = app->game.board.spawn[i].x;
+			int y = app->game.board.spawn[i].y;
+			walkability[x][y] = 0; // totally walkable
+		}
+	}
+
 	if( app->game.player1.body.status == BODY_ALIVE) {
 		int x = app->game.player1.body.pos.x/tileSize;
 		int y = app->game.player1.body.pos.y/tileSize;
 		app->game.board.crowd[x][y] = 2;
 	}
+
 	if( app->game.player2.body.status == BODY_ALIVE) {
 		int x = app->game.player2.body.pos.x/tileSize;
 		int y = app->game.player2.body.pos.y/tileSize;
 		app->game.board.crowd[x][y] = 3;
 	}
+
 	for(i=0; i < ENEMY_COUNT; i++)
 	{
 		if(app->game.enemies[i].body.status == BODY_ALIVE)
@@ -27,20 +40,10 @@ void movePrepare(App *app)
 			int y = app->game.enemies[i].body.pos.y/tileSize;
 			app->game.board.crowd[x][y] = 4+i;
 			app->game.board.hittable[x][y] = 4+i;
-			if(rand()%8 == 0) // sometimes take crowd in account, sometimes not
-				walkability[x][y] = unwalkable;
+			walkability[x][y] = mapWidth; // 1% walkable
 		}
 	}
 				
-	for(i=0; i < app->game.board.spawn_count; i++)
-	{
-		if(app->game.board.spawn[i].open)
-		{
-			int x = app->game.board.spawn[i].x;
-			int y = app->game.board.spawn[i].y;
-			walkability[x][y] = unwalkable;
-		}
-	}
 }
 
 
@@ -190,6 +193,7 @@ void move_enemies(App *app)
         }
 
 
+#if 0
 		{
 			extern int* pathBank [numberPeople+1];
 			int k;
@@ -200,6 +204,7 @@ void move_enemies(App *app)
 			}
 			printf("\n");
 		}
+#endif 
 
 		if(SDL_GetTicks() > deadline)
 			break;
