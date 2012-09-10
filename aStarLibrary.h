@@ -18,7 +18,7 @@ void EndPathfinder();
 #define walkable  0
 #define unwalkable 1// walkability array constants
 
-extern char walkability[mapWidth][mapHeight];
+extern int walkability[mapWidth][mapHeight];
 extern int pathStatus[numberPeople+1];
 extern int xPath[numberPeople+1];
 extern int yPath[numberPeople+1];

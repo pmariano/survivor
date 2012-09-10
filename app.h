@@ -115,6 +115,7 @@ typedef struct{
   int crowd[mapWidth][mapHeight];
   int hittable[mapWidth][mapHeight];
   int powerup[mapWidth][mapHeight];
+  int spawn_map[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;
   Sprite sprite[SPRITE_COUNT];
@@ -168,11 +169,23 @@ typedef enum {
   CREDITS_SOUND
 } Credits;
 
+typedef enum {
+	DEBUG_NONE,
+	DEBUG_WALL,
+	DEBUG_AIR,
+	DEBUG_AI,
+	DEBUG_ENEMY,
+	DEBUG_MOVE,
+	DEBUG_SHOT,
+	DEBUG_ITEM,
+	DEBUG_COUNT
+} Debug;
+
 typedef struct {
   SDL_Surface *screen;
   Game game;
   Credits credits;
-  int debug;
+  Debug debug;
   AppState state;
   /**
    * just to handle if is to show or not the resume page

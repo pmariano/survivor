@@ -38,16 +38,19 @@ void moveInit(App *app)
 	memset(app->game.board.wall, 0, sizeof(app->game.board.wall));
 	memset(app->game.board.air, 0, sizeof(app->game.board.air));
 	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
+	memset(app->game.board.spawn_map, 0, sizeof(app->game.board.spawn_map));
 	memset(walkability, 0, sizeof(walkability));
 	app->game.board.spawn_count = 0;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
-			Uint8 *p = ((Uint8*)app->game.board.hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch);
-			// printf("%d,%d: %d %d %d %d\n", x,y, hit->format->BytesPerPixel,p[0], p[1], p[2]);
-			app->game.board.wall[x][y] = !p[0];
-			app->game.board.air[x][y] = !(p[0]||p[1]||p[2]);
-			walkability[x][y] = !(p[0]||p[2]);
-			if(p[2]) {
+			Uint32 *p = (Uint32*)( ((Uint8*)hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch) );
+			Uint8 r,g,b;
+			SDL_GetRGB(*p, hit->format, &r, &g, &b);
+			app->game.board.wall[x][y] = !(b>r+g);
+			app->game.board.air[x][y] = !(r||g||b);
+			walkability[x][y] = (r+b>g) ? walkable : unwalkable;
+			if(r>b+g) {
+				app->game.board.spawn_map[x][y]=1;
 				app->game.board.spawn[app->game.board.spawn_count].x = x;
 				app->game.board.spawn[app->game.board.spawn_count].y = y;
 				app->game.board.spawn[app->game.board.spawn_count].open = 1;

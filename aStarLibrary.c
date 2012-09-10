@@ -13,7 +13,7 @@
 int onClosedList = 10;
 
 //Create needed arrays
-char walkability[mapWidth][mapHeight];
+int walkability[mapWidth][mapHeight];
 int openList[mapWidth*mapHeight+2]; //1 dimensional array holding ID# of open list items
 int whichList[mapWidth+1][mapHeight+1];  //2 dimensional array used to record
 //whether a cell is on the open list or on the closed list.

@@ -136,6 +136,7 @@ void pauseOrJoinTheGame(App *app, Player *player){
 void bindGameplayKeysDown(App *app, SDLKey *key){
 	Player *player1 = &app->game.player1;
 	Player *player2 = &app->game.player2;
+	SDLMod mod = SDL_GetModState();
 
 	switch(*key){
 		case SDLK_1:
@@ -145,7 +146,7 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			pauseOrJoinTheGame(app, player2);
 			break;
 		case SDLK_0:
-			app->debug ^= 1;
+			app->debug = (DEBUG_COUNT + app->debug + (mod & KMOD_SHIFT ? -1 : 1)) % DEBUG_COUNT;
 			break;
 		case SDLK_ESCAPE:
 			app->state = STATE_PAUSED;
@@ -340,8 +341,8 @@ void spawnEnemy(App *app)
 void loadMap(App *app, int map_index) {
   char image_path[256];
   char hit_path[256];
-  sprintf(image_path, "data/map%d.bmp", map_index);
-  sprintf(hit_path, "data/map%d_hit.bmp", map_index);
+  sprintf(image_path, "data/map%d.png", map_index);
+  sprintf(hit_path, "data/map%d_hit.png", map_index);
   app->game.board.image = IMG_Load(image_path);
   app->game.board.hit = IMG_Load(hit_path);
   moveInit(app);

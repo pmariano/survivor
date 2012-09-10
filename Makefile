@@ -11,19 +11,19 @@ else
   OUTPUT=survivor
 endif
 
-all: clean $(OUTPUT)
+.PHONY: all clean depend
+
+all: depend $(OUTPUT)
 
 clean:
-	rm -fv survivor survivor.exe *.o
+	rm -fv survivor survivor.exe *.o .depend
 
-%.o : %.c
-	$(CC) $(CFLAGS) $< -c -o $@
+depend: .depend
 
-render.o: render.c app.h render.h
-survivor.o: survivor.c app.h
-movement.o: movement.c movement.h app.h aStarLibrary.h
-aStarLibrary.o: aStarLibrary.c aStarLibrary.h app.h
-sound.o: sound.c sound.h
+.depend: $(wildcard *.c)
+	$(CC) $(CFLAGS) -MM $^ > .depend
+
+include .depend
 
 $(OUTPUT): survivor.o render.o font.o movement.o aStarLibrary.o sound.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)

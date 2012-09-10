@@ -38,7 +38,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 	  sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
 	  text_write_raw(screen, 910, 30, ammo, yellow, 20);
 
-	  Uint32 color = SDL_MapRGB(screen->format, "FF", 0,0 );
+	  Uint32 color = SDL_MapRGB(screen->format, 0xff, 0,0 );
 	  SDL_Rect rect = { 830, 10, player2->body.life*2, 20};
 	  SDL_FillRect(screen, &rect, color);
 	}
@@ -151,8 +151,59 @@ void addPowerup(App *app)
 	}
 }
 
+void renderDebug(App *app)
+{
+	int x,y;
+
+	int color;
+	int *map = NULL;
+	switch(app->debug) {
+		case DEBUG_WALL: // black
+			color = SDL_MapRGBA(app->screen->format, 0x00,0x00,0x00,0xff );
+			map = (int *)app->game.board.wall;
+			break;
+		case DEBUG_AIR: // green
+			color = SDL_MapRGBA(app->screen->format, 0x00,0xff,0x00,0xff );
+			map = (int *)app->game.board.air;
+			break;
+		case DEBUG_AI: // white
+			color = SDL_MapRGBA(app->screen->format, 0xff,0xff,0xff,0xff );
+			map = (int *)walkability;
+			break;
+		case DEBUG_ENEMY: // red
+			color = SDL_MapRGBA(app->screen->format, 0xff,0x00,0x00,0xff );
+			map = (int *)app->game.board.spawn_map;
+			break;
+		case DEBUG_MOVE: // blue
+			color = SDL_MapRGBA(app->screen->format, 0x00,0x00,0xff,0xff );
+			map = (int *)app->game.board.crowd;
+			break;
+		case DEBUG_SHOT: // yellow
+			color = SDL_MapRGBA(app->screen->format, 0xff,0xff,0x00,0xff );
+			map = (int *)app->game.board.hittable;
+			break;
+		case DEBUG_ITEM: // magenta
+			color = SDL_MapRGBA(app->screen->format, 0xff,0x00,0xff,0xff );
+			map = (int *)app->game.board.powerup;
+			break;
+	}
+
+	if(map){
+		for (x=0; x < mapWidth;x++) {
+			for (y=0; y < mapHeight;y++) {
+				if(map[x*mapHeight+y]) {
+					SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
+					SDL_FillRect(app->screen, &rect , color);
+				}
+			}
+		}
+	}
+
+	SDL_BlitSurface(app->game.board.hit, NULL, app->screen, NULL);
+}
+
+
 void renderStart(App *app){
-  int x,y;
   app->game.board.sprite_count = 0;
 
   Game game = app->game;
@@ -161,21 +212,6 @@ void renderStart(App *app){
   SDL_FillRect(app->screen, NULL , color);
 
   SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
-
-  if(app->debug){
-    for (x=0; x < mapWidth;x++) {
-      for (y=0; y < mapHeight;y++) {
-        if(walkability[x][y]) {
-        // if(app->game.board.wall[x][y]) {
-        //if(app->game.board.crowd[x][y]) {
-        //if(app->game.board.powerup[x][y]) {
-          SDL_Rect rect = { x*tileSize, y*tileSize, tileSize, tileSize };
-          SDL_FillRect(app->screen, &rect , 0xffffff);
-        }
-      }
-    }
-  }
-
 }
 
 void renderFinish(App *app){
@@ -193,6 +229,8 @@ void renderFinish(App *app){
 
   flushRender(app);
   renderStats(app, app->screen, &game.player1, &game.player2);
+
+  renderDebug(app);
 
   SDL_Flip(app->screen);
 }

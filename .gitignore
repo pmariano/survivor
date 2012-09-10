@@ -21,3 +21,6 @@ profile
 survivor
 survivor.exe
 .DS_Store
+*.orig
+*.rej
+.depend
