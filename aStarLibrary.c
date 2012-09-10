@@ -474,6 +474,7 @@ int ReadPath(int pathfinderID,int currentX,int currentY,
 		//reached then reset.
 		if (pathLocation[ID] == pathLength[ID])
 		{
+			// printf("goal %d %d (%d)\n", abs(currentX - xPath[ID]), abs(currentY - yPath[ID]), pixelsPerFrame);
 			if (abs(currentX - xPath[ID]) < pixelsPerFrame
 				&& abs(currentY - yPath[ID]) < pixelsPerFrame) {  //if close enough to center of square
 					pathStatus[ID] = notStarted;

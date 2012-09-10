@@ -233,7 +233,8 @@ void bindGameplayKeystate(App *app){
 	  keystate[SDLK_UP] || keystate[SDLK_q],
 	  keystate[SDLK_RIGHT] || keystate[SDLK_r],
 	  keystate[SDLK_DOWN] || keystate[SDLK_w],
-	  keystate[SDLK_LEFT] || keystate[SDLK_e]
+	  keystate[SDLK_LEFT] || keystate[SDLK_e],
+	  keystate[SDLK_s]
 	  );
 
   /**
@@ -246,7 +247,8 @@ void bindGameplayKeystate(App *app){
 	  keystate[SDLK_KP6] || keystate[SDLK_i],
 	  keystate[SDLK_KP8] || keystate[SDLK_t],
 	  keystate[SDLK_KP4] || keystate[SDLK_u],
-	  keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_y]
+	  keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_y],
+	  keystate[SDLK_x]
 	  );
 
   if(keystate[SDLK_a])

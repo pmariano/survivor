@@ -107,13 +107,13 @@ int is_empty(Game *game, Body *body, int x, int y)
 	return !is_solid(game, body,x,y);
 }
 
-void body_move(Game *game, Body *body, float angle)
+void body_move(Game *game, Body *body, float angle, float vel)
 {
 	if(body->status== BODY_DEAD){
 		return;
 	}
 
-	float v = body->max_vel;
+	float v = body->max_vel * vel;
 
 	angle_rotate(&body->angle, angle, body->ang_vel);
 	float a = body->angle * M_PI / 180.;
@@ -198,11 +198,11 @@ void move_enemies(App *app)
 		int crazy = app->game.enemies[i].pathfinder;
         if(pathStatus[crazy] == found)
         {
-          int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize/2);
+          int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize*1.25);
           int dx = xPath[crazy] - enemy_body->pos.x;
           int dy = yPath[crazy] - enemy_body->pos.y;
           float angle = ATAN2(dx,dy);
-          body_move(&app->game, enemy_body, angle);
+          body_move(&app->game, enemy_body, angle, rand()/(float)RAND_MAX);
 
 		  if(reach){
 				printf("reach %d %d %d\n", i, dx, dy);
@@ -216,13 +216,13 @@ void move_enemies(App *app)
 
 
 
-void player_move(Game *game, Body *body, int up, int right, int down, int left)
+void player_move(Game *game, Body *body, int up, int right, int down, int left, int halt)
 {
     int dx=right-left;
     int dy=down-up;
     if(dx||dy) {
         float angle = ATAN2(dx,dy);
-        body_move(game, body, angle);
+        body_move(game, body, angle, !halt);
     }
 }
 
