@@ -10,10 +10,10 @@ SDL_Color green = {0x00, 0XFF, 0x00};
 SDL_Color yellow = {0xFF, 0XFF, 0x00};
 
 void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2){
-  if(player1->state != PLAYER_IDLE){
+  if(player1->body.status != BODY_DEAD){
     text_write_raw(screen, 5, 60, "Player 1", green, 30);
 
-	if(player1->state != PLAYER_DEAD){
+	if(player1->body.status != BODY_DEAD){
 
 	  char ammo[256];
 	  sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
@@ -30,10 +30,10 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
   sprintf(kills, "%i kill(s)", app->game.kill_count);
   text_write_raw(screen, 400, 30, kills, white, 50);
 
-  if(player2->state != PLAYER_IDLE){
+  if(player2->body.status != BODY_DEAD){
     text_write_raw(screen, 900, 60, "Player 2", green, 30);
 
-	if(player2->state != PLAYER_DEAD){
+	if(player2->body.status != BODY_DEAD){
 	  char ammo[256];
 	  sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
 	  text_write_raw(screen, 910, 30, ammo, yellow, 20);
@@ -46,7 +46,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 }
 
 void renderPlayer(Game *game, Player *player){
-	if(player->state != PLAYER_READY) return;
+	if(player->body.status != BODY_ALIVE) return;
 	int a = player->body.angle;
 	SDL_Surface *image;
 	if(a >= 315 || a < 45) image = player->right;
@@ -77,7 +77,7 @@ void renderEnemies(App *app)
   int i = 0;
   for(; i < ENEMY_COUNT; i++)
   {
-    if(app->game.enemies[i].state == ENEMY_LIVE)
+    if(app->game.enemies[i].body.status == BODY_ALIVE)
     {
       Enemy *enemy = &app->game.enemies[i];
       SDL_Surface *image = enemy->image;

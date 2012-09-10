@@ -27,16 +27,9 @@ typedef struct {
 } Menu;
 
 typedef enum {
-  BODY_ALIVE = 0,
-  BODY_IDLE,
-  BODY_DEAD
+  BODY_DEAD = 0,
+  BODY_ALIVE
 } BodyStatus;
-
-typedef enum {
-  PLAYER_IDLE = 0,
-  PLAYER_DEAD,
-  PLAYER_READY,
-} PlayerStatus;
 
 typedef struct {
   int spread;
@@ -48,6 +41,7 @@ typedef struct {
   float damage;
   float range;
   int ammo_total;
+  int score;
 } ItemType;
 
 typedef struct {
@@ -71,18 +65,12 @@ typedef struct {
 } Body;
 
 typedef struct{
-  PlayerStatus state;
   Body body;
   SDL_Surface *left;
   SDL_Surface *right;
   SDL_Surface *up;
   SDL_Surface *down;
 } Player;
-
-typedef enum {
-  ENEMY_LIVE,
-  ENEMY_DEAD,
-} EnemyState;
 
 typedef struct{
   SDL_Surface *image;
@@ -93,7 +81,6 @@ typedef struct{
 typedef struct{
   Body body;
   SDL_Surface *image;
-  EnemyState state;
   int pathfinder;
   int pathfinder_other;
   Body *target;

@@ -23,24 +23,8 @@ void checkGameover(App *app){
   Player *player1 = &app->game.player1;
   Player *player2 = &app->game.player2;
 
-  int numCurrentPlayers = (player1->state != PLAYER_IDLE) + (player2->state != PLAYER_IDLE);
-
-  if(numCurrentPlayers == 0 ){
-	//there is no player
-	return;
-  }
-  int numDeadPlayers = 0;
-  if(player1->body.status == BODY_DEAD){
-	player1->state = PLAYER_DEAD;
-	numDeadPlayers++;
-  }
-  if(player2->body.status == BODY_DEAD){
-	player2->state = PLAYER_DEAD;
-	numDeadPlayers++;
-  }
-
-  if(numCurrentPlayers == numDeadPlayers){
-	app->game.kill_count -= numDeadPlayers;
+  int numCurrentPlayers = (player1->body.status != BODY_DEAD) + (player2->body.status != BODY_DEAD);
+  if(!numCurrentPlayers){
 	app->state = STATE_GAMEOVER;
   }
 }
@@ -55,28 +39,28 @@ void gameInit(App *app){
 	 * Player 1 init settings
 	 * */
 	Body *p1body = &app->game.player1.body;
-	app->game.player1.state = PLAYER_IDLE;
-	p1body->ang_vel = 0.1;
-	p1body->max_vel = 5;
+	app->game.player1.body.status = BODY_DEAD;
+	p1body->ang_vel = 0.04;
+	p1body->max_vel = 4;
 	p1body->angle = 0;
 	p1body->life = 100.0;
 	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
-	p1body->status = BODY_IDLE;
+	p1body->status = BODY_DEAD;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
 	 * Player 2 init settings
 	 * */
 	Body *p2body = &app->game.player2.body;
-	app->game.player2.state = PLAYER_IDLE;
+	app->game.player2.body.status = BODY_DEAD;
 
 	p2body->ang_vel = 0.4;
-	p2body->max_vel = 5;
+	p2body->max_vel = 6;
 	p2body->angle = 1;
 	p2body->life = 100.0;
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
-	p2body->status = BODY_IDLE;
+	p2body->status = BODY_DEAD;
 	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
@@ -86,7 +70,7 @@ void gameInit(App *app){
   int i;
   for(i=0;i < ENEMY_COUNT; i++)
   {
-	app->game.enemies[i].state = ENEMY_DEAD;
+	app->game.enemies[i].body.status = BODY_DEAD;
   }
 
   for(i=0;i<POWERUP_COUNT; i++)
@@ -101,11 +85,11 @@ void resetApp(App *app){
 }
 
 void pauseOrJoinTheGame(App *app, Player *player){
-  if(player->state == PLAYER_READY){
+  if(player->body.status == BODY_ALIVE){
 	app->state = STATE_PAUSED;
 	app->menu.selected = MENU_RESUME;
   } else{
-	player->state = PLAYER_READY;
+	player->body.status = BODY_ALIVE;
 	player->body.status = BODY_ALIVE;
   }
 }
@@ -153,10 +137,10 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 
   switch(*key){
 	case SDLK_1:
-	  player1->state = PLAYER_READY;
+	  player1->body.status = BODY_ALIVE;
 	  break;
 	case SDLK_2:
-	  player2->state = PLAYER_READY;
+	  player2->body.status = BODY_ALIVE;
 	  break;
 	case SDLK_UP:
 	case SDLK_q:
@@ -198,11 +182,11 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		app->state = STATE_PLAYING;
 	  }
 	  if(*key == SDLK_z){
-		player2->state = PLAYER_READY;
+		player2->body.status = BODY_ALIVE;
 		player2->body.status = BODY_ALIVE;
 	  } else {
 		printf("player 1 is ready\n");
-		player1->state = PLAYER_READY;
+		player1->body.status = BODY_ALIVE;
 		player1->body.status = BODY_ALIVE;
 	  }
 	  break;
@@ -293,7 +277,7 @@ void spawnEnemy(App *app)
   int i;
   for(i = 0; i < ENEMY_COUNT; i++)
   {
-	if(game->enemies[i].state == ENEMY_DEAD)
+	if(game->enemies[i].body.status == BODY_DEAD)
 	{
 	  enemy = &game->enemies[i];
 	  break;
@@ -303,7 +287,7 @@ void spawnEnemy(App *app)
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
   {
 	printf("spawn %d\n", i);
-	enemy->state = ENEMY_LIVE;
+	enemy->body.status = BODY_ALIVE;
 	int k = rand() % ENEMY_TYPE_COUNT;
 	enemy->image = game->enemy_class[k].image;
 	Body *enemybody = &enemy->body;
@@ -329,9 +313,11 @@ void loadMap(App *app, int map_index) {
 
 void loadItems(App *app) {
 	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = 1;
+	app->game.itemtype[ITEM_ENEMY_MEDIC].score = 1;
 	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_MEDIC].sound = Mix_LoadWAV("sounds/ouch.wav");
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].damage = 4;
+	app->game.itemtype[ITEM_ENEMY_SOLDIER].score = 5;
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].sound = Mix_LoadWAV("sounds/ouch.wav");
 	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 75;
@@ -357,10 +343,10 @@ void loadItems(App *app) {
 }
 
 void loadEnemies(App *app) {
-  app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie1.png");
+  app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie2.png");
   app->game.enemy_class[ENEMY_MEDIC].type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
   app->game.enemy_class[ENEMY_MEDIC].max_life = 100;
-  app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie2.png");
+  app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie1.png");
   app->game.enemy_class[ENEMY_SOLDIER].type = &app->game.itemtype[ITEM_ENEMY_SOLDIER];
   app->game.enemy_class[ENEMY_SOLDIER].max_life = 500;
 }
@@ -402,10 +388,8 @@ int hit(App *app, Body *source, Body *target){
 
   if(target->life <= 0){
 	if(target->status == BODY_ALIVE){
-	  if(target->status != BODY_DEAD){
-		app->game.kill_count++;
-	  }
-	  target->status = BODY_DEAD;
+		app->game.kill_count += !!target->item.type->score;
+		target->status = BODY_DEAD;
 	}
 	return 1;
   }

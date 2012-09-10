@@ -21,7 +21,7 @@ void movePrepare(App *app)
 	}
 	for(i=0; i < ENEMY_COUNT; i++)
 	{
-		if(app->game.enemies[i].state == ENEMY_LIVE)
+		if(app->game.enemies[i].body.status == BODY_ALIVE)
 		{
 			int x = app->game.enemies[i].body.pos.x/tileSize;
 			int y = app->game.enemies[i].body.pos.y/tileSize;
@@ -144,22 +144,23 @@ void move_enemies(App *app)
   int i;
   for(i=0; i < ENEMY_COUNT; i++)
   {
-    if(app->game.enemies[i].state == ENEMY_LIVE
+    if(app->game.enemies[i].body.status == BODY_ALIVE
 	&& app->game.enemies[i].body.life <= 0) {
-		app->game.enemies[i].state = ENEMY_DEAD;
+		app->game.enemies[i].body.status = BODY_DEAD;
 	}
   }
 
+  int deadline = SDL_GetTicks() + 100;
   for(i=0; i < ENEMY_COUNT; i++)
   {
     int id = app->game.latest_enemy_updated = ( app->game.latest_enemy_updated + 1 ) % ENEMY_COUNT;
     int crazy = id*2;
-    if(app->game.enemies[id].state == ENEMY_LIVE)
+    if(app->game.enemies[id].body.status == BODY_ALIVE)
     {
         Body *enemy_body = &app->game.enemies[id].body;
 
 		if(app->game.player1.body.status == BODY_ALIVE &&
-			app->game.player1.state == PLAYER_READY)
+			app->game.player1.body.status == BODY_ALIVE)
 			pathStatus[crazy] = FindPath(crazy,
 				enemy_body->pos.x,
 				enemy_body->pos.y,
@@ -167,7 +168,7 @@ void move_enemies(App *app)
 				app->game.player1.body.pos.y);
 
 		if(app->game.player2.body.status == BODY_ALIVE &&
-			app->game.player2.state == PLAYER_READY)
+			app->game.player2.body.status == BODY_ALIVE)
 			pathStatus[crazy+1] = FindPath(crazy+1,
 				enemy_body->pos.x,
 				enemy_body->pos.y,
@@ -177,7 +178,7 @@ void move_enemies(App *app)
 
         if(
 		(app->game.player2.body.status != BODY_ALIVE ||
-			app->game.player2.state != PLAYER_READY) ||
+			app->game.player2.body.status != BODY_ALIVE) ||
 			pathLength[crazy] < pathLength[crazy+1]){
           app->game.enemies[id].pathfinder = crazy;
           app->game.enemies[id].pathfinder_other = crazy+1;
@@ -187,12 +188,27 @@ void move_enemies(App *app)
           app->game.enemies[id].pathfinder_other = crazy;
           app->game.enemies[id].target = &app->game.player2.body;
         }
+
+
+		{
+			extern int* pathBank [numberPeople+1];
+			int k;
+			int j = app->game.enemies[id].pathfinder;
+			printf("%d (%d)", j, pathLength[j]);
+			for(k=0; k<pathLength[j]; k+=2) {
+				printf("%d,%d; ", pathBank[j][k], pathBank[j][k+1]);
+			}
+			printf("\n");
+		}
+
+		if(SDL_GetTicks() > deadline)
+			break;
     }
   }
 
   for(i = 0; i < ENEMY_COUNT; i++)
   {
-    if(app->game.enemies[i].state == ENEMY_LIVE)
+    if(app->game.enemies[i].body.status == BODY_ALIVE)
     {
         Body *enemy_body = &app->game.enemies[i].body;
 		int crazy = app->game.enemies[i].pathfinder;
@@ -202,7 +218,7 @@ void move_enemies(App *app)
           int dx = xPath[crazy] - enemy_body->pos.x;
           int dy = yPath[crazy] - enemy_body->pos.y;
           float angle = ATAN2(dx,dy);
-          body_move(&app->game, enemy_body, angle, rand()/(float)RAND_MAX);
+          body_move(&app->game, enemy_body, angle, .25+.75*rand()/(float)RAND_MAX);
 
 		  if(reach){
 				printf("reach %d %d %d\n", i, dx, dy);
