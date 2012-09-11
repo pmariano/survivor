@@ -34,7 +34,6 @@ void gameInit(App *app){
 	app->game.spawnTime = app->game.start;
 	app->game.kill_count= 0;
 
-
 	/**
 	 * Player 1 init settings
 	 * */
@@ -45,6 +44,7 @@ void gameInit(App *app){
 	p1body->angle = 0;
 	p1body->life = 100.0;
 	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
+	p1body->item.ammo_used = 0 ;
 	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
 	p1body->status = BODY_DEAD;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
@@ -60,6 +60,7 @@ void gameInit(App *app){
 	p2body->angle = 1;
 	p2body->life = 100.0;
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
+	p2body->item.ammo_used = 0 ;
 	p2body->status = BODY_DEAD;
 	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
