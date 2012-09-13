@@ -7,7 +7,7 @@ It was implemented using C as main language and [SDL](http://www.libsdl.org/) as
 
 #Current status
 
-The game is full playable but it's in alpha version, check the TODO list for features under development.
+The game is full playable but it's in alpha version, check the [TODO](https://github.com/pmariano/survivor/blob/master/TODO.txt) list for features under development.
 
 ## Collaborators
 
