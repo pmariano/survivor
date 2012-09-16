@@ -269,8 +269,8 @@ use Algorithm::Evolutionary qw( Individual::BitString
 				Op::Crossover Fitness::Royal_Road);
 use Algorithm::Evolutionary::Utils qw(entropy consensus);
 
-my $pop_size = shift || 256; #Population size
-my $selection_rate = shift || 0.2;
+my $pop_size = shift || 100;
+my $selection_rate = shift || 0.25;
 
 my $w = 10;
 my $h = 7;
@@ -296,11 +296,12 @@ for (1..$pop_size) {
 }
 # use Data::Dumper; print Dumper \@pop;
 
-my $m = Algorithm::Evolutionary::Op::Bitflip->new( int($bit_count*.03) );
-my $c = Algorithm::Evolutionary::Op::Crossover->new(2);
+my $m = Algorithm::Evolutionary::Op::Bitflip->new(1);
+my $c = Algorithm::Evolutionary::Op::Crossover->new(2,4);
 
 my $fitness = sub {
 	my $indi = shift;
+	my $print = shift;
 
 	my @door = map {$indi->Atom($_)} 0..$indi->size()-1;
 
@@ -338,10 +339,15 @@ my $fitness = sub {
 		}
 	}
 
+	my $score = 10 + $coverage ** 3 * $sum ** 2 / $dissonance / $overload ;
 
-	my $score = $coverage ** 3 * $sum ** 2 / $dissonance / $overload ;
+	if($print) {
+		print $indi->asString()," $score \n";
+		print "path lengths @path\n";
+		$map->toText();
+	}
 
-	return 10+$score;
+	return $score;
 };
 
 map( $_->evaluate( $fitness ), @pop ); 
@@ -350,27 +356,12 @@ my $generation = Algorithm::Evolutionary::Op::CanonicalGA->new( $fitness , $sele
 
 my $genCount=0;
 while(1) {
-  $generation->apply( \@pop );
-  print "$genCount : ", $pop[0]->asString(), "\n" ;
+	$generation->apply( \@pop );
+	print "$genCount\n";
 
-  {
-	  my $map = Maze->new($w,$h);
-	  my @door = map {$pop[0]->Atom($_)} 0..$pop[0]->size()-1;
-	  $map->{door} = \@door;
-	  my $id = 0;
-	  my @path = map {
-		  my ($start, $end) = @$_;
-		  $map->teseo(
-				  $start->[0], $start->[1],
-				  $end->[0], $end->[1],
-				  $id++,
-				  );
-	  } @task;
-	  print "path lengths @path\n";
-	  $map->toText();
-  }
+	&$fitness($pop[0], 1);
+	&$fitness($pop[0], 1);
 
-
-  $genCount++;
+	$genCount++;
 }
 
