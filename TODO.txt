@@ -16,15 +16,18 @@
 . p2 can barricade doors
 . drop close to p1 make him pick instantly
 
-* tutorial
-- make ammo count bold red blinking when low
-- animate a pickup sign over first items
-- inform engeneer that he can give items to soldier
+* tutorial/guide/help
 - inform that start1 adds a soldier and 2 an engineer
+- inform engeneer that he can give items to soldier
+- animate a pickup sign over first items
+- make ammo count bold/red/blinking when low
 - put a clear sign of wave start
 . make clear the stop condition by simple signs
 . time: number over clock
 . kills: number over killed zombies
-. display enemy types of wave?
+. display enemy types comming on next wave?
 - put a clear countdown/progress to wave end
+- explode enemies around the player respawn area
+  do not count enemies as dead (neither for scores
+  or for wave progress)
 
