@@ -270,7 +270,6 @@ use Algorithm::Evolutionary qw( Individual::BitString
 use Algorithm::Evolutionary::Utils qw(entropy consensus);
 
 my $pop_size = shift || 256; #Population size
-my $numGens = shift || 200; #Max number of generations
 my $selection_rate = shift || 0.2;
 
 my $w = 10;
@@ -318,14 +317,14 @@ my $fitness = sub {
 				);
 	} @task;
 
-	return 0 if @path != @task || grep {!$_} @path;
+	return 1 if @path != @task || grep {!$_} @path;
 
 	my $n = @path;
 	my $sum = sum(@path);
 	my $average = $sum/$n;
-	my $pow = 2;
-	my @dissonance = map { abs($_ - $average) ** $pow } @path;
-	my $pow_sum = sum(map { $_ ** $pow } @path);
+	my $dissonance_pow = 2;
+	my @dissonance = map { abs($_ - $average) ** $dissonance_pow } @path;
+	my $pow_sum = sum(map { $_ ** $dissonance_pow } @path);
 	my $dissonance = sum(@dissonance) / $pow_sum ;
 
 	my $overload = 1;
@@ -334,25 +333,25 @@ my $fitness = sub {
 		for (my $x = 0; $x < $w; $x++){
 			my $sol = $map->isSolution($x, $y) || 0;
 			my $over = unpack '%b*', pack 'I', $sol;
-			$overload += $over ** 21;
+			$overload += $over ** 2;
 			$coverage ++ if $over;
 		}
 	}
 
 
-	my $score = $coverage ** 22 * $sum ** 10 / $dissonance ** 8 / $overload ** 4;
+	my $score = $coverage ** 3 * $sum ** 2 / $dissonance / $overload ;
 
-	return $score;
+	return 10+$score;
 };
 
 map( $_->evaluate( $fitness ), @pop ); 
 
 my $generation = Algorithm::Evolutionary::Op::CanonicalGA->new( $fitness , $selection_rate , [$m, $c] ) ;
 
-my $contador=0;
-do {
+my $genCount=0;
+while(1) {
   $generation->apply( \@pop );
-  print "$contador : ", $pop[0]->asString(), "\n" ;
+  print "$genCount : ", $pop[0]->asString(), "\n" ;
 
   {
 	  my $map = Maze->new($w,$h);
@@ -367,10 +366,11 @@ do {
 				  $id++,
 				  );
 	  } @task;
+	  print "path lengths @path\n";
 	  $map->toText();
   }
 
 
-  $contador++;
-} while( ($contador < $numGens) );
+  $genCount++;
+}
 
