@@ -262,7 +262,7 @@ package main;
 
 use Algorithm::Combinatorics qw(combinations);
 use Storable qw(dclone);
-use List::Util qw(reduce);
+use List::Util qw(sum);
 
 my $w = 10;
 my $h = 7;
@@ -296,7 +296,16 @@ while(1)
 		);
 	} @task;
 
-	my $score = reduce { our $a + our $b ** 2 } 0,@path; 
+	my $overload = 0;
+    for (my $y = 0; $y < $h; $y++){
+        for (my $x = 0; $x < $w; $x++){
+            my $sol = $map->isSolution($x, $y) || 0;
+			my $over = unpack '%b*', pack 'I', $sol;
+			$overload += $over ** 3;
+		}
+	}
+
+	my $score = 1-sum(map { (1/($_+1))**9 } @path) / @path * $overload; 
 
 	if($score > $max_score) {
 		$max_score = $score;
