@@ -5,11 +5,12 @@ use Term::ANSIColor;
 use Graph::Undirected;
 # use Graph::Writer::Dot;
 use Algorithm::Combinatorics qw(combinations);
-use List::Util qw(sum);
+use List::Util qw(sum min max);
+use POSIX;
 
 use Algorithm::Evolutionary qw(
 	Individual::BitString
-	Op::Breeder_Diverser
+	Op::Breeder
 	Op::Mutation
 	Op::Crossover
 	Op::RouletteWheel
@@ -18,6 +19,17 @@ use Algorithm::Evolutionary::Utils qw(
 	average
 	decode_string
 );
+
+my $w = shift || 22-2;
+my $h = shift || 16-2;
+my $space_bits = $w*$h;
+my @entry = (
+	[$w/2,0],
+	[0,$h-1],
+	[$w/2,$h-1],
+	[$w-1,$h-1],
+);
+my @task = combinations([@entry],2);
 
 my $min_pop_size = shift || 50;
 my $max_pop_size = shift || 400;
@@ -31,27 +43,17 @@ my $cross_bits = 4;
 my $pop_bits = 8;
 my $ga_bits = $mut_bits + $cross_bits + $pop_bits;
 
-my $w = 22-2;
-my $h = 16-2;
-my $space_bits = $w*$h;
-my $bit_count = $space_bits+$ga_bits;
-
 my $length_pow = 2;
 my $coverage_pow = 1;
 my $openness_pow = 3;
 my $dissonance_pow = 1;
 my $overload_pow = 1;
 
+my $fit_p_max = shift || 8;
+my $fit_p_bits = 8;
+my $fit_bits = 5*$fit_p_bits;
 
-my @entry = (
-	[$w/2,0],
-	[0,$h-1],
-	[$w/2,$h-1],
-	[$w-1,$h-1],
-);
-
-my @task = combinations([@entry],2);
-# print join ';', map {join ',', map { "@$_"}  @$_} combinations([@entry],2);
+my $bit_count = $space_bits+$ga_bits+$fit_bits;
 
 # my $writer = Graph::Writer::Dot->new();
 
@@ -80,7 +82,7 @@ my $mutator =  Algorithm::Evolutionary::Op::Mutation->new($min_mut_rate);
 my $crossover = Algorithm::Evolutionary::Op::Crossover->new($min_cross_section);
 my $selector = Algorithm::Evolutionary::Op::RouletteWheel::Fix->new($min_pop_size);
 
-my $generation = Algorithm::Evolutionary::Op::Breeder_Diverser->new( [$mutator, $crossover], $selector );
+my $generation = Algorithm::Evolutionary::Op::Breeder->new( [$mutator, $crossover], $selector );
 
 
 sub idx {
@@ -170,7 +172,10 @@ my $fitness = sub {
 	# return 1 if @path != @task || grep {!$_} @path;
 	my $should = @task;
 	my $did = grep {$_} @path;
-	return 1+$openness/$space_bits+10*$did/$should if $should != $did;
+	return 1+
+			$openness/$space_bits+
+			10*$did/$should 
+				if $should != $did;
 
 	my $n = @path;
 	my $length = sum(@path);
@@ -195,7 +200,8 @@ my $fitness = sub {
 		* $length ** $length_pow 
 		/ $dissonance 
 		/ $overload 
-		/ $openness ** $openness_pow;
+		/ $openness ** $openness_pow
+	;
 
 	# print "score $score\n" if $print;
 
@@ -204,6 +210,7 @@ my $fitness = sub {
 
 my $genCount=0;
 while(1) {
+	print '-' x 60, "\n";
 	
 	@pop = 
 		sort { $b->Fitness() <=> $a->Fitness() }
@@ -211,25 +218,51 @@ while(1) {
 		@pop;
 
 	my ($mut, $cross, $sel) = (0,0,0);
+	my ($plen, $pcov, $popen, $pdis, $pover) = (0,0,0,0,0);
 	for(@pop) {
 		$mut   += (decode_string(substr($_->as_string(),$space_bits,                       $mut_bits),   $mut_bits,   $min_mut_rate,      $max_mut_rate      ))[0];
 		$cross += (decode_string(substr($_->as_string(),$space_bits+$mut_bits,             $cross_bits), $cross_bits, $min_cross_section, $max_cross_section ))[0];
 		$sel   += (decode_string(substr($_->as_string(),$space_bits+$mut_bits+$cross_bits, $pop_bits),   $pop_bits,   $min_pop_size,      $max_pop_size      ))[0];
+
+		$plen  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*0, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+		$pcov  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*1, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+		$popen += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*2, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+		$pdis  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*3, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+		$pover += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*4, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
 	}
-	$mut /= @pop;
-	$cross /= @pop;
-	$sel /= @pop;
+	$length_pow     = $plen  / @pop;
+	$coverage_pow   = $pcov  / @pop;
+	$openness_pow   = $popen / @pop;
+	$dissonance_pow = $pdis  / @pop;
+	$overload_pow   = $pover / @pop;
 
-	$mutator->{mutRate} = $mut;
-	$crossover->{numPoints} = int $cross;
-	$selector->{_outputSize} = int $sel;
+	$mutator->{mutRate} = $mut / @pop;
+	$crossover->{numPoints} = int $cross / @pop;
+	my $total_pop = $selector->{_outputSize} = int $sel / @pop;
 
-	print "$genCount: ",average( \@pop ),"\n";
+	print "gen $genCount\n";
 	print "mut $mutator->{mutRate}; cross $crossover->{numPoints}; pop $selector->{_outputSize}\n";
-	&$fitness($pop[0], 1);
+	print "len $length_pow; cov $coverage_pow; open $openness_pow; dis $dissonance_pow; over $overload_pow\n";
+	print "average fitness: ",average( \@pop ),"\n";
+	
 
 	my $new_pop = $generation->apply( \@pop );
-	@pop = (@pop[0..$min_pop_size/2], @$new_pop); # elitism
+	@$new_pop = 
+		sort { $b->Fitness() <=> $a->Fitness() }
+		map { $_->Fitness() || $_->evaluate( $fitness ); $_ }
+		@$new_pop;
+
+	my $elite = min(int($min_pop_size/4), scalar(@pop));
+	my $commoner = min($total_pop - $elite, scalar(@$new_pop));
+
+	&$fitness($pop[0], 1); # top prev gen elite
+	&$fitness($new_pop->[0], 1); # top commoner
+
+	@pop = (@pop[0..$elite-1], @$new_pop[0..$commoner-1]); # elitism
+
+	my $actual_pop_size = scalar @pop;
+
+	print "$actual_pop_size <= $total_pop = $elite + $commoner\n";
 
 	$genCount++;
 }
