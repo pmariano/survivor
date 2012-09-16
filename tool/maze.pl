@@ -111,16 +111,16 @@ sub isSolution($$$){
 # generate maze
 sub asterione($$$;$){
     no warnings 'recursion';
-    my ($self, $x, $y, $visited) = @_;
+    my ($self, $x, $y, $x1, $y1, $visited) = @_;
     $visited->[$x][$y] = 1;
-    return if $self->isCellExit($x,$y);
+    return if $x == $x1 && $y == $y1;
     my @neighbors = $self->getCellNeighbors($x, $y);
     while (scalar @neighbors){
         my ($tox, $toy, $dir) = 
             @{ splice(@neighbors, rand(@neighbors), 1) };
         next if $visited->[$tox][$toy];
         $self->openWall($x, $y, $dir);
-        $self->asterione($tox, $toy, $visited);
+        $self->asterione($tox, $toy, $x1, $y1, $visited);
     }
 }
 
@@ -284,7 +284,10 @@ my $winner = {};
 while(1)
 {
 	my $map = Maze->new($w,$h);
-	$map->asterione(0,0);
+	$map->asterione(
+		int(rand($w-1)),int(rand($h-1)),
+		int(rand($w-1)),int(rand($h-1)),
+	);
 
 	my $id = 0;
 	my @path = map {
@@ -296,21 +299,36 @@ while(1)
 		);
 	} @task;
 
-	my $overload = 0;
+	next if @path != @task || grep {!$_} @path;
+
+	my $n = @path;
+	my $sum = sum(@path);
+	my $average = $sum/$n;
+	my $pow = 2;
+	my @dissonance = map { abs($_ - $average) ** $pow } @path;
+	my $pow_sum = sum(map { $_ ** $pow } @path);
+	my $dissonance = sum(@dissonance) / $pow_sum ;
+
+	my $overload = 1;
+	my $coverage = 0;
     for (my $y = 0; $y < $h; $y++){
         for (my $x = 0; $x < $w; $x++){
             my $sol = $map->isSolution($x, $y) || 0;
 			my $over = unpack '%b*', pack 'I', $sol;
-			$overload += $over ** 3;
+			$overload += $over ** 21;
+			$coverage ++ if $over;
 		}
 	}
 
-	my $score = 1-sum(map { (1/($_+1))**9 } @path) / @path * $overload; 
+
+	my $score = $coverage ** 22 * $sum ** 10 / $dissonance ** 8 / $overload ** 4;
+	# print "$score >> $sum / $dissonance / $overload : $average >> ", join(",",@path), "\n";
 
 	if($score > $max_score) {
 		$max_score = $score;
 		$winner = {path => \@path, map => dclone($map)};
 		print "#" x 40, "\n$score >> ", join(",",@path), "\n";
+		print "cover $coverage :: over $overload :: sum $sum :: avg $average :: dis $dissonance\n@dissonance\n";
 
 		$map->toText();
 	}
