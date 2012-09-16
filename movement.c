@@ -237,13 +237,15 @@ void move_enemies(App *app)
 
 
 
-void player_move(Game *game, Body *body, int up, int right, int down, int left, int halt)
+void player_move(App *app, Body *body, int up, int right, int down, int left, int halt)
 {
+    Game game = app->game; 
+    aim(app, body);
     int dx=right-left;
     int dy=down-up;
     if(dx||dy) {
         float angle = ATAN2(dx,dy);
-        body_move(game, body, angle, !halt);
+        body_move(&game, body, angle, !halt);
     }
 }
 

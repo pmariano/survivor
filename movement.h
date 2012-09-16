@@ -1,7 +1,7 @@
 #include <math.h>
 #include "app.h"
 
-void player_move(Game *game, Body *body, int up, int right, int down, int left, int halt);
+void player_move(App *app, Body *body, int up, int right, int down, int left, int halt);
 void moveInit(App *app);
 void movePrepare(App *app);
 void move_enemies(App *app);

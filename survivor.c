@@ -214,7 +214,7 @@ void bindGameplayKeystate(App *app){
    * S = SECONDARY ATTACK
    * */
 
-  player_move(&app->game, &player1->body,
+  player_move(app, &player1->body,
 	  keystate[SDLK_UP] || keystate[SDLK_q],
 	  keystate[SDLK_RIGHT] || keystate[SDLK_r],
 	  keystate[SDLK_DOWN] || keystate[SDLK_w],
@@ -430,6 +430,97 @@ int draw(App *app, Body *body, int x, int y)
   return target;
 }
 
+int aimer(App *app, Body *body, int x, int y)
+{
+	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
+#if 0
+		Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
+		p[0] = 0xff;
+		p[1] = 0xff;
+#else
+    SDL_Rect rect = {
+      x - app->game.itemtype[ITEM_PLAYER_BULLET].shot_image->w/2,
+      y - app->game.itemtype[ITEM_PLAYER_BULLET].shot_image->h/2,
+      app->game.itemtype[ITEM_PLAYER_BULLET].shot_image->w,
+      app->game.itemtype[ITEM_PLAYER_BULLET].shot_image->h
+    };
+    SDL_BlitSurface(app->game.itemtype[ITEM_PLAYER_BULLET].shot_image, NULL, app->screen, &rect);
+#endif
+	}
+  return 0;
+}
+
+int aim(App *app, Body *body)
+{
+  Uint8 *keystate;
+  keystate = SDL_GetKeyState(NULL);
+  if(keystate[SDLK_a] || keystate[SDLK_z] ) return;
+	int x1, y1, x2, y2;
+	int dx, dy, i, e;
+	int incx, incy, inc1, inc2;
+	int x,y;
+	int range;
+	if(body->status != BODY_ALIVE)
+		return;
+
+	range = 150;
+
+	x1 = body->pos.x;
+	y1 = body->pos.y;
+
+	float a = (int)(body->angle + ((rand() % (body->item.type->spread+1)) - body->item.type->spread/2))%360;
+	x2 = x1 + cos(a * M_PI / 180.) * range;
+	y2 = y1 - sin(a * M_PI / 180.) * range;
+
+	dx = x2 - x1;
+	dy = y2 - y1;
+
+	if(dx < 0) dx = -dx;
+	if(dy < 0) dy = -dy;
+	incx = 1;
+	if(x2 < x1) incx = -1;
+	incy = 1;
+	if(y2 < y1) incy = -1;
+	x=x1;
+	y=y1;
+
+	if(dx > dy)
+	{
+	  if(aimer(app,body,x,y)) return 1;
+      e = 2*dy - dx;
+      inc1 = 2*( dy -dx);
+      inc2 = 2*dy;
+      for(i = 0; i < dx; i++)
+      {
+        if(e >= 0)
+        {
+          y += incy;
+          e += inc1;
+        } else e += inc2;
+        x += incx;
+        if(aimer(app,body,x,y)) return 1;
+      }
+  }
+  else
+  {
+    if(aimer(app,body,x,y)) return 1;
+      e = 2*dx - dy;
+      inc1 = 2*( dx - dy);
+      inc2 = 2*dx;
+      for(i = 0; i < dy; i++)
+      {
+        if(e >= 0)
+        {
+          x += incx;
+          e += inc1;
+        }
+        else e += inc2;
+        y += incy;
+        if(aimer(app,body,x,y)) return 1;
+      }
+  }
+  return 0;
+}
 
 int shoot(App *app, Body *body)
 {
@@ -473,33 +564,32 @@ int shoot(App *app, Body *body)
       inc2 = 2*dy;
       for(i = 0; i < dx; i++)
       {
-	  if(e >= 0)
-	  {
-		y += incy;
-		e += inc1;
-	  }
-	  else e += inc2;
-	  x += incx;
-	  if(draw(app,body,x,y)) return 1;
-	}
+        if(e >= 0)
+        {
+          y += incy;
+          e += inc1;
+        } else e += inc2;
+        x += incx;
+        if(draw(app,body,x,y)) return 1;
+      }
   }
   else
   {
-	if(draw(app,body,x,y)) return 1;
-	e = 2*dx - dy;
-	inc1 = 2*( dx - dy);
-	inc2 = 2*dx;
-	for(i = 0; i < dy; i++)
-	{
-	  if(e >= 0)
-	  {
-		x += incx;
-		e += inc1;
-	  }
-	  else e += inc2;
-	  y += incy;
-	  if(draw(app,body,x,y)) return 1;
-	}
+    if(draw(app,body,x,y)) return 1;
+      e = 2*dx - dy;
+      inc1 = 2*( dx - dy);
+      inc2 = 2*dx;
+      for(i = 0; i < dy; i++)
+      {
+        if(e >= 0)
+        {
+          x += incx;
+          e += inc1;
+        }
+        else e += inc2;
+        y += incy;
+        if(draw(app,body,x,y)) return 1;
+      }
   }
 
   return 0;
