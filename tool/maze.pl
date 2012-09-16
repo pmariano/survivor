@@ -31,7 +31,7 @@ sub new {
     my $self = { 
         x => $x, 
         y => $y,
-        doors => [], 
+        door => [], 
         solution => [],
     };
 
@@ -45,30 +45,30 @@ sub new {
 sub _getWallIndex($$$){
     my ($self, $x, $y, $dir) = @_;
 
-    my @idx =
-        $dir eq 'N' ? ($x,      $y,     'N') :
-        $dir eq 'S' ? ($x,      $y + 1, 'N') :
-        $dir eq 'W' ? ($x,      $y,     'E') :
-        $dir eq 'E' ? ($x + 1,  $y,     'E') :
+    my ($wx, $wy, $wdir) = 
+        $dir eq 'N' ? ($x,      $y,     0) :
+        $dir eq 'S' ? ($x,      $y + 1, 0) :
+        $dir eq 'W' ? ($x,      $y,     1) :
+        $dir eq 'E' ? ($x + 1,  $y,     1) :
             croak "wrong direction";
 
-    return @idx;
+    return ($wy*$self->{x}+$wx)*2+$wdir;
 }
 
 sub isWallOpen($$$){
     my ($self, $x, $y, $dir) = @_;
 
-    my ($wx, $wy, $wdir) = $self->_getWallIndex($x, $y, $dir);    
+    my $idx = $self->_getWallIndex($x, $y, $dir);    
 
-    return $self->{door}[$wx][$wy]{$wdir} || 0;
+    return $self->{door}[$idx] || 0;
 }
 
 sub openWall($$$) {
     my ($self, $x, $y, $dir) = @_;
 
-    my ($wx, $wy, $wdir) = $self->_getWallIndex($x, $y, $dir);    
+    my $idx = $self->_getWallIndex($x, $y, $dir);    
 
-    $self->{door}[$wx][$wy]{$wdir} = 1;
+    $self->{door}[$idx] = 1;
 }
 
 sub getCellNeighbors($$$){
@@ -264,6 +264,15 @@ use Algorithm::Combinatorics qw(combinations);
 use Storable qw(dclone);
 use List::Util qw(sum);
 
+use Algorithm::Evolutionary qw( Individual::BitString
+				Op::CanonicalGA Op::Bitflip 
+				Op::Crossover Fitness::Royal_Road);
+use Algorithm::Evolutionary::Utils qw(entropy consensus);
+
+my $pop_size = shift || 256; #Population size
+my $numGens = shift || 200; #Max number of generations
+my $selection_rate = shift || 0.2;
+
 my $w = 10;
 my $h = 7;
 
@@ -280,26 +289,36 @@ my @task = combinations([@entry],2);
 my $max_score = -1;
 my $winner = {};
 
+my $bit_count = $w*$h*2;
+my @pop;
+for (1..$pop_size) {
+	push @pop, Algorithm::Evolutionary::Individual::BitString->new($bit_count);
 
-while(1)
-{
+}
+# use Data::Dumper; print Dumper \@pop;
+
+my $m = Algorithm::Evolutionary::Op::Bitflip->new( int($bit_count*.03) );
+my $c = Algorithm::Evolutionary::Op::Crossover->new(2);
+
+my $fitness = sub {
+	my $indi = shift;
+
+	my @door = map {$indi->Atom($_)} 0..$indi->size()-1;
+
 	my $map = Maze->new($w,$h);
-	$map->asterione(
-		int(rand($w-1)),int(rand($h-1)),
-		int(rand($w-1)),int(rand($h-1)),
-	);
+	$map->{door} = \@door;
 
 	my $id = 0;
 	my @path = map {
 		my ($start, $end) = @$_;
 		$map->teseo(
-			$start->[0], $start->[1],
-			$end->[0], $end->[1],
-			$id++,
-		);
+				$start->[0], $start->[1],
+				$end->[0], $end->[1],
+				$id++,
+				);
 	} @task;
 
-	next if @path != @task || grep {!$_} @path;
+	return 0 if @path != @task || grep {!$_} @path;
 
 	my $n = @path;
 	my $sum = sum(@path);
@@ -311,9 +330,9 @@ while(1)
 
 	my $overload = 1;
 	my $coverage = 0;
-    for (my $y = 0; $y < $h; $y++){
-        for (my $x = 0; $x < $w; $x++){
-            my $sol = $map->isSolution($x, $y) || 0;
+	for (my $y = 0; $y < $h; $y++){
+		for (my $x = 0; $x < $w; $x++){
+			my $sol = $map->isSolution($x, $y) || 0;
 			my $over = unpack '%b*', pack 'I', $sol;
 			$overload += $over ** 21;
 			$coverage ++ if $over;
@@ -322,15 +341,36 @@ while(1)
 
 
 	my $score = $coverage ** 22 * $sum ** 10 / $dissonance ** 8 / $overload ** 4;
-	# print "$score >> $sum / $dissonance / $overload : $average >> ", join(",",@path), "\n";
 
-	if($score > $max_score) {
-		$max_score = $score;
-		$winner = {path => \@path, map => dclone($map)};
-		print "#" x 40, "\n$score >> ", join(",",@path), "\n";
-		print "cover $coverage :: over $overload :: sum $sum :: avg $average :: dis $dissonance\n@dissonance\n";
+	return $score;
+};
 
-		$map->toText();
-	}
-}
+map( $_->evaluate( $fitness ), @pop ); 
+
+my $generation = Algorithm::Evolutionary::Op::CanonicalGA->new( $fitness , $selection_rate , [$m, $c] ) ;
+
+my $contador=0;
+do {
+  $generation->apply( \@pop );
+  print "$contador : ", $pop[0]->asString(), "\n" ;
+
+  {
+	  my $map = Maze->new($w,$h);
+	  my @door = map {$pop[0]->Atom($_)} 0..$pop[0]->size()-1;
+	  $map->{door} = \@door;
+	  my $id = 0;
+	  my @path = map {
+		  my ($start, $end) = @$_;
+		  $map->teseo(
+				  $start->[0], $start->[1],
+				  $end->[0], $end->[1],
+				  $id++,
+				  );
+	  } @task;
+	  $map->toText();
+  }
+
+
+  $contador++;
+} while( ($contador < $numGens) );
 
