@@ -7,6 +7,7 @@ use Graph::Undirected;
 use Algorithm::Combinatorics qw(combinations);
 use List::Util qw(sum min max);
 use POSIX;
+use List::Uniq ':all';
 
 use Algorithm::Evolutionary qw(
 	Individual::BitString
@@ -33,8 +34,8 @@ my @task = combinations([@entry],2);
 
 my $min_pop_size = shift || 50;
 my $max_pop_size = shift || 400;
-my $min_mut_rate = shift || .05;
-my $max_mut_rate = shift || .75;
+my $min_mut_rate = shift || .2;
+my $max_mut_rate = shift || .8;
 my $min_cross_section = shift || 2;
 my $max_cross_section = shift || 16;
 
@@ -43,17 +44,21 @@ my $cross_bits = 4;
 my $pop_bits = 8;
 my $ga_bits = $mut_bits + $cross_bits + $pop_bits;
 
-my $length_pow = 2;
-my $coverage_pow = 1;
-my $openness_pow = 3;
+my $length_pow = 3;
+my $coverage_pow = 6;
+my $openness_pow = 1;
+my $overload_item_pow = 2;
+my $overload_pow = 2;
+my $dissonance_item_pow = 2;
 my $dissonance_pow = 1;
-my $overload_pow = 1;
 
 my $fit_p_max = shift || 8;
 my $fit_p_bits = 8;
 my $fit_bits = 5*$fit_p_bits;
 
-my $bit_count = $space_bits+$ga_bits+$fit_bits;
+my $bit_count = $space_bits+$ga_bits; # +$fit_bits;
+
+my $elitism = 0;
 
 # my $writer = Graph::Writer::Dot->new();
 
@@ -169,37 +174,49 @@ my $fitness = sub {
 		}
 	}
 
+	$openness /= $space_bits;
+
 	# return 1 if @path != @task || grep {!$_} @path;
 	my $should = @task;
 	my $did = grep {$_} @path;
 	return 1+
-			$openness/$space_bits+
+			5*$openness+
 			10*$did/$should 
 				if $should != $did;
 
 	my $n = @path;
 	my $length = sum(@path);
 	my $average = $length/$n;
-	my @dissonance = map { abs($_ - $average) ** $dissonance_pow } @path;
-	my $pow_sum = sum(map { $_ ** $dissonance_pow } @path);
+	$length /= $space_bits;
+
+	my @dissonance = map { abs($_ - $average) ** $dissonance_item_pow } @path;
+	my $pow_sum = sum(map { $_ ** $dissonance_item_pow } @path);
 	my $dissonance = sum(@dissonance) / $pow_sum ;
 
+	my $overload_max = 0;
+	my $coverage_max = 0;
 	my $overload = 1;
 	my $coverage = 0;
 	for (my $y = 0; $y < $h; $y++){
 		for (my $x = 0; $x < $w; $x++){
 			my $visit = exists $visited[$x][$y] ? $visited[$x][$y] : 0;
 			my $over = unpack '%b*', pack 'I', $visit;
-			$overload += $over ** $overload_pow;
+			
+			$overload += $over ** $overload_item_pow;
+			$overload_max += scalar(@task) ** $overload_item_pow;
+
 			$coverage ++ if $over;
+			$coverage_max ++;
 		}
 	}
+	$overload /= $overload_max;
+	$coverage /= $coverage_max;
 
 	my $score = 100 + 
 		$coverage ** $coverage_pow 
 		* $length ** $length_pow 
-		/ $dissonance 
-		/ $overload 
+		/ $dissonance  ** $dissonance_pow
+		/ $overload  ** $overload_pow
 		/ $openness ** $openness_pow
 	;
 
@@ -208,6 +225,7 @@ my $fitness = sub {
 	return $score;
 };
 
+my @elite = ();
 my $genCount=0;
 while(1) {
 	print '-' x 60, "\n";
@@ -217,6 +235,12 @@ while(1) {
 		map { $_->Fitness() || $_->evaluate( $fitness ); $_ }
 		@pop;
 
+	my $elite = min(int($min_pop_size/4), scalar(@pop));
+	my @hist = (@elite, @pop);
+	@hist = @{uniq({sort=>1, compare => sub { $_[1]->Fitness() <=> $_[0]->Fitness() }}, \@hist )};
+	@elite = @hist[0..min($elite,scalar(@hist))-1];
+	$elite = scalar(@elite);
+
 	my ($mut, $cross, $sel) = (0,0,0);
 	my ($plen, $pcov, $popen, $pdis, $pover) = (0,0,0,0,0);
 	for(@pop) {
@@ -224,17 +248,17 @@ while(1) {
 		$cross += (decode_string(substr($_->as_string(),$space_bits+$mut_bits,             $cross_bits), $cross_bits, $min_cross_section, $max_cross_section ))[0];
 		$sel   += (decode_string(substr($_->as_string(),$space_bits+$mut_bits+$cross_bits, $pop_bits),   $pop_bits,   $min_pop_size,      $max_pop_size      ))[0];
 
-		$plen  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*0, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
-		$pcov  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*1, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
-		$popen += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*2, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
-		$pdis  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*3, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
-		$pover += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*4, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+#		$plen  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*0, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+#		$pcov  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*1, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+#		$popen += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*2, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+#		$pdis  += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*3, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
+#		$pover += (decode_string(substr($_->as_string(),$space_bits+$ga_bits+$fit_p_bits*4, $fit_p_bits), $fit_p_bits, 0, $fit_p_max ))[0];
 	}
-	$length_pow     = $plen  / @pop;
-	$coverage_pow   = $pcov  / @pop;
-	$openness_pow   = $popen / @pop;
-	$dissonance_pow = $pdis  / @pop;
-	$overload_pow   = $pover / @pop;
+#	$length_pow     = $plen  / @pop;
+#	$coverage_pow   = $pcov  / @pop;
+#	$openness_pow   = $popen / @pop;
+#	$dissonance_pow = $pdis  / @pop;
+#	$overload_pow   = $pover / @pop;
 
 	$mutator->{mutRate} = $mut / @pop;
 	$crossover->{numPoints} = int $cross / @pop;
@@ -245,23 +269,25 @@ while(1) {
 	print "len $length_pow; cov $coverage_pow; open $openness_pow; dis $dissonance_pow; over $overload_pow\n";
 	print "average fitness: ",average( \@pop ),"\n";
 	
+	print "all time top:\n";
+	for(@elite[0..1]) {
+		&$fitness($_, 1);
+	}
+	print "generation top:\n";
+	&$fitness($pop[0], 1);
 
-	my $new_pop = $generation->apply( \@pop );
-	@$new_pop = 
-		sort { $b->Fitness() <=> $a->Fitness() }
-		map { $_->Fitness() || $_->evaluate( $fitness ); $_ }
-		@$new_pop;
+	my $new_pop = $generation->apply( $elitism ? \@hist : \@pop );
 
-	my $elite = min(int($min_pop_size/4), scalar(@pop));
-	my $commoner = min($total_pop - $elite, scalar(@$new_pop));
 
-	&$fitness($pop[0], 1); # top prev gen elite
-	&$fitness($new_pop->[0], 1); # top commoner
+	@pop = @$new_pop[0..min($total_pop,scalar(@$new_pop))-1]; # no elitism
 
-	@pop = (@pop[0..$elite-1], @$new_pop[0..$commoner-1]); # elitism
+	while (@pop < $total_pop) {
+		push @pop, Algorithm::Evolutionary::Individual::BitString->new($bit_count);
+	}
 
 	my $actual_pop_size = scalar @pop;
 
+	my $commoner = min($total_pop - $elite, scalar(@$new_pop));
 	print "$actual_pop_size <= $total_pop = $elite + $commoner\n";
 
 	$genCount++;
