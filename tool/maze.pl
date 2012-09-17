@@ -8,6 +8,7 @@ use Algorithm::Combinatorics qw(combinations);
 use List::Util qw(sum min max);
 use POSIX;
 use List::Uniq ':all';
+use Data::Dumper; 
 
 use Algorithm::Evolutionary qw(
 	Individual::BitString
@@ -24,18 +25,19 @@ use Algorithm::Evolutionary::Utils qw(
 my $w = shift || 22-2;
 my $h = shift || 16-2;
 my $space_bits = $w*$h;
-my @entry = (
-	[$w/2,0],
-	[0,$h-1],
-	[$w/2,$h-1],
-	[$w-1,$h-1],
-);
+# my @entry = ( [int($w/2),0], [0,$h-1], [int($w/2),$h-1], [$w-1,$h-1],); # 3 doors on side one another
+# my @entry = ( [int($w/2),0], [int($w/2),$h-1], ); # one door on each side
+# my @entry = ( [int($w/2),0], [$w-1,int($h/2)], ); # one door in front other on side
+my @entry = ( [int($w/2),0], [$w-1,int($h/2)], [int($w/5),0], [$w-1,int($h/5)], ); # two doors in front other two on side
+
 my @task = combinations([@entry],2);
 
-my $min_pop_size = shift || 50;
-my $max_pop_size = shift || 400;
+my $elitism = 0.05;
+
+my $min_pop_size = shift || 10;
+my $max_pop_size = shift || 50;
 my $min_mut_rate = shift || .2;
-my $max_mut_rate = shift || .8;
+my $max_mut_rate = shift || .9;
 my $min_cross_section = shift || 2;
 my $max_cross_section = shift || 16;
 
@@ -58,7 +60,6 @@ my $fit_bits = 5*$fit_p_bits;
 
 my $bit_count = $space_bits+$ga_bits; # +$fit_bits;
 
-my $elitism = 0;
 
 # my $writer = Graph::Writer::Dot->new();
 
@@ -140,6 +141,7 @@ my $fitness = sub {
 	my @visited = ();
 	my @path = map {
 		my ($start, $end) = @$_;
+		# avoid camper points?
 		my @path = $graph->SP_Dijkstra(idx(@$start), idx(@$end));
 		for my $i (@path) {
 			my ($x, $y) = coord($i);
@@ -191,12 +193,12 @@ my $fitness = sub {
 
 	my @dissonance = map { abs($_ - $average) ** $dissonance_item_pow } @path;
 	my $pow_sum = sum(map { $_ ** $dissonance_item_pow } @path);
-	my $dissonance = sum(@dissonance) / $pow_sum ;
+	my $dissonance = 1+sum(@dissonance) / $pow_sum ;
 
-	my $overload_max = 0;
-	my $coverage_max = 0;
+	my $overload_max = 1;
+	my $coverage_max = 1;
 	my $overload = 1;
-	my $coverage = 0;
+	my $coverage = 1;
 	for (my $y = 0; $y < $h; $y++){
 		for (my $x = 0; $x < $w; $x++){
 			my $visit = exists $visited[$x][$y] ? $visited[$x][$y] : 0;
@@ -276,7 +278,7 @@ while(1) {
 	print "generation top:\n";
 	&$fitness($pop[0], 1);
 
-	my $new_pop = $generation->apply( $elitism ? \@hist : \@pop );
+	my $new_pop = $generation->apply( rand() < $elitism ? \@hist : \@pop );
 
 
 	@pop = @$new_pop[0..min($total_pop,scalar(@$new_pop))-1]; # no elitism
