@@ -1,4 +1,4 @@
-#import "sound.h"
+#include "sound.h"
 
 Mix_Music *music = NULL;
 char* lastMusic = "";
