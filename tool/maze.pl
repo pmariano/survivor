@@ -25,10 +25,14 @@ use Algorithm::Evolutionary::Utils qw(
 my $w = shift || 22-2;
 my $h = shift || 16-2;
 my $space_bits = $w*$h;
+
+my @entry = ( [int($w/3),0], [int($w*2/3),0], [0,$h-1], [int($w/2),$h-1], [$w-1,$h-1],); # 3 to 2
+# my @entry = ( [$w-1,$h-1], [0,0], [int($w/2),0], [$w-1,0],); # 1 to 3
+
 # my @entry = ( [int($w/2),0], [0,$h-1], [int($w/2),$h-1], [$w-1,$h-1],); # 3 doors on side one another
 # my @entry = ( [int($w/2),0], [int($w/2),$h-1], ); # one door on each side
 # my @entry = ( [int($w/2),0], [$w-1,int($h/2)], ); # one door in front other on side
-my @entry = ( [int($w/2),0], [$w-1,int($h/2)], [int($w/5),0], [$w-1,int($h/5)], ); # two doors in front other two on side
+# my @entry = ( [int($w/2),0], [$w-1,int($h/2)], [int($w/5),0], [$w-1,int($h/5)], ); # two doors in front other two on side
 
 my @task = combinations([@entry],2);
 
@@ -160,7 +164,7 @@ my $fitness = sub {
 				my $over = unpack '%b*', pack 'I', $visit;
 				my @color = qw(black blue cyan green yellow red magenta);
 				my $color = $grid[$x][$y] ? 'white' : $color[$over];
-				my $char = $grid[$x][$y] ? '##' : sprintf "%02x", $visit;
+				my $char = $grid[$x][$y] ? '###' : sprintf "%03x", $visit;
 				print color($color), $char;
 			}
 			print color('reset'), "\n";
