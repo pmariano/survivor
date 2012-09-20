@@ -8,7 +8,7 @@ int ReadPath(int pathfinderID,int currentX,int currentY, int pixelsPerFrame);
 void EndPathfinder();
 
 #define mapWidth  51
-#define mapHeight 39
+#define mapHeight 38
 #define tileSize  20
 #define enemyTileHeight  3 // FIXME chan change by enemy?
 #define numberPeople ENEMY_COUNT

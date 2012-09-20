@@ -528,24 +528,20 @@ int draw(App *app, Body *body, int x, int y)
   return target;
 }
 
-int aimer(App *app, Body *body, int x, int y)
+int lasersight(App *app, Body *body, int x, int y, int n)
 {
+	int hit;
 	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
-#if 0
-		Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
-		p[0] = 0xff;
-		p[1] = 0xff;
-#else
-    SDL_Rect rect = {
-      x - app->game.itemtype[ITEM_PLAYER_BULLET].shot_image->w/2,
-      y - app->game.itemtype[ITEM_PLAYER_BULLET].shot_image->h/2,
-      app->game.itemtype[ITEM_PLAYER_BULLET].shot_image->w,
-      app->game.itemtype[ITEM_PLAYER_BULLET].shot_image->h
-    };
-    SDL_BlitSurface(app->game.itemtype[ITEM_PLAYER_BULLET].shot_image, NULL, app->screen, &rect);
-#endif
+		Uint32 *p = (Uint32*)(((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch));
+		hit = is_air(&app->game, body, x, y);
+		if(hit) n=0;
+		if(n<=0x80) {
+			Uint32 color = SDL_MapRGB(app->screen->format, 0xff-n, 0,0 );
+			*p = color;
+		}
 	}
-  return 0;
+
+  return hit;
 }
 
 int aim(App *app, Body *body)
@@ -558,15 +554,16 @@ int aim(App *app, Body *body)
 	int incx, incy, inc1, inc2;
 	int x,y;
 	int range;
+	int n=0;
 	if(body->status != BODY_ALIVE)
 		return;
 
-	range = 150;
+	range = app->screen->w;
 
 	x1 = body->pos.x;
 	y1 = body->pos.y;
 
-	float a = (int)(body->angle + ((rand() % (body->item.type->spread+1)) - body->item.type->spread/2))%360;
+	float a = (int)(body->angle)%360;
 	x2 = x1 + cos(a * M_PI / 180.) * range;
 	y2 = y1 - sin(a * M_PI / 180.) * range;
 
@@ -584,7 +581,7 @@ int aim(App *app, Body *body)
 
 	if(dx > dy)
 	{
-	  if(aimer(app,body,x,y)) return 1;
+	  if(lasersight(app,body,x,y,n++)) return 1;
       e = 2*dy - dx;
       inc1 = 2*( dy -dx);
       inc2 = 2*dy;
@@ -596,12 +593,12 @@ int aim(App *app, Body *body)
           e += inc1;
         } else e += inc2;
         x += incx;
-        if(aimer(app,body,x,y)) return 1;
+        if(lasersight(app,body,x,y,n++)) return 1;
       }
   }
   else
   {
-    if(aimer(app,body,x,y)) return 1;
+    if(lasersight(app,body,x,y,n++)) return 1;
       e = 2*dx - dy;
       inc1 = 2*( dx - dy);
       inc2 = 2*dx;
@@ -614,7 +611,7 @@ int aim(App *app, Body *body)
         }
         else e += inc2;
         y += incy;
-        if(aimer(app,body,x,y)) return 1;
+        if(lasersight(app,body,x,y,n++)) return 1;
       }
   }
   return 0;
