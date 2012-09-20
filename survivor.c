@@ -38,7 +38,6 @@ void gameInit(App *app){
 	 * Player 1 init settings
 	 * */
 	Body *p1body = &app->game.player1.body;
-	app->game.player1.body.status = BODY_DEAD;
 	p1body->ang_vel = 0.04;
 	p1body->max_vel = 4;
 	p1body->angle = 0;
@@ -46,14 +45,12 @@ void gameInit(App *app){
 	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p1body->item.ammo_used = 0 ;
 	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
-	p1body->status = BODY_DEAD;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
 	 * Player 2 init settings
 	 * */
 	Body *p2body = &app->game.player2.body;
-	app->game.player2.body.status = BODY_DEAD;
 
 	p2body->ang_vel = 0.4;
 	p2body->max_vel = 6;
@@ -61,7 +58,6 @@ void gameInit(App *app){
 	p2body->life = 100.0;
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p2body->item.ammo_used = 0 ;
-	p2body->status = BODY_DEAD;
 	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
@@ -80,9 +76,14 @@ void gameInit(App *app){
   }
 }
 
-void resetApp(App *app){
-  gameInit(app);
-  //reset here other stuffs
+void setWave(App *app, int wave_index);
+void resetApp(App *app)
+{
+	app->game.total_kill_count= 0;
+	app->game.won = 0;
+	app->game.player1.body.status = BODY_DEAD;
+	app->game.player2.body.status = BODY_DEAD;
+	setWave(app,0); // calls gameInit
 }
 
 void pauseOrJoinTheGame(App *app, Player *player){
@@ -106,6 +107,9 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			break;
 		case SDLK_2:
 			pauseOrJoinTheGame(app, player2);
+			break;
+		case SDLK_9:
+			setWave(app, (app->game.board.wave_count + app->game.board.wave_index + (mod & KMOD_SHIFT ? -1 : 1)) % app->game.board.wave_count);
 			break;
 		case SDLK_0:
 			app->debug = (DEBUG_COUNT + app->debug + (mod & KMOD_SHIFT ? -1 : 1)) % DEBUG_COUNT;
@@ -228,7 +232,7 @@ void bindGameplayKeystate(App *app){
    * Z = ATTACK
    * S = SECONDARY ATTACK
    * */
-  player_move(&app->game, &player2->body,
+  player_move(app, &player2->body,
 	  keystate[SDLK_KP6] || keystate[SDLK_i],
 	  keystate[SDLK_KP8] || keystate[SDLK_t],
 	  keystate[SDLK_KP4] || keystate[SDLK_u],
@@ -302,14 +306,94 @@ void spawnEnemy(App *app)
   }
 }
 
-void loadMap(App *app, int map_index) {
+void loadMap(App *app) {
   char image_path[256];
   char hit_path[256];
-  sprintf(image_path, "data/map%d.png", map_index);
-  sprintf(hit_path, "data/map%d_hit.png", map_index);
-  app->game.board.image = IMG_Load(image_path);
-  app->game.board.hit = IMG_Load(hit_path);
-  moveInit(app);
+  char wave_path[256];
+  char *map_name = "map1";
+  sprintf(image_path, "data/%s.png", map_name);
+  sprintf(hit_path, "data/%s_hit.png", map_name);
+  // TODO sprintf(wave_path, "data/%s_wave.txt", map_name);
+  app->game.board.base_image = IMG_Load(image_path);
+  app->game.board.base_hit = IMG_Load(hit_path);
+
+  app->game.board.image = SDL_CreateRGBSurface(SDL_SWSURFACE, mapWidth*tileSize, mapHeight*tileSize, 24, 0, 0, 0, 0);
+  app->game.board.hit = SDL_CreateRGBSurface(SDL_SWSURFACE, mapWidth, mapHeight, 24, 0, 0, 0, 0);
+
+  // TODO set other wave fields
+  int bx = 880;
+  int by = 640;
+  app->game.board.wave_count=19;
+  app->game.board.wave[0].x=bx*0;
+  app->game.board.wave[0].y=by*0;
+  app->game.board.wave[1].x=bx*1;
+  app->game.board.wave[1].y=by*0;
+  app->game.board.wave[2].x=bx*2;
+  app->game.board.wave[2].y=by*0;
+  app->game.board.wave[3].x=bx*3;
+  app->game.board.wave[3].y=by*0;
+  app->game.board.wave[4].x=bx*3;
+  app->game.board.wave[4].y=by*1;
+  app->game.board.wave[5].x=bx*2;
+  app->game.board.wave[5].y=by*1;
+  app->game.board.wave[6].x=bx*1;
+  app->game.board.wave[6].y=by*1;
+  app->game.board.wave[7].x=bx*0;
+  app->game.board.wave[7].y=by*1;
+  app->game.board.wave[8].x=bx*0;
+  app->game.board.wave[8].y=by*2;
+  app->game.board.wave[9].x=bx*0;
+  app->game.board.wave[9].y=by*3;
+  app->game.board.wave[10].x=bx*1;
+  app->game.board.wave[10].y=by*3;
+  app->game.board.wave[11].x=bx*2;
+  app->game.board.wave[11].y=by*3;
+  app->game.board.wave[12].x=bx*2;
+  app->game.board.wave[12].y=by*2;
+  app->game.board.wave[13].x=bx*3;
+  app->game.board.wave[13].y=by*2;
+  app->game.board.wave[14].x=bx*3;
+  app->game.board.wave[14].y=by*3;
+  app->game.board.wave[15].x=bx*4;
+  app->game.board.wave[15].y=by*3;
+  app->game.board.wave[16].x=bx*4;
+  app->game.board.wave[16].y=by*2;
+  app->game.board.wave[17].x=bx*4;
+  app->game.board.wave[17].y=by*1;
+  app->game.board.wave[18].x=bx*4;
+  app->game.board.wave[18].y=by*0;
+}
+
+void setWave(App *app, int wave_index) {
+	if(wave_index >= app->game.board.wave_count) {
+		app->state = STATE_GAMEOVER;
+		app->game.won = 1;
+	}
+	app->game.board.wave_index = wave_index;
+
+	{ // cut map slice
+		SDL_Rect rect = {
+			app->game.board.wave[wave_index].x,
+			app->game.board.wave[wave_index].y,
+			mapWidth*tileSize,
+			mapHeight*tileSize
+		};
+		SDL_BlitSurface(app->game.board.base_image, &rect, app->game.board.image, NULL);
+	}
+
+	{ // cut hit map slice
+		SDL_Rect rect = {
+			app->game.board.wave[wave_index].x/tileSize,
+			app->game.board.wave[wave_index].y/tileSize,
+			mapWidth,
+			mapHeight
+		};
+		SDL_BlitSurface(app->game.board.base_hit, &rect, app->game.board.hit, NULL);
+	}
+
+
+	moveInit(app);
+	gameInit(app);
 }
 
 void loadItems(App *app) {
@@ -390,7 +474,9 @@ int hit(App *app, Body *source, Body *target){
   if(target->life <= 0){
 	if(target->status == BODY_ALIVE){
 		if(!app->debug || target->item.type->score) { // player immortal on debug
-			app->game.kill_count += !!target->item.type->score;
+			int kill = !!target->item.type->score;
+			app->game.kill_count += kill;
+			app->game.total_kill_count += kill;
 			target->status = BODY_DEAD;
 		}
 	}
@@ -401,6 +487,8 @@ int hit(App *app, Body *source, Body *target){
 
 int draw(App *app, Body *body, int x, int y)
 {
+	int i;
+
 	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
 #if 0
 		Uint8 *p = ((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch);
@@ -420,13 +508,23 @@ int draw(App *app, Body *body, int x, int y)
 		}
 #endif
 	}
-	int target = is_air(&app->game, body, x, y);
-	if(target) {
-		if(target>=4) {
-			int i = target - 4;
-			hit(app, body, &app->game.enemies[i].body);
+
+	int target = 0;
+	for(i=0; i<enemyTileHeight; i++) {
+		//printf("hit %d,%d-%d\n", x,y,i *tileSize);
+		target = is_air(&app->game, body, x, y+i*tileSize);
+		if(target==1 && i>0) // extension only works for enemies, not walls
+			continue;
+		if(target) {
+			if(target>=4) {
+				int idx = target - 4;
+				hit(app, body, &app->game.enemies[idx].body);
+				//printf("XXX body %d,%d\n", app->game.enemies[idx].body.pos.x, app->game.enemies[idx].body.pos.y);
+			}
+			break;
 		}
 	}
+
   return target;
 }
 
@@ -614,7 +712,8 @@ int main(int argc, char* args[] )
   soundInit();
   loadItems(&app);
   loadEnemies(&app);
-  loadMap(&app, 0); // calls moveInit
+  loadMap(&app);
+  setWave(&app, 0); // calls moveInit / gameInit
 
   while(app.state != STATE_EXIT){
 	Uint32 startTime = SDL_GetTicks();

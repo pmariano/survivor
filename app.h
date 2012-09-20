@@ -6,9 +6,27 @@
 #define ENEMY_COUNT 666
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
-#define SHOT_COUNT 666
-#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+SHOT_COUNT+POWERUP_COUNT)
-#include "aStarLibrary.h"
+#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
+
+#define WAVE_COUNT 256
+
+#include "aStarLibrary.h" // must be after the defines above
+
+enum {
+	ITEM_HEALTH_PACK,
+	ITEM_PLAYER_BULLET,
+	ITEM_PLAYER_FLAME,
+	ITEM_PLAYER_COUNT,
+	ITEM_ENEMY_MEDIC,
+	ITEM_ENEMY_SOLDIER,
+	ITEM_COUNT
+};
+enum {
+  ENEMY_MEDIC,
+  ENEMY_SOLDIER,
+  ENEMY_TYPE_COUNT
+};
+
 
 typedef enum {
   MENU_RESUME = 0,
@@ -96,14 +114,26 @@ typedef struct {
 	SDL_Surface *image;
 } Sprite;
 
+typedef struct {
+	int x, y;
+	int enemy_chance[ENEMY_TYPE_COUNT];
+	int required_kills;
+} Wave;
+
 typedef struct{
+  SDL_Surface *base_image;
+  SDL_Surface *base_hit;
   SDL_Surface *image;
   SDL_Surface *hit;
+  Wave wave[WAVE_COUNT];
+  int wave_count;
+  int wave_index;
   int wall[mapWidth][mapHeight];
   int air[mapWidth][mapHeight];
   int crowd[mapWidth][mapHeight];
   int hittable[mapWidth][mapHeight];
   int powerup[mapWidth][mapHeight];
+  int safearea[mapWidth][mapHeight];
   int spawn_map[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;
@@ -116,21 +146,6 @@ typedef struct {
   SDL_Surface *image;
 } HealthPack;
 
-enum {
-	ITEM_HEALTH_PACK,
-	ITEM_PLAYER_BULLET,
-	ITEM_PLAYER_FLAME,
-	ITEM_PLAYER_COUNT,
-	ITEM_ENEMY_MEDIC,
-	ITEM_ENEMY_SOLDIER,
-	ITEM_COUNT
-};
-enum {
-  ENEMY_MEDIC,
-  ENEMY_SOLDIER,
-  ENEMY_TYPE_COUNT
-};
-
 typedef struct {
   Player player1;
   Player player2;
@@ -140,6 +155,8 @@ typedef struct {
   Uint32 spawnTime;
   int latest_enemy_updated;
   int kill_count;
+  int total_kill_count;
+  int won;
   HealthPack health_pack;
   ItemType itemtype[ITEM_COUNT];
   EnemyClass enemy_class[ENEMY_TYPE_COUNT];
@@ -168,6 +185,7 @@ typedef enum {
 	DEBUG_MOVE,
 	DEBUG_SHOT,
 	DEBUG_ITEM,
+	DEBUG_SAFE,
 	DEBUG_COUNT
 } Debug;
 

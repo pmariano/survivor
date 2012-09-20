@@ -119,8 +119,8 @@ void renderPowerups(App *app)
     if(app->game.board.powerups[i].should_show == 1)
     {
       SDL_Rect rect = {
-        app->game.board.powerups[i].x,
-        app->game.board.powerups[i].y,
+        app->game.board.powerups[i].x-app->game.board.powerups[i].type->image->w/2,
+        app->game.board.powerups[i].y-app->game.board.powerups[i].type->image->h/2,
         app->game.board.powerups[i].type->image->w,
         app->game.board.powerups[i].type->image->h
       };
@@ -186,6 +186,10 @@ void renderDebug(App *app)
 			color = SDL_MapRGBA(app->screen->format, 0xff,0x00,0xff,0xff );
 			map = (int *)app->game.board.powerup;
 			break;
+		case DEBUG_SAFE: // cyan
+			color = SDL_MapRGBA(app->screen->format, 0x00,0xff,0xff,0xff );
+			map = (int *)app->game.board.safearea;
+			break;
 	}
 
 	if(map){
@@ -197,9 +201,10 @@ void renderDebug(App *app)
 				}
 			}
 		}
+
+		SDL_BlitSurface(app->game.board.hit, NULL, app->screen, NULL);
 	}
 
-	SDL_BlitSurface(app->game.board.hit, NULL, app->screen, NULL);
 }
 
 
