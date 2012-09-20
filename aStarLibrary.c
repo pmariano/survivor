@@ -26,7 +26,7 @@ int Gcost[mapWidth+1][mapHeight+1]; 	//2d array to store G cost for each cell.
 int Hcost[mapWidth*mapHeight+2];	//1d array to store H cost of a cell on the open list
 int pathLength[numberPeople+1];     //stores length of the found path for critter
 int pathLocation[numberPeople+1];   //stores current position along the chosen path for critter
-int* pathBank [numberPeople+1];
+int pathBank [numberPeople+1][maxPathLength*2];
 
 //Path reading variables
 int pathStatus[numberPeople+1];
@@ -47,8 +47,8 @@ int ReadPathY(int pathfinderID,int pathLocation);
 void InitializePathfinder ()
 {
   int x = 0;
-	for (; x < numberPeople+1; x++)
-		pathBank[x] = (int*) malloc(2);
+	memset(pathStatus, 0, sizeof(pathStatus));
+	memset(pathBank, 0, sizeof(pathBank));
 }
 
 
@@ -58,11 +58,6 @@ void InitializePathfinder ()
 //-----------------------------------------------------------------------------
 void EndPathfinder (void)
 {
-  int x = 0;
-	for (; x < numberPeople+1; x++)
-	{
-		free (pathBank [x]);
-	}
 }
 
 
@@ -378,8 +373,8 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 	while (pathX != startX || pathY != startY);
 
 //b.Resize the data bank to the right size in bytes
-	pathBank[pathfinderID] = (int*) realloc (pathBank[pathfinderID],
-		pathLength[pathfinderID]*8);
+	if(pathLength[pathfinderID] > maxPathLength)
+		goto noPath;
 
 //c. Now copy the path information over to the databank. Since we are
 //	working backwards from the target to the start location, we copy

@@ -54,6 +54,7 @@ void moveInit(App *app)
 	memset(app->game.board.wall, 0, sizeof(app->game.board.wall));
 	memset(app->game.board.air, 0, sizeof(app->game.board.air));
 	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
+	memset(app->game.board.safearea, 0, sizeof(app->game.board.safearea));
 	memset(app->game.board.spawn_map, 0, sizeof(app->game.board.spawn_map));
 	app->game.board.spawn_count = 0;
 	for (x=0; x < mapWidth;x++) {
@@ -61,9 +62,13 @@ void moveInit(App *app)
 			Uint32 *p = (Uint32*)( ((Uint8*)hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch) );
 			Uint8 r,g,b;
 			SDL_GetRGB(*p, hit->format, &r, &g, &b);
-			app->game.board.wall[x][y] = !(b>r+g);
-			app->game.board.air[x][y] = !(r||g||b);
-			if(r>b+g) {
+			int walk = b+g>r+0x20;
+			int fly = r+g+b>0x20;
+			int safe = g>r+b+0x20;
+			app->game.board.wall[x][y] = !walk;
+			app->game.board.air[x][y] = !fly;
+			app->game.board.safearea[x][y] = safe;
+			if(walk && (x==0 || y==0 || x==mapWidth-1 || y==mapHeight-1)) {
 				app->game.board.spawn_map[x][y]=1;
 				app->game.board.spawn[app->game.board.spawn_count].x = x;
 				app->game.board.spawn[app->game.board.spawn_count].y = y;
@@ -94,6 +99,8 @@ int is_air(Game *game, Body *body, int x, int y)
 {
 	x/=tileSize;
 	y/=tileSize;
+	if(x<0 || y<0 || x>=mapWidth || y>=mapHeight)
+		return 1;
 	return game->board.hittable[x][y];
 }
 int is_solid(Game *game, Body *body, int x, int y)
@@ -101,6 +108,8 @@ int is_solid(Game *game, Body *body, int x, int y)
 	x/=tileSize;
 	y/=tileSize;
 
+	if(x<0 || y<0 || x>=mapWidth || y>=mapHeight)
+		return 1;
 	if(body->pos.x/tileSize == x && body->pos.y/tileSize == y)
 		return 0;
 	return game->board.crowd[x][y];
@@ -162,21 +171,23 @@ void move_enemies(App *app)
     {
         Body *enemy_body = &app->game.enemies[id].body;
 
-		if(app->game.player1.body.status == BODY_ALIVE &&
-			app->game.player1.body.status == BODY_ALIVE)
+		if(app->game.player1.body.status == BODY_ALIVE) {
+			printf("find %d=%d\n", id, crazy);
 			pathStatus[crazy] = FindPath(crazy,
 				enemy_body->pos.x,
 				enemy_body->pos.y,
 				app->game.player1.body.pos.x,
 				app->game.player1.body.pos.y);
+		}
 
-		if(app->game.player2.body.status == BODY_ALIVE &&
-			app->game.player2.body.status == BODY_ALIVE)
+		if(app->game.player2.body.status == BODY_ALIVE) {
+			printf("find %d=%d\n", id, crazy+1);
 			pathStatus[crazy+1] = FindPath(crazy+1,
 				enemy_body->pos.x,
 				enemy_body->pos.y,
 				app->game.player2.body.pos.x,
 				app->game.player2.body.pos.y);
+		}
 
 
         if(
@@ -219,6 +230,7 @@ void move_enemies(App *app)
 		int crazy = app->game.enemies[i].pathfinder;
         if(pathStatus[crazy] == found)
         {
+			printf("read %d=%d\n", i, crazy);
           int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize*1.25);
           int dx = xPath[crazy] - enemy_body->pos.x;
           int dy = yPath[crazy] - enemy_body->pos.y;
@@ -226,7 +238,7 @@ void move_enemies(App *app)
           body_move(&app->game, enemy_body, angle, .25+.75*rand()/(float)RAND_MAX);
 
 		  if(reach){
-				printf("reach %d %d %d\n", i, dx, dy);
+				printf("reach %d=%d %d,%d\n", i, crazy, dx, dy);
 				pathStatus[app->game.enemies[i].pathfinder_other] = notStarted;
 				hit(app, enemy_body, app->game.enemies[i].target);
 		  }
@@ -266,7 +278,7 @@ int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y)
 	for(i=0; i< 100; i++) {
 		int x1 = rand() % mapWidth;
 		int y1 = rand() % mapHeight;
-		if(!game->board.crowd[x1][y1]) {
+		if(game->board.safearea[x1][y1] && !game->board.crowd[x1][y1]) {
 			*x = x1 * tileSize + tileSize/2;
 			*y = y1 * tileSize + tileSize/2;
 			return 1;
@@ -280,9 +292,9 @@ int powerup_spawn_pos(Game *game, int *x, int *y) {
 	for(i=0; i< 10; i++) {
 		int x1 = rand() % mapWidth;
 		int y1 = rand() % mapHeight;
-		if(!game->board.wall[x1][y1] && !game->board.powerup[x1][y1]) {
-			*x = x1 * tileSize + (rand() % tileSize);
-			*y = y1 * tileSize + (rand() % tileSize);
+		if(game->board.safearea[x1][y1] && !game->board.powerup[x1][y1]) {
+			*x = x1 * tileSize + tileSize/2;
+			*y = y1 * tileSize + tileSize/2;
 			return 1;
 		}
 	}
