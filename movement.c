@@ -163,7 +163,7 @@ void move_enemies(App *app)
 	}
   }
 
-  int n=30; // ENEMY_COUNT
+  int n=10; // ENEMY_COUNT
   for(i=0; i < n; i++) 
   {
     int id = app->game.latest_enemy_updated = ( app->game.latest_enemy_updated + 1 ) % ENEMY_COUNT;
