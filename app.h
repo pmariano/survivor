@@ -61,6 +61,7 @@ typedef struct {
   float range;
   int ammo_total;
   int score;
+  int chance;
 } ItemType;
 
 typedef struct {
@@ -161,6 +162,7 @@ typedef struct {
   Board board;
   Uint32 start;
   Uint32 spawnTime;
+  Uint32 spawnPowerupTime;
   int latest_enemy_updated;
   int kill_count;
   int total_kill_count;

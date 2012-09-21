@@ -31,7 +31,8 @@ void checkGameover(App *app){
 
 void gameInit(App *app){
 	app->game.start = SDL_GetTicks();
-	app->game.spawnTime = app->game.start;
+	app->game.spawnTime = app->game.start+5000;
+	app->game.spawnPowerupTime = app->game.start+1;//5000;
 	app->game.kill_count= 0;
 
 	Body *p1body = &app->game.player1.body;
@@ -289,7 +290,8 @@ void spawnEnemy(App *app)
 	int t = SDL_GetTicks();
 
 	// printf("spawn tick %d\n", t);
-	if(game->on_screen_enemies>0 && t < app->game.spawnTime)
+	//if(game->on_screen_enemies>0 && t < app->game.spawnTime)
+	if(t < app->game.spawnTime)
 		return;
 	// printf("spawn started %d\n", t);
 
@@ -379,10 +381,10 @@ void loadMap(App *app) {
   app->game.board.wave[0].y=by*0;
   app->game.board.wave[0].w=mapWidth;
   app->game.board.wave[0].h=mapHeight;
-  app->game.board.wave[0].enemy_spawn_interval=5000;
+  app->game.board.wave[0].enemy_spawn_interval=2000;
   app->game.board.wave[0].enemy_count=40;
   app->game.board.wave[0].enemy_count_on_screen=20;
-  app->game.board.wave[0].enemy_count_per_spawn=20;
+  app->game.board.wave[0].enemy_count_per_spawn=5;
   app->game.board.wave[0].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[0].enemy_chance[ENEMY_SOLDIER]=0;
 
@@ -628,10 +630,13 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_ENEMY_MEDIC].score = 1;
 	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_MEDIC].sound = Mix_LoadWAV("sounds/ouch.wav");
+
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].damage = 4;
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].score = 5;
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].sound = Mix_LoadWAV("sounds/ouch.wav");
+
+	app->game.itemtype[ITEM_PLAYER_BULLET].chance = 50;
 	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 15;
 	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
 	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
@@ -641,6 +646,8 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_PLAYER_BULLET].spread = 3;
 	app->game.itemtype[ITEM_PLAYER_BULLET].ammo_total = 1000;
 	app->game.itemtype[ITEM_PLAYER_BULLET].sound = Mix_LoadWAV("sounds/machinegun.wav");
+
+	app->game.itemtype[ITEM_PLAYER_FLAME].chance = 5;
 	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 100;
 	app->game.itemtype[ITEM_PLAYER_FLAME].range = 150;
 	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
@@ -650,6 +657,8 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_PLAYER_FLAME].sound = Mix_LoadWAV("sounds/flame.wav");
 	app->game.itemtype[ITEM_PLAYER_FLAME].freq = 2;
 	app->game.itemtype[ITEM_PLAYER_FLAME].ammo_total = 250;
+
+	app->game.itemtype[ITEM_HEALTH_PACK].chance = 20;
 	app->game.itemtype[ITEM_HEALTH_PACK].damage = -50;
 	app->game.itemtype[ITEM_HEALTH_PACK].image = IMG_Load("data/health.png");
 
@@ -974,6 +983,45 @@ int shoot(App *app, Body *body)
   return 0;
 }
 
+void addPowerup(App *app)
+{
+	int i,j;
+	int x,y;
+
+	int t = SDL_GetTicks();
+	if(t < app->game.spawnPowerupTime)
+		return;
+	app->game.spawnPowerupTime = t + 10000;
+
+	int roulette = 0;
+	for(i=0; i < ITEM_PLAYER_COUNT; i++) {
+		roulette += app->game.itemtype[i].chance;
+	}
+
+
+	if(powerup_spawn_pos(&app->game, &x, &y)) {
+		for(i=0; i < POWERUP_COUNT; i++) {
+			if(app->game.board.powerups[i].should_show == 0) {
+				int k = rand() % roulette;
+				for(j=0;j<ITEM_PLAYER_COUNT;j++) {
+					int kk = app->game.itemtype[j].chance;
+					printf("type %d %d/%d/%d\n",j, k, kk, roulette);
+					if(k<kk) break;
+					k-=kk;
+				}
+				app->game.board.powerups[i].should_show = 1;
+				app->game.board.powerups[i].ammo_used = 0;
+				app->game.board.powerups[i].type = &app->game.itemtype[j];
+				app->game.board.powerups[i].x = x;
+				app->game.board.powerups[i].y = y;
+				app->game.board.powerup[x/tileSize][y/tileSize] = 1+i;
+				break;
+			}
+		}
+	}
+}
+
+
 
 int main(int argc, char* args[] )
 {
@@ -1006,6 +1054,7 @@ int main(int argc, char* args[] )
 
 	if (app.state == STATE_PLAYING){
 	  playRandomMusic();
+	  addPowerup(&app);
 	  spawnEnemy(&app);
 	  move_enemies(&app);
 	  renderFinish(&app);

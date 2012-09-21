@@ -37,7 +37,9 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 
   int t = SDL_GetTicks();
   if(t < app->game.board.wave_start + 5000) {
-	  text_write_raw(screen, 360, 420, "NEW WAVE", (t/500) % 2 ? trueRed : white, 60);
+	  char new_wave[256];
+	  sprintf(new_wave, "NEW WAVE IN %d", 5-(t-app->game.board.wave_start) / 1000);
+	  text_write_raw(screen, 360, 420, new_wave, (t/500) % 2 ? trueRed : white, 60);
   }
 
   if(player2->body.status != BODY_DEAD){
@@ -142,25 +144,6 @@ void renderPowerups(App *app)
 
 }
 
-void addPowerup(App *app)
-{
-	int i;
-	int x,y;
-	if(powerup_spawn_pos(&app->game, &x, &y)) {
-		for(i=0; i < POWERUP_COUNT; i++) {
-			if(app->game.board.powerups[i].should_show == 0) {
-				app->game.board.powerups[i].should_show = 1;
-				app->game.board.powerups[i].ammo_used = 0;
-				app->game.board.powerups[i].type = &app->game.itemtype[rand()%ITEM_PLAYER_COUNT];
-				app->game.board.powerups[i].x = x;
-				app->game.board.powerups[i].y = y;
-				app->game.board.powerup[x/tileSize][y/tileSize] = 1+i;
-				break;
-			}
-		}
-	}
-}
-
 void renderDebug(App *app)
 {
 	int x,y;
@@ -235,10 +218,6 @@ void renderFinish(App *app){
   renderPlayer(&app->game, &game.player1);
   renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
-  if((rand() % 200) == 0)
-  {
-    addPowerup(app);
-  }
   renderPowerups(app);
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 
