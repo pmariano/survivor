@@ -87,9 +87,9 @@ void renderEnemies(App *app)
         enemy->body.pos.w,
         enemy->body.pos.h
       };
-		int j = app->game.board.sprite_count++;
-		app->game.board.sprite[j].image = image;
-		app->game.board.sprite[j].rect = rect;
+	  int j = app->game.board.sprite_count++;
+	  app->game.board.sprite[j].image = image;
+	  app->game.board.sprite[j].rect = rect;
     }
   }
 }

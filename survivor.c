@@ -447,6 +447,19 @@ int grab(App *app, Body *body)
 	int x = body->pos.x/tileSize;
 	int y = body->pos.y/tileSize;
 	int i = app->game.board.powerup[x][y];
+	int offset = 2;
+	int min_offset = -offset;
+
+	while(!i && offset >= min_offset){
+		i = app->game.board.powerup[x][y+offset--];
+		if(!i){
+			i = app->game.board.powerup[x+offset][y+offset];
+		}
+		if(!i){
+			i = app->game.board.powerup[x+offset][y];
+		}
+	}
+
 	if(i && app->game.board.powerups[--i].should_show) {
 		if(app->game.board.powerups[i].type->damage < 0) {
 			body->life -= app->game.board.powerups[i].type->damage;
@@ -471,6 +484,7 @@ int give(App *app, Body *body1, Body *body2)
 		if(fabs(x1 - x2) < 5 && fabs(y1 - y2) < 5){
 			body1->item = body2->item;
 			body2->item.type = &app->game.itemtype[ITEM_NONE];
+			body2->item.ammo_used = 0 ;
 		}
 	}
 }
