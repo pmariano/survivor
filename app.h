@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-#define ENEMY_COUNT 666
+#define ENEMY_COUNT 0
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
 #define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
@@ -19,6 +19,7 @@ enum {
 	ITEM_PLAYER_COUNT,
 	ITEM_ENEMY_MEDIC,
 	ITEM_ENEMY_SOLDIER,
+	ITEM_NONE,
 	ITEM_COUNT
 };
 enum {

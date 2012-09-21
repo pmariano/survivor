@@ -121,6 +121,9 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 		case SDLK_s:
 			grab(app, &player1->body);
 			break;
+		case SDLK_d:
+			throw(app, &player1->body, &player2->body);
+			break;
 		case SDLK_x:
 			grab(app, &player2->body);
 			break;
@@ -233,10 +236,10 @@ void bindGameplayKeystate(App *app){
    * S = SECONDARY ATTACK
    * */
   player_move(app, &player2->body,
-	  keystate[SDLK_KP6] || keystate[SDLK_i],
-	  keystate[SDLK_KP8] || keystate[SDLK_t],
-	  keystate[SDLK_KP4] || keystate[SDLK_u],
-	  keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_y],
+	  keystate[SDLK_p] || keystate[SDLK_KP6] || keystate[SDLK_t],
+	  keystate[SDLK_QUOTE] || keystate[SDLK_KP8] || keystate[SDLK_i],
+	  keystate[SDLK_SEMICOLON] ||keystate[SDLK_KP4] || keystate[SDLK_y],
+	  keystate[SDLK_l] ||keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_u],
 	  keystate[SDLK_x]
 	  );
 
@@ -425,6 +428,10 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_PLAYER_FLAME].ammo_total = 250;
 	app->game.itemtype[ITEM_HEALTH_PACK].damage = -50;
 	app->game.itemtype[ITEM_HEALTH_PACK].image = IMG_Load("data/health.png");
+
+	app->game.itemtype[ITEM_NONE].damage = 0;
+	app->game.itemtype[ITEM_NONE].freq= 0;
+
 }
 
 void loadEnemies(App *app) {
@@ -450,6 +457,20 @@ int grab(App *app, Body *body)
 		}
 		app->game.board.powerups[i].should_show = 0;
 		app->game.board.powerup[x][y] = 0;
+	}
+}
+int throw(App *app, Body *body1, Body *body2)
+{
+	int x1 = body1->pos.x/tileSize;
+	int y1 = body1->pos.y/tileSize;
+	int x2 = body2->pos.x/tileSize;
+	int y2 = body2->pos.y/tileSize;
+
+	if(body2->item.type->freq != 0){
+		if(fabs(x1 - x2) < 5 && fabs(y1 - y2) < 5){
+			body1->item = body2->item;
+			body2->item.type = &app->game.itemtype[ITEM_NONE];
+		}
 	}
 }
 
