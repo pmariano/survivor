@@ -35,7 +35,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 
 	if(player2->body.status != BODY_DEAD){
 	  char ammo[256];
-	  sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
+	  sprintf(ammo, "ammo: %i", player2->body.item.type->ammo_total - player2->body.item.ammo_used) ;
 	  text_write_raw(screen, 910, 30, ammo, yellow, 20);
 
 	  Uint32 color = SDL_MapRGB(screen->format, 0xff, 0,0 );

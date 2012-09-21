@@ -121,10 +121,8 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 		case SDLK_s:
 			grab(app, &player1->body);
 			break;
-		case SDLK_d:
-			throw(app, &player1->body, &player2->body);
-			break;
 		case SDLK_x:
+			give(app, &player1->body, &player2->body);
 			grab(app, &player2->body);
 			break;
 	}
@@ -459,7 +457,7 @@ int grab(App *app, Body *body)
 		app->game.board.powerup[x][y] = 0;
 	}
 }
-int throw(App *app, Body *body1, Body *body2)
+int give(App *app, Body *body1, Body *body2)
 {
 	int x1 = body1->pos.x/tileSize;
 	int y1 = body1->pos.y/tileSize;
@@ -647,9 +645,12 @@ int shoot(App *app, Body *body)
 	int range;
 	if(body->status != BODY_ALIVE)
 		return;
-	if(!app->debug && ++body->item.ammo_used > body->item.type->ammo_total) // infinit ammo on debug
-		return;
 
+	if((body->item.ammo_used >= body->item.type->ammo_total) || app->debug){
+		return;
+	}
+
+	++body->item.ammo_used;
 	range = body->item.type->range;
 	playSound(body->item.type->sound, -1);
 
