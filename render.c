@@ -13,22 +13,26 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
   if(player1->body.status != BODY_DEAD){
     text_write_raw(screen, 5, 60, "Player 1", green, 30);
 
-	if(player1->body.status != BODY_DEAD){
+    if(player1->body.status != BODY_DEAD){
 
-	  char ammo[256];
-	  sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
-	  text_write_raw(screen, 5, 30, ammo, yellow, 20);
+      char ammo[256];
+      sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
+      text_write_raw(screen, 5, 30, ammo, yellow, 20);
 
-	  Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
-	  SDL_Rect rect = { 5, 10, player1->body.life*2, 20};
-	  SDL_FillRect(screen, &rect, color);
-	}
+      Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
+      SDL_Rect rect = { 5, 10, player1->body.life*2, 20};
+      SDL_FillRect(screen, &rect, color);
+    }
   }
 
 
   char kills[256];
-  sprintf(kills, "%i kill(s)", app->game.kill_count);
+  sprintf(kills, "%i kill(s)", app->game.total_kill_count);
   text_write_raw(screen, 400, 30, kills, white, 50);
+
+  char enemies_wave[256];
+  sprintf(enemies_wave, "%i Enemies", app->game.board.wave[app->game.board.wave_index].enemy_count);
+  text_write_raw(screen, 400, 90, enemies_wave, green, 30);
 
   if(player2->body.status != BODY_DEAD){
     text_write_raw(screen, 900, 60, "Player 2", green, 30);

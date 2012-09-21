@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-#define ENEMY_COUNT 0
+#define ENEMY_COUNT 30000
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
 #define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
@@ -119,6 +119,7 @@ typedef struct {
 	int x, y;
 	int enemy_chance[ENEMY_TYPE_COUNT];
 	int required_kills;
+  int enemy_count;
 } Wave;
 
 typedef struct{
@@ -158,6 +159,7 @@ typedef struct {
   int kill_count;
   int total_kill_count;
   int won;
+  int total_enemies;
   HealthPack health_pack;
   ItemType itemtype[ITEM_COUNT];
   EnemyClass enemy_class[ENEMY_TYPE_COUNT];

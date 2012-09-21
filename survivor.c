@@ -33,6 +33,7 @@ void gameInit(App *app){
 	app->game.start = SDL_GetTicks();
 	app->game.spawnTime = app->game.start;
 	app->game.kill_count= 0;
+  int enemy_count = app->game.board.wave[app->game.board.wave_index].enemy_count;
 
 	/**
 	 * Player 1 init settings
@@ -65,14 +66,14 @@ void gameInit(App *app){
 
 	app->credits = 0;
   int i;
-  for(i=0;i < ENEMY_COUNT; i++)
+  for(i=0;i < enemy_count; i++)
   {
-	app->game.enemies[i].body.status = BODY_DEAD;
+    app->game.enemies[i].body.status = BODY_DEAD;
   }
 
   for(i=0;i<POWERUP_COUNT; i++)
   {
-	app->game.board.powerups[i].should_show = 0;
+    app->game.board.powerups[i].should_show = 0;
   }
 }
 
@@ -283,13 +284,14 @@ void spawnEnemy(App *app)
   int x,y;
 
   int i;
-  for(i = 0; i < ENEMY_COUNT; i++)
+  for(i = 0; i < app->game.board.wave[app->game.board.wave_index].enemy_count; i++)
   {
-	if(game->enemies[i].body.status == BODY_DEAD)
-	{
-	  enemy = &game->enemies[i];
-	  break;
-	}
+    if(game->enemies[i].body.status == BODY_DEAD && game->total_enemies <= app->game.board.wave[app->game.board.wave_index].enemy_count )
+    {
+      game->total_enemies += 1;
+      enemy = &game->enemies[i];
+      break;
+    }
   }
 
   if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
@@ -329,42 +331,61 @@ void loadMap(App *app) {
   app->game.board.wave_count=19;
   app->game.board.wave[0].x=bx*0;
   app->game.board.wave[0].y=by*0;
+  app->game.board.wave[0].enemy_count=40;
   app->game.board.wave[1].x=bx*1;
   app->game.board.wave[1].y=by*0;
+  app->game.board.wave[1].enemy_count=50;
   app->game.board.wave[2].x=bx*2;
   app->game.board.wave[2].y=by*0;
+  app->game.board.wave[2].enemy_count=60;
   app->game.board.wave[3].x=bx*3;
   app->game.board.wave[3].y=by*0;
+  app->game.board.wave[3].enemy_count=80;
   app->game.board.wave[4].x=bx*3;
   app->game.board.wave[4].y=by*1;
+  app->game.board.wave[4].enemy_count=90;
   app->game.board.wave[5].x=bx*2;
   app->game.board.wave[5].y=by*1;
+  app->game.board.wave[5].enemy_count=100;
   app->game.board.wave[6].x=bx*1;
   app->game.board.wave[6].y=by*1;
+  app->game.board.wave[6].enemy_count=110;
   app->game.board.wave[7].x=bx*0;
   app->game.board.wave[7].y=by*1;
+  app->game.board.wave[7].enemy_count=120;
   app->game.board.wave[8].x=bx*0;
   app->game.board.wave[8].y=by*2;
+  app->game.board.wave[8].enemy_count=130;
   app->game.board.wave[9].x=bx*0;
   app->game.board.wave[9].y=by*3;
+  app->game.board.wave[9].enemy_count=140;
   app->game.board.wave[10].x=bx*1;
   app->game.board.wave[10].y=by*3;
+  app->game.board.wave[10].enemy_count=150;
   app->game.board.wave[11].x=bx*2;
   app->game.board.wave[11].y=by*3;
+  app->game.board.wave[11].enemy_count=160;
   app->game.board.wave[12].x=bx*2;
   app->game.board.wave[12].y=by*2;
+  app->game.board.wave[12].enemy_count=170;
   app->game.board.wave[13].x=bx*3;
   app->game.board.wave[13].y=by*2;
+  app->game.board.wave[13].enemy_count=170;
   app->game.board.wave[14].x=bx*3;
   app->game.board.wave[14].y=by*3;
+  app->game.board.wave[14].enemy_count=180;
   app->game.board.wave[15].x=bx*4;
   app->game.board.wave[15].y=by*3;
+  app->game.board.wave[15].enemy_count=200;
   app->game.board.wave[16].x=bx*4;
   app->game.board.wave[16].y=by*2;
+  app->game.board.wave[16].enemy_count=230;
   app->game.board.wave[17].x=bx*4;
   app->game.board.wave[17].y=by*1;
+  app->game.board.wave[17].enemy_count=250;
   app->game.board.wave[18].x=bx*4;
   app->game.board.wave[18].y=by*0;
+  app->game.board.wave[18].enemy_count=300;
 }
 
 void setWave(App *app, int wave_index) {
@@ -499,6 +520,12 @@ int hit(App *app, Body *source, Body *target){
 			app->game.kill_count += kill;
 			app->game.total_kill_count += kill;
 			target->status = BODY_DEAD;
+      app->game.board.wave[app->game.board.wave_index].enemy_count -= 1;
+      int index = app->game.board.wave_index;
+      int count = app->game.board.wave[app->game.board.wave_index].enemy_count;
+      if(count == 0){
+        setWave(app, index+1);    
+      }
 		}
 	}
 	return 1;
@@ -540,7 +567,6 @@ int draw(App *app, Body *body, int x, int y)
 			if(target>=4) {
 				int idx = target - 4;
 				hit(app, body, &app->game.enemies[idx].body);
-				//printf("XXX body %d,%d\n", app->game.enemies[idx].body.pos.x, app->game.enemies[idx].body.pos.y);
 			}
 			break;
 		}
