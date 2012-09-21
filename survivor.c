@@ -282,7 +282,7 @@ void spawnEnemy(App *app)
   int x,y;
 
   int i;
-  int count = app->game.board.wave[app->game.board.wave_index].enemy_count;
+  int count = game->board.wave[game->board.wave_index].enemy_count;
   for(i = 0; i < count; i++)
   {
     if(game->enemies[i].body.status == BODY_DEAD && game->total_enemies <= count )
@@ -393,6 +393,7 @@ void setWave(App *app, int wave_index) {
 		app->game.won = 1;
 	}
 	app->game.board.wave_index = wave_index;
+	app->game.total_enemies = 0;
 
 	{ // cut map slice
 		SDL_Rect rect = {
