@@ -32,7 +32,7 @@ void checkGameover(App *app){
 void gameInit(App *app){
 	app->game.start = SDL_GetTicks();
 	app->game.spawnTime = app->game.start+5000;
-	app->game.spawnPowerupTime = app->game.start+1;//5000;
+	app->game.spawnPowerupTime = app->game.start+15000;
 	app->game.kill_count= 0;
 
 	Body *p1body = &app->game.player1.body;
@@ -370,8 +370,8 @@ void loadMap(App *app) {
   app->game.board.base_image = IMG_Load(image_path);
   app->game.board.base_hit = IMG_Load(hit_path);
 
-  app->game.board.image = SDL_CreateRGBSurface(SDL_HWSURFACE, mapWidth*tileSize, mapHeight*tileSize, 24, 0, 0, 0, 0);
-  app->game.board.hit = SDL_CreateRGBSurface(SDL_SWSURFACE, mapWidth, mapHeight, 24, 0, 0, 0, 0);
+  app->game.board.image = SDL_CreateRGBSurface(SDL_HWSURFACE, mapWidth*tileSize, mapHeight*tileSize, 32, 0, 0, 0, 0);
+  app->game.board.hit = SDL_CreateRGBSurface(SDL_SWSURFACE, mapWidth, mapHeight, 32, 0, 0, 0, 0);
 
   // TODO set other wave fields
   int bx = 44;

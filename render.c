@@ -203,13 +203,21 @@ void renderDebug(App *app)
 
 void renderStart(App *app){
   app->game.board.sprite_count = 0;
+  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
 
   Game game = app->game;
 
-  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
-  SDL_FillRect(app->screen, NULL , color);
-
+  int t = SDL_GetTicks();
+  if(t < app->game.board.wave_start + 2000) {
+	  int alpha = 0xff * (t-app->game.board.wave_start)/2000;
+	  SDL_SetAlpha(game.board.image, SDL_SRCALPHA, alpha);
+	  printf("wave start %d\n", alpha);
+  } else {
+	  SDL_FillRect(app->screen, NULL , color);
+	  SDL_SetAlpha(game.board.image, 0, 0xff);
+  }
   SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
+
 }
 
 void renderFinish(App *app){
