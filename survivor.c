@@ -331,9 +331,9 @@ void loadMap(App *app) {
   app->game.board.wave[1].y=by*0;
   app->game.board.wave[2].x=bx*2;
   app->game.board.wave[2].y=by*0;
-  app->game.board.wave[3].x=bx*3;
+  app->game.board.wave[3].x=bx*3-tileSize*7;
   app->game.board.wave[3].y=by*0;
-  app->game.board.wave[4].x=bx*3;
+  app->game.board.wave[4].x=bx*3-tileSize*6;
   app->game.board.wave[4].y=by*1;
   app->game.board.wave[5].x=bx*2;
   app->game.board.wave[5].y=by*1;
@@ -549,14 +549,12 @@ int draw(App *app, Body *body, int x, int y)
 	for(i=0; i<enemyTileHeight; i++) {
 		//printf("hit %d,%d-%d\n", x,y,i *tileSize);
 		target = is_air(&app->game, body, x, y+i*tileSize);
-		if(target==1 && i>0) // extension only works for enemies, not walls
-			continue;
-		if(target) {
-			if(target>=4) {
-				int idx = target - 4;
-				hit(app, body, &app->game.enemies[idx].body);
-				//printf("XXX body %d,%d\n", app->game.enemies[idx].body.pos.x, app->game.enemies[idx].body.pos.y);
-			}
+		if(target>=4) {
+			int idx = target - 4;
+			hit(app, body, &app->game.enemies[idx].body);
+			//printf("XXX body %d,%d\n", app->game.enemies[idx].body.pos.x, app->game.enemies[idx].body.pos.y);
+			break;
+		} else if(target==1 && i==0) {
 			break;
 		}
 	}
