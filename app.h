@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-#define ENEMY_COUNT 30000
+#define ENEMY_COUNT 999
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
 #define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)

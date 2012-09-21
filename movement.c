@@ -96,7 +96,7 @@ void angle_rotate(float *a0_base, float a1, float f)
 	*a0_base = a0;
 }
 
-int is_air(Game *game, Body *body, int x, int y)
+inline int is_air(Game *game, Body *body, int x, int y)
 {
 	x/=tileSize;
 	y/=tileSize;
@@ -104,7 +104,7 @@ int is_air(Game *game, Body *body, int x, int y)
 		return 1;
 	return game->board.hittable[x][y];
 }
-int is_solid(Game *game, Body *body, int x, int y)
+inline int is_solid(Game *game, Body *body, int x, int y)
 {
 	x/=tileSize;
 	y/=tileSize;
@@ -115,7 +115,7 @@ int is_solid(Game *game, Body *body, int x, int y)
 		return 0;
 	return game->board.crowd[x][y];
 }
-int is_empty(Game *game, Body *body, int x, int y)
+inline int is_empty(Game *game, Body *body, int x, int y)
 {
 	return !is_solid(game, body,x,y);
 }
@@ -163,14 +163,15 @@ void move_enemies(App *app)
 	}
   }
 
-  int deadline = SDL_GetTicks() + 100;
-  for(i=0; i < ENEMY_COUNT; i++)
+  int n=30; // ENEMY_COUNT
+  for(i=0; i < n; i++) 
   {
     int id = app->game.latest_enemy_updated = ( app->game.latest_enemy_updated + 1 ) % ENEMY_COUNT;
     int crazy = id*2;
     if(app->game.enemies[id].body.status == BODY_ALIVE)
     {
         Body *enemy_body = &app->game.enemies[id].body;
+		n++;
 
 		if(app->game.player1.body.status == BODY_ALIVE) {
 			//printf("find %d=%d\n", id, crazy);
@@ -218,8 +219,6 @@ void move_enemies(App *app)
 		}
 #endif 
 
-		if(SDL_GetTicks() > deadline)
-			break;
     }
   }
 

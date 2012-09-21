@@ -5,8 +5,8 @@ ifdef WIN
   CC=i386-mingw32-gcc
   OUTPUT=survivor.exe
 else
-  CFLAGS=`sdl-config --cflags` -ggdb -pg
-  LIBS=`sdl-config --libs` -L/opt/local/lib -lSDL_image -lSDL_ttf -lSDL_mixer -lSDL_gfx -lSDL_ttf -pg
+  CFLAGS=`sdl-config --cflags` -ggdb -pg -O9
+  LIBS=`sdl-config --libs` -L/opt/local/lib -lSDL_image -lSDL_ttf -lSDL_mixer -lSDL_gfx -lSDL_ttf -lm -pg
   CC=gcc
   OUTPUT=survivor
 endif

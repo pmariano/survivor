@@ -12,7 +12,7 @@
 #include "movement.h"
 #include "aStarLibrary.h"
 
-#define FPS 40
+#define FPS 30
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
 void finishHim(App *app){
@@ -272,6 +272,7 @@ void handleDelay(Uint32 start) {
   int actual_delta = end - start;
   int expected_delta = 1000/FPS;
   int delay = MAX(0, expected_delta - actual_delta);
+  printf("delay %d %d %d\n", actual_delta, expected_delta, delay);
   SDL_Delay(delay);
 }
 
@@ -321,7 +322,7 @@ void loadMap(App *app) {
   app->game.board.base_image = IMG_Load(image_path);
   app->game.board.base_hit = IMG_Load(hit_path);
 
-  app->game.board.image = SDL_CreateRGBSurface(SDL_SWSURFACE, mapWidth*tileSize, mapHeight*tileSize, 24, 0, 0, 0, 0);
+  app->game.board.image = SDL_CreateRGBSurface(SDL_HWSURFACE, mapWidth*tileSize, mapHeight*tileSize, 24, 0, 0, 0, 0);
   app->game.board.hit = SDL_CreateRGBSurface(SDL_SWSURFACE, mapWidth, mapHeight, 24, 0, 0, 0, 0);
 
   // TODO set other wave fields
@@ -548,7 +549,7 @@ int hit(App *app, Body *source, Body *target){
   return 0;
 }
 
-int draw(App *app, Body *body, int x, int y)
+inline int draw(App *app, Body *body, int x, int y)
 {
 	int i;
 
@@ -575,9 +576,7 @@ int draw(App *app, Body *body, int x, int y)
 	int target = 0;
 	for(i=0; i<enemyTileHeight; i++) {
 		//printf("hit %d,%d-%d\n", x,y,i *tileSize);
-		target = is_air(&app->game, body, x, y+i*tileSize);
-		if(target==1 && i>0) // extension only works for enemies, not walls
-			continue;
+		target = is_air2(&app->game, body, x, y+i*tileSize);
 		if(target>=4) {
 			int idx = target - 4;
 			hit(app, body, &app->game.enemies[idx].body);
@@ -589,12 +588,21 @@ int draw(App *app, Body *body, int x, int y)
   return target;
 }
 
-int lasersight(App *app, Body *body, int x, int y, int n)
+inline int is_air2(Game *game, Body *body, int x, int y)
+{
+	x/=tileSize;
+	y/=tileSize;
+	if(x<0 || y<0 || x>=mapWidth || y>=mapHeight)
+		return 1;
+	return game->board.hittable[x][y];
+}
+
+inline int lasersight(App *app, Body *body, int x, int y, int n)
 {
 	int hit;
 	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
 		Uint32 *p = (Uint32*)(((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch));
-		hit = is_air(&app->game, body, x, y);
+		hit = is_air2(&app->game, body, x, y);
 		if(hit) n=0;
 		if(n<=0x80) {
 			Uint32 color = SDL_MapRGB(app->screen->format, 0xff-n, 0,0 );
