@@ -34,6 +34,11 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
   sprintf(enemies_wave, "%i Enemies", app->game.board.wave[app->game.board.wave_index].enemy_count);
   text_write_raw(screen, 400, 90, enemies_wave, green, 30);
 
+  int t = SDL_GetTicks();
+  if(t < app->game.board.wave_start + 5000) {
+	  text_write_raw(screen, 360, 420, "NEW WAVE", (t/500) % 2 ? trueRed : white, 60);
+  }
+
   if(player2->body.status != BODY_DEAD){
     text_write_raw(screen, 900, 60, "Player 2", green, 30);
 
@@ -295,8 +300,15 @@ void renderMenu(App *app){
 	  resumePadding = 100;
 
 	  char kills[256];
-	  sprintf(kills, "You died. Zombies killed: %i", app->game.kill_count);
-	  text_write_raw(screen, 100, 250, kills, trueRed, 50);
+	  SDL_Color color;
+	  if(app->game.won) {
+		  color = green;
+		  sprintf(kills, "You won!!! Zombies killed: %i", app->game.kill_count);
+	  } else {
+		  color = trueRed;
+		  sprintf(kills, "You died. Zombies killed: %i", app->game.kill_count);
+	  }
+	  text_write_raw(screen, 100, 250, kills, color, 50);
 	} else if(app->state == STATE_PAUSED){
 	  resumePadding = 100;
 	  text_write(screen, 100, 250, "resume game", menu->selected == MENU_RESUME);

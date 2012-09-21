@@ -80,6 +80,7 @@ typedef struct {
   float max_vel;
   float ang_vel;
   float angle; // degree
+  int shoot_key; // OH GOD WHY!
   Mix_Chunk *onHitSound;
 } Body;
 
@@ -130,6 +131,7 @@ typedef struct{
   Wave wave[WAVE_COUNT];
   int wave_count;
   int wave_index;
+  int wave_start;
   int wall[mapWidth][mapHeight];
   int air[mapWidth][mapHeight];
   int crowd[mapWidth][mapHeight];

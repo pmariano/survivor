@@ -46,6 +46,7 @@ void gameInit(App *app){
 	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p1body->item.ammo_used = 0 ;
 	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
+	p1body->shoot_key = SDLK_a;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
 	/**
@@ -60,13 +61,14 @@ void gameInit(App *app){
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p2body->item.ammo_used = 0 ;
 	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
+	p2body->shoot_key = SDLK_z;
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
 	app->game.latest_enemy_updated = 0;
 
 	app->credits = 0;
   int i;
-  for(i=0;i < enemy_count; i++)
+  for(i=0;i < ENEMY_COUNT; i++)
   {
     app->game.enemies[i].body.status = BODY_DEAD;
   }
@@ -394,6 +396,7 @@ void setWave(App *app, int wave_index) {
 		app->game.won = 1;
 	}
 	app->game.board.wave_index = wave_index;
+	app->game.board.wave_start = SDL_GetTicks();
 
 	{ // cut map slice
 		SDL_Rect rect = {
@@ -429,7 +432,7 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].score = 5;
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].sound = Mix_LoadWAV("sounds/ouch.wav");
-	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 75;
+	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 1;
 	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
 	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_PLAYER_BULLET].image = IMG_Load("data/bullet_ammo.png");
@@ -438,7 +441,7 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_PLAYER_BULLET].spread = 3;
 	app->game.itemtype[ITEM_PLAYER_BULLET].ammo_total = 1000;
 	app->game.itemtype[ITEM_PLAYER_BULLET].sound = Mix_LoadWAV("sounds/machinegun.wav");
-	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 250;
+	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 5;
 	app->game.itemtype[ITEM_PLAYER_FLAME].range = 150;
 	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
 	app->game.itemtype[ITEM_PLAYER_FLAME].hit_image = IMG_Load("data/fire_hit.png");
@@ -617,7 +620,7 @@ int aim(App *app, Body *body)
 {
   Uint8 *keystate;
   keystate = SDL_GetKeyState(NULL);
-  if(keystate[SDLK_a] || keystate[SDLK_z] ) return;
+  if(keystate[body->shoot_key] ) return;
 	int x1, y1, x2, y2;
 	int dx, dy, i, e;
 	int incx, incy, inc1, inc2;
