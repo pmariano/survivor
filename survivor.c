@@ -282,9 +282,10 @@ void spawnEnemy(App *app)
   int x,y;
 
   int i;
-  for(i = 0; i < app->game.board.wave[app->game.board.wave_index].enemy_count; i++)
+  int count = app->game.board.wave[app->game.board.wave_index].enemy_count;
+  for(i = 0; i < count; i++)
   {
-    if(game->enemies[i].body.status == BODY_DEAD && game->total_enemies <= app->game.board.wave[app->game.board.wave_index].enemy_count )
+    if(game->enemies[i].body.status == BODY_DEAD && game->total_enemies <= count )
     {
       game->total_enemies += 1;
       enemy = &game->enemies[i];
@@ -535,10 +536,9 @@ int hit(App *app, Body *source, Body *target){
 			app->game.kill_count += kill;
 			app->game.total_kill_count += kill;
 			target->status = BODY_DEAD;
-      app->game.board.wave[app->game.board.wave_index].enemy_count -= 1;
       int index = app->game.board.wave_index;
       int count = app->game.board.wave[app->game.board.wave_index].enemy_count;
-      if(count == 0){
+      if(count == app->game.kill_count){
         setWave(app, index+1);    
       }
 		}
