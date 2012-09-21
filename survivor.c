@@ -450,6 +450,9 @@ int grab(App *app, Body *body)
 	if(i && app->game.board.powerups[--i].should_show) {
 		if(app->game.board.powerups[i].type->damage < 0) {
 			body->life -= app->game.board.powerups[i].type->damage;
+			if(body->life > 100.0){
+				body->life = 100.0;
+			}
 		} else  {
 			body->item = app->game.board.powerups[i];
 		}
