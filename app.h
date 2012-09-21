@@ -118,9 +118,13 @@ typedef struct {
 
 typedef struct {
 	int x, y;
+	int w, h;
 	int enemy_chance[ENEMY_TYPE_COUNT];
 	int required_kills;
-  int enemy_count;
+	int enemy_spawn_interval;
+	int enemy_count_per_spawn;
+	int enemy_count_on_screen;
+	int enemy_count;
 } Wave;
 
 typedef struct{
@@ -162,6 +166,7 @@ typedef struct {
   int total_kill_count;
   int won;
   int total_enemies;
+  int on_screen_enemies;
   HealthPack health_pack;
   ItemType itemtype[ITEM_COUNT];
   EnemyClass enemy_class[ENEMY_TYPE_COUNT];

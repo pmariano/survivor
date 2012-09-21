@@ -69,7 +69,10 @@ void moveInit(App *app)
 			app->game.board.wall[x][y] = !walk;
 			app->game.board.air[x][y] = !fly;
 			app->game.board.safearea[x][y] = safe;
-			if(walk && (x==0 || y==0 || x==mapWidth-1 || y==mapHeight-1)) {
+			if(walk && (x==0 || y==0 || x==mapWidth-1 || y==mapHeight-1
+				|| x == (app->game.board.wave[app->game.board.wave_index].w)-1
+				|| y == (app->game.board.wave[app->game.board.wave_index].h)-1
+			)) {
 				app->game.board.spawn_map[x][y]=1;
 				app->game.board.spawn[app->game.board.spawn_count].x = x;
 				app->game.board.spawn[app->game.board.spawn_count].y = y;
@@ -172,6 +175,8 @@ void move_enemies(App *app)
     {
         Body *enemy_body = &app->game.enemies[id].body;
 		n++;
+		pathLength[crazy] = 9999;
+		pathLength[crazy+1] = 9999;
 
 		if(app->game.player1.body.status == BODY_ALIVE) {
 			//printf("find %d=%d\n", id, crazy);
@@ -192,10 +197,7 @@ void move_enemies(App *app)
 		}
 
 
-        if(
-		(app->game.player2.body.status != BODY_ALIVE ||
-			app->game.player2.body.status != BODY_ALIVE) ||
-			pathLength[crazy] < pathLength[crazy+1]){
+        if(pathLength[crazy] < pathLength[crazy+1]){
           app->game.enemies[id].pathfinder = crazy;
           app->game.enemies[id].pathfinder_other = crazy+1;
           app->game.enemies[id].target = &app->game.player1.body;

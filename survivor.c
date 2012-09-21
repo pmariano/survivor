@@ -33,7 +33,6 @@ void gameInit(App *app){
 	app->game.start = SDL_GetTicks();
 	app->game.spawnTime = app->game.start;
 	app->game.kill_count= 0;
-  int enemy_count = app->game.board.wave[app->game.board.wave_index].enemy_count;
 
 	Body *p1body = &app->game.player1.body;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
@@ -284,37 +283,78 @@ void handleDelay(Uint32 start) {
 
 void spawnEnemy(App *app)
 {
-  Game *game = &app->game;
-  Enemy *enemy = NULL;
-  int x,y;
+	Game *game = &app->game;
+	int x,y,i;
+	Wave *wave = &game->board.wave[game->board.wave_index];
+	int t = SDL_GetTicks();
 
-  int i;
-  int count = game->board.wave[game->board.wave_index].enemy_count;
-  for(i = 0; i < count; i++)
-  {
-    if(game->enemies[i].body.status == BODY_DEAD && game->total_enemies <= count )
-    {
-      game->total_enemies += 1;
-      enemy = &game->enemies[i];
-      break;
-    }
-  }
+	// printf("spawn tick %d\n", t);
+	if(game->on_screen_enemies>0 && t < app->game.spawnTime)
+		return;
+	// printf("spawn started %d\n", t);
 
-  if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
-  {
-	// printf("spawn %d\n", i);
-	enemy->body.status = BODY_ALIVE;
-	int k = rand() % ENEMY_TYPE_COUNT;
-	enemy->image = game->enemy_class[k].image;
-	Body *enemybody = &enemy->body;
-	enemybody->life = game->enemy_class[k].max_life;
-	enemybody->item.type = game->enemy_class[k].type;
-	enemybody->ang_vel = 0.05;
-	enemybody->max_vel = 2.5;
-	enemybody->angle = 0;
-	enemybody->pos.x = x;
-	enemybody->pos.y = y;
-  }
+	int spawnDelay = wave->enemy_spawn_interval;
+
+	int roulette = 0;
+	for(i=0;i<ENEMY_TYPE_COUNT;i++) {
+		roulette += wave->enemy_chance[i];
+	}
+
+	int spawn  = wave->enemy_count_per_spawn/2 + (rand() % (wave->enemy_count_per_spawn/2));
+	
+	if(spawn + game->on_screen_enemies > wave->enemy_count_on_screen) {
+		printf("spawn %d on_screen\n", game->on_screen_enemies);
+		spawn = wave->enemy_count_on_screen - game->on_screen_enemies;
+	}
+	
+	if(spawn + game->total_enemies > wave->enemy_count) {
+		printf("spawn %d wave\n", game->total_enemies);
+		spawn = wave->enemy_count - game->total_enemies;
+	}
+
+	printf("spawn %d enemies\n", spawn);
+	while(spawn > 0) {
+		Enemy *enemy = NULL;
+		for(i = 0; i < wave->enemy_count; i++)
+		{
+			if(game->enemies[i].body.status == BODY_DEAD)
+			{
+				game->total_enemies ++;
+				game->on_screen_enemies ++;
+				spawn --;
+				enemy = &game->enemies[i];
+				break;
+			}
+		}
+
+		if(enemy != NULL && enemy_spawn_pos(game, &x,&y))
+		{
+			// printf("spawn %d\n", i);
+			enemy->body.status = BODY_ALIVE;
+			int i = 0;
+			int k = rand() % roulette;
+			for(i=0; i<ENEMY_TYPE_COUNT;i++) {
+				int kk = wave->enemy_chance[i];
+				// printf("type %d %d %d\n",i, k, kk);
+				if(k<kk) break;
+				k-=kk;
+			}
+			// printf("type selected %d %d\n",i, k);
+			enemy->image = game->enemy_class[i].image;
+			Body *enemybody = &enemy->body;
+			enemybody->life = game->enemy_class[i].max_life;
+			enemybody->item.type = game->enemy_class[i].type;
+			enemybody->ang_vel = 0.05;
+			enemybody->max_vel = 2.5;
+			enemybody->angle = 0;
+			enemybody->pos.x = x;
+			enemybody->pos.y = y;
+		} else {
+			spawnDelay = 500;
+			break; // did not finished group spawn, persist
+		}
+	}
+	app->game.spawnTime = t + spawnDelay;
 }
 
 void loadMap(App *app) {
@@ -332,66 +372,218 @@ void loadMap(App *app) {
   app->game.board.hit = SDL_CreateRGBSurface(SDL_SWSURFACE, mapWidth, mapHeight, 24, 0, 0, 0, 0);
 
   // TODO set other wave fields
-  int bx = 880;
-  int by = 640;
+  int bx = 44;
+  int by = 32;
   app->game.board.wave_count=19;
   app->game.board.wave[0].x=bx*0;
   app->game.board.wave[0].y=by*0;
+  app->game.board.wave[0].w=mapWidth;
+  app->game.board.wave[0].h=mapHeight;
+  app->game.board.wave[0].enemy_spawn_interval=5000;
   app->game.board.wave[0].enemy_count=40;
+  app->game.board.wave[0].enemy_count_on_screen=20;
+  app->game.board.wave[0].enemy_count_per_spawn=20;
+  app->game.board.wave[0].enemy_chance[ENEMY_MEDIC]=1;
+  app->game.board.wave[0].enemy_chance[ENEMY_SOLDIER]=0;
+
   app->game.board.wave[1].x=bx*1;
   app->game.board.wave[1].y=by*0;
+  app->game.board.wave[1].w=mapWidth;
+  app->game.board.wave[1].h=mapHeight;
+  app->game.board.wave[1].enemy_spawn_interval=5000;
   app->game.board.wave[1].enemy_count=50;
+  app->game.board.wave[1].enemy_count_on_screen=25;
+  app->game.board.wave[1].enemy_count_per_spawn=20;
+  app->game.board.wave[1].enemy_chance[ENEMY_MEDIC]=1;
+  app->game.board.wave[1].enemy_chance[ENEMY_SOLDIER]=0;
+
   app->game.board.wave[2].x=bx*2;
   app->game.board.wave[2].y=by*0;
+  app->game.board.wave[2].w=mapWidth;
+  app->game.board.wave[2].h=mapHeight;
+  app->game.board.wave[2].enemy_spawn_interval=5000;
   app->game.board.wave[2].enemy_count=60;
+  app->game.board.wave[2].enemy_count_on_screen=30;
+  app->game.board.wave[2].enemy_count_per_spawn=20;
+  app->game.board.wave[2].enemy_chance[ENEMY_MEDIC]=1;
+  app->game.board.wave[2].enemy_chance[ENEMY_SOLDIER]=0;
+
   app->game.board.wave[3].y=by*0;
-  app->game.board.wave[3].x=bx*3-tileSize*7;
+  app->game.board.wave[3].x=bx*3-2;
+  app->game.board.wave[3].w=(mapWidth-5);
+  app->game.board.wave[3].h=mapHeight;
+  app->game.board.wave[3].enemy_spawn_interval=5000;
   app->game.board.wave[3].enemy_count=80;
-  app->game.board.wave[4].x=bx*3-tileSize*6;
+  app->game.board.wave[3].enemy_count_on_screen=35;
+  app->game.board.wave[3].enemy_count_per_spawn=20;
+  app->game.board.wave[3].enemy_chance[ENEMY_MEDIC]=1;
+  app->game.board.wave[3].enemy_chance[ENEMY_SOLDIER]=0;
+
+  app->game.board.wave[4].x=bx*3-6;
   app->game.board.wave[4].y=by*1;
+  app->game.board.wave[4].w=mapWidth;
+  app->game.board.wave[4].h=mapHeight;
+  app->game.board.wave[4].enemy_spawn_interval=5000;
   app->game.board.wave[4].enemy_count=90;
+  app->game.board.wave[4].enemy_count_on_screen=40;
+  app->game.board.wave[4].enemy_count_per_spawn=20;
+  app->game.board.wave[4].enemy_chance[ENEMY_MEDIC]=1;
+  app->game.board.wave[4].enemy_chance[ENEMY_SOLDIER]=0;
+
   app->game.board.wave[5].x=bx*2;
   app->game.board.wave[5].y=by*1;
+  app->game.board.wave[5].w=mapWidth;
+  app->game.board.wave[5].h=mapHeight;
+  app->game.board.wave[5].enemy_spawn_interval=6000;
   app->game.board.wave[5].enemy_count=100;
+  app->game.board.wave[5].enemy_count_on_screen=30;
+  app->game.board.wave[5].enemy_count_per_spawn=20;
+  app->game.board.wave[5].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[5].enemy_chance[ENEMY_SOLDIER]=1;
+
   app->game.board.wave[6].x=bx*1;
   app->game.board.wave[6].y=by*1;
+  app->game.board.wave[6].w=mapWidth;
+  app->game.board.wave[6].h=mapHeight;
+  app->game.board.wave[6].enemy_spawn_interval=7000;
   app->game.board.wave[6].enemy_count=110;
+  app->game.board.wave[6].enemy_count_on_screen=40;
+  app->game.board.wave[6].enemy_count_per_spawn=20;
+  app->game.board.wave[6].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[6].enemy_chance[ENEMY_SOLDIER]=2;
+
   app->game.board.wave[7].x=bx*0;
   app->game.board.wave[7].y=by*1;
+  app->game.board.wave[7].w=mapWidth;
+  app->game.board.wave[7].h=mapHeight;
+  app->game.board.wave[7].enemy_spawn_interval=8000;
   app->game.board.wave[7].enemy_count=120;
+  app->game.board.wave[7].enemy_count_on_screen=45;
+  app->game.board.wave[7].enemy_count_per_spawn=21;
+  app->game.board.wave[7].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[7].enemy_chance[ENEMY_SOLDIER]=3;
+
   app->game.board.wave[8].x=bx*0;
   app->game.board.wave[8].y=by*2;
+  app->game.board.wave[8].w=mapWidth;
+  app->game.board.wave[8].h=mapHeight;
+  app->game.board.wave[8].enemy_spawn_interval=8500;
   app->game.board.wave[8].enemy_count=130;
+  app->game.board.wave[8].enemy_count_on_screen=50;
+  app->game.board.wave[8].enemy_count_per_spawn=22;
+  app->game.board.wave[8].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[8].enemy_chance[ENEMY_SOLDIER]=4;
+
   app->game.board.wave[9].x=bx*0;
-  app->game.board.wave[9].y=by*3;
+  app->game.board.wave[9].y=by*3+3;
+  app->game.board.wave[9].w=(mapWidth-1);
+  app->game.board.wave[9].h=(mapHeight-3);
+  app->game.board.wave[9].enemy_spawn_interval=9000;
   app->game.board.wave[9].enemy_count=140;
+  app->game.board.wave[9].enemy_count_on_screen=55;
+  app->game.board.wave[9].enemy_count_per_spawn=23;
+  app->game.board.wave[9].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[9].enemy_chance[ENEMY_SOLDIER]=5;
+
   app->game.board.wave[10].x=bx*1;
   app->game.board.wave[10].y=by*3;
+  app->game.board.wave[10].w=mapWidth;
+  app->game.board.wave[10].h=mapHeight;
+  app->game.board.wave[10].enemy_spawn_interval=10000;
   app->game.board.wave[10].enemy_count=150;
+  app->game.board.wave[10].enemy_count_on_screen=60;
+  app->game.board.wave[10].enemy_count_per_spawn=24;
+  app->game.board.wave[10].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[10].enemy_chance[ENEMY_SOLDIER]=6;
+
   app->game.board.wave[11].x=bx*2;
-  app->game.board.wave[11].y=by*3;
+  app->game.board.wave[11].y=by*3+3;
+  app->game.board.wave[11].w=(mapWidth-4);
+  app->game.board.wave[11].h=(mapHeight-3);
+  app->game.board.wave[11].enemy_spawn_interval=10500;
   app->game.board.wave[11].enemy_count=160;
+  app->game.board.wave[11].enemy_count_on_screen=65;
+  app->game.board.wave[11].enemy_count_per_spawn=25;
+  app->game.board.wave[11].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[11].enemy_chance[ENEMY_SOLDIER]=7;
+
   app->game.board.wave[12].x=bx*2;
   app->game.board.wave[12].y=by*2;
+  app->game.board.wave[12].w=mapWidth;
+  app->game.board.wave[12].h=mapHeight;
+  app->game.board.wave[12].enemy_spawn_interval=11000;
   app->game.board.wave[12].enemy_count=170;
+  app->game.board.wave[12].enemy_count_on_screen=70;
+  app->game.board.wave[12].enemy_count_per_spawn=26;
+  app->game.board.wave[12].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[12].enemy_chance[ENEMY_SOLDIER]=8;
+
   app->game.board.wave[13].x=bx*3;
   app->game.board.wave[13].y=by*2;
+  app->game.board.wave[13].w=(mapWidth-5);
+  app->game.board.wave[13].h=mapHeight;
+  app->game.board.wave[13].enemy_spawn_interval=11500;
   app->game.board.wave[13].enemy_count=170;
+  app->game.board.wave[13].enemy_count_on_screen=75;
+  app->game.board.wave[13].enemy_count_per_spawn=27;
+  app->game.board.wave[13].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[13].enemy_chance[ENEMY_SOLDIER]=9;
+
   app->game.board.wave[14].x=bx*3;
-  app->game.board.wave[14].y=by*3;
+  app->game.board.wave[14].y=by*3+3;
+  app->game.board.wave[14].w=mapWidth;
+  app->game.board.wave[14].h=(mapHeight-3);
+  app->game.board.wave[14].enemy_spawn_interval=12000;
   app->game.board.wave[14].enemy_count=180;
+  app->game.board.wave[14].enemy_count_on_screen=80;
+  app->game.board.wave[14].enemy_count_per_spawn=28;
+  app->game.board.wave[14].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[14].enemy_chance[ENEMY_SOLDIER]=10;
+
   app->game.board.wave[15].x=bx*4;
-  app->game.board.wave[15].y=by*3;
+  app->game.board.wave[15].y=by*3+3;
+  app->game.board.wave[15].w=mapWidth;
+  app->game.board.wave[15].h=mapHeight;
+  app->game.board.wave[15].enemy_spawn_interval=12500;
   app->game.board.wave[15].enemy_count=200;
+  app->game.board.wave[15].enemy_count_on_screen=85;
+  app->game.board.wave[15].enemy_count_per_spawn=29;
+  app->game.board.wave[15].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[15].enemy_chance[ENEMY_SOLDIER]=15;
+
   app->game.board.wave[16].x=bx*4;
   app->game.board.wave[16].y=by*2;
+  app->game.board.wave[16].w=mapWidth;
+  app->game.board.wave[16].h=mapHeight;
+  app->game.board.wave[16].enemy_spawn_interval=13000;
   app->game.board.wave[16].enemy_count=230;
+  app->game.board.wave[16].enemy_count_on_screen=90;
+  app->game.board.wave[16].enemy_count_per_spawn=30;
+  app->game.board.wave[16].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[16].enemy_chance[ENEMY_SOLDIER]=20;
+
   app->game.board.wave[17].x=bx*4;
   app->game.board.wave[17].y=by*1;
+  app->game.board.wave[17].w=mapWidth;
+  app->game.board.wave[17].h=mapHeight;
+  app->game.board.wave[17].enemy_spawn_interval=13500;
   app->game.board.wave[17].enemy_count=250;
+  app->game.board.wave[17].enemy_count_on_screen=95;
+  app->game.board.wave[17].enemy_count_per_spawn=32;
+  app->game.board.wave[17].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[17].enemy_chance[ENEMY_SOLDIER]=30;
+
   app->game.board.wave[18].x=bx*4;
-  app->game.board.wave[18].y=by*0;
-  app->game.board.wave[18].enemy_count=300;
+  app->game.board.wave[18].y=by*0+1;
+  app->game.board.wave[18].w=mapWidth;
+  app->game.board.wave[18].h=mapHeight;
+  app->game.board.wave[18].enemy_spawn_interval=15000;
+  app->game.board.wave[18].enemy_count=500;
+  app->game.board.wave[18].enemy_count_on_screen=100;
+  app->game.board.wave[18].enemy_count_per_spawn=50;
+  app->game.board.wave[18].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[18].enemy_chance[ENEMY_SOLDIER]=40;
+
 }
 
 void setWave(App *app, int wave_index) {
@@ -402,11 +594,13 @@ void setWave(App *app, int wave_index) {
 	app->game.board.wave_index = wave_index;
 	app->game.board.wave_start = SDL_GetTicks();
 	app->game.total_enemies = 0;
+	app->game.on_screen_enemies = 0;
 
 	{ // cut map slice
+		SDL_FillRect(app->game.board.hit, NULL, 0);
 		SDL_Rect rect = {
-			app->game.board.wave[wave_index].x,
-			app->game.board.wave[wave_index].y,
+			app->game.board.wave[wave_index].x*tileSize,
+			app->game.board.wave[wave_index].y*tileSize,
 			mapWidth*tileSize,
 			mapHeight*tileSize
 		};
@@ -414,11 +608,12 @@ void setWave(App *app, int wave_index) {
 	}
 
 	{ // cut hit map slice
+		SDL_FillRect(app->game.board.hit, NULL, 0);
 		SDL_Rect rect = {
-			app->game.board.wave[wave_index].x/tileSize,
-			app->game.board.wave[wave_index].y/tileSize,
-			mapWidth,
-			mapHeight
+			app->game.board.wave[wave_index].x,
+			app->game.board.wave[wave_index].y,
+			app->game.board.wave[wave_index].w,
+			app->game.board.wave[wave_index].h
 		};
 		SDL_BlitSurface(app->game.board.base_hit, &rect, app->game.board.hit, NULL);
 	}
@@ -506,6 +701,9 @@ int grab(App *app, Body *body)
 }
 int give(App *app, Body *body1, Body *body2)
 {
+	if(body1->status != BODY_ALIVE
+	|| body2->status != BODY_ALIVE)
+		return;
 	int x1 = body1->pos.x/tileSize;
 	int y1 = body1->pos.y/tileSize;
 	int x2 = body2->pos.x/tileSize;
@@ -535,26 +733,36 @@ int hit(App *app, Body *source, Body *target){
 	}
 
 	if(target->status != BODY_DEAD){
-	  playSound(target->onHitSound);
+		playSound(target->onHitSound);
 	}
 
-  if(target->life <= 0){
-	if(target->status == BODY_ALIVE){
-		if(!app->debug || target->item.type->score) { // player immortal on debug
-			int kill = !!target->item.type->score;
-			app->game.kill_count += kill;
-			app->game.total_kill_count += kill;
-			target->status = BODY_DEAD;
-      int index = app->game.board.wave_index;
-      int count = app->game.board.wave[app->game.board.wave_index].enemy_count;
-      if(count == app->game.kill_count){
-        setWave(app, index+1);    
-      }
+	if(target->life <= 0){
+		if(target->status == BODY_ALIVE){
+			if(!app->debug || target->item.type->score) { // player immortal on debug
+				int kill = !!target->item.type->score;
+				app->game.kill_count += kill;
+				app->game.total_kill_count += kill;
+				app->game.on_screen_enemies -= kill;
+				target->status = BODY_DEAD;
+				int index = app->game.board.wave_index;
+				int count = app->game.board.wave[app->game.board.wave_index].enemy_count;
+				if(count == app->game.kill_count){
+					setWave(app, index+1);    
+				}
+			}
 		}
+		return 1;
 	}
-	return 1;
-  }
-  return 0;
+	return 0;
+}
+
+inline int is_air2(Game *game, Body *body, int x, int y)
+{
+	x/=tileSize;
+	y/=tileSize;
+	if(x<0 || y<0 || x>=mapWidth || y>=mapHeight)
+		return 1;
+	return game->board.hittable[x][y];
 }
 
 inline int draw(App *app, Body *body, int x, int y)
@@ -582,28 +790,23 @@ inline int draw(App *app, Body *body, int x, int y)
 	}
 
 	int target = 0;
-	for(i=0; i<enemyTileHeight; i++) {
-		//printf("hit %d,%d-%d\n", x,y,i *tileSize);
-		target = is_air2(&app->game, body, x, y+i*tileSize);
-		if(target>=4) {
-			int idx = target - 4;
-			hit(app, body, &app->game.enemies[idx].body);
-			break;
-		} else if(target==1 && i==0) {
+	for(i=0; i<enemyTileHeight; i++) { // hit the whole height of the enemies, not just the feet
+		// printf("hit %d,%d-%d /%d\n", x,y,i *tileSize, enemyTileHeight);
+		int tg = is_air2(&app->game, body, x, y+i*tileSize);
+		if(tg >=4 || tg && i==0) {
+			// printf("i %d tg %d\n", i, tg);
+			target = tg;
 			break;
 		}
 	}
 
-  return target;
-}
+	
+	if(target>=4) {
+		int idx = target - 4;
+		hit(app, body, &app->game.enemies[idx].body);
+	}
 
-inline int is_air2(Game *game, Body *body, int x, int y)
-{
-	x/=tileSize;
-	y/=tileSize;
-	if(x<0 || y<0 || x>=mapWidth || y>=mapHeight)
-		return 1;
-	return game->board.hittable[x][y];
+	return target;
 }
 
 inline int lasersight(App *app, Body *body, int x, int y, int n)
@@ -705,7 +908,7 @@ int shoot(App *app, Body *body)
 	if(body->status != BODY_ALIVE)
 		return;
 
-	if((body->item.ammo_used >= body->item.type->ammo_total) || app->debug){
+	if((body->item.ammo_used >= body->item.type->ammo_total) && !app->debug){
 		return;
 	}
 
@@ -803,12 +1006,7 @@ int main(int argc, char* args[] )
 
 	if (app.state == STATE_PLAYING){
 	  playRandomMusic();
-	  Uint32 elapsed = startTime - app.game.spawnTime;
-	  if(elapsed > 500)
-	  {
-      spawnEnemy(&app);
-      app.game.spawnTime = startTime;
-	  }
+	  spawnEnemy(&app);
 	  move_enemies(&app);
 	  renderFinish(&app);
 	  checkGameover(&app);

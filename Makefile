@@ -1,11 +1,11 @@
 ifdef WIN
-  CFLAGS=`/opt/SDL-1.2.13/bin/i586-mingw32msvc-sdl-config --cflags` -I/opt/SDL-1.2.13/include/ -I/opt/SDL-1.2.13/include/SDL/
+  CFLAGS=`/opt/SDL-1.2.13/bin/i586-mingw32msvc-sdl-config --cflags` -I/opt/SDL-1.2.13/include/ -I/opt/SDL-1.2.13/include/SDL/ -O9
   LIBS=`/opt/SDL-1.2.13/bin/i586-mingw32msvc-sdl-config --libs` -lSDL_image -lSDL_ttf -lSDL_mixer -lSDL_gfx -lSDL_ttf 
   # CC=i586-mingw32msvc-gcc
   CC=i386-mingw32-gcc
   OUTPUT=survivor.exe
 else
-  CFLAGS=`sdl-config --cflags` -ggdb -pg -O9
+  CFLAGS=`sdl-config --cflags` -ggdb -pg
   LIBS=`sdl-config --libs` -L/opt/local/lib -lSDL_image -lSDL_ttf -lSDL_mixer -lSDL_gfx -lSDL_ttf -lm -pg
   CC=gcc
   OUTPUT=survivor
