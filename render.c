@@ -27,11 +27,12 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 
 
   char kills[256];
-  sprintf(kills, "%i kill(s)", app->game.total_kill_count);
-  text_write_raw(screen, 400, 30, kills, white, 50);
+  sprintf(kills, "%i Total kill(s)", app->game.total_kill_count);
+  text_write_raw(screen, 400, 30, kills, white, 40);
 
   char enemies_wave[256];
-  sprintf(enemies_wave, "%i Enemies", app->game.board.wave[app->game.board.wave_index].enemy_count);
+  int count = app->game.board.wave[app->game.board.wave_index].enemy_count;
+  sprintf(enemies_wave, "%i Enemies", count - app->game.kill_count);
   text_write_raw(screen, 400, 90, enemies_wave, green, 30);
 
   int t = SDL_GetTicks();
@@ -44,7 +45,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 
 	if(player2->body.status != BODY_DEAD){
 	  char ammo[256];
-	  sprintf(ammo, "ammo: %i", player2->body.item.type->ammo_total - player2->body.item.ammo_used) ;
+	  sprintf(ammo, "ammo: %i", player2->body.item.type->ammo_total - player2->body.item.ammo_used);
 	  text_write_raw(screen, 910, 30, ammo, yellow, 20);
 
 	  Uint32 color = SDL_MapRGB(screen->format, 0xff, 0,0 );
