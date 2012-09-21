@@ -24,3 +24,4 @@ survivor.exe
 *.orig
 *.rej
 .depend
+gmon.out
