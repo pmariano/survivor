@@ -304,10 +304,10 @@ void renderMenu(App *app){
 	  SDL_Color color;
 	  if(app->game.won) {
 		  color = green;
-		  sprintf(kills, "You won!!! Zombies killed: %i", app->game.kill_count);
+		  sprintf(kills, "You won!!! Zombies killed: %i", app->game.total_kill_count);
 	  } else {
 		  color = trueRed;
-		  sprintf(kills, "You died. Zombies killed: %i", app->game.kill_count);
+		  sprintf(kills, "You died. Zombies killed: %i", app->game.total_kill_count);
 	  }
 	  text_write_raw(screen, 100, 250, kills, color, 50);
 	} else if(app->state == STATE_PAUSED){

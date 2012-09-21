@@ -35,33 +35,10 @@ void gameInit(App *app){
 	app->game.kill_count= 0;
   int enemy_count = app->game.board.wave[app->game.board.wave_index].enemy_count;
 
-	/**
-	 * Player 1 init settings
-	 * */
 	Body *p1body = &app->game.player1.body;
-	p1body->ang_vel = 0.04;
-	p1body->max_vel = 4;
-	p1body->angle = 0;
-	p1body->life = 100.0;
-	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
-	p1body->item.ammo_used = 0 ;
-	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
-	p1body->shoot_key = SDLK_a;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
 
-	/**
-	 * Player 2 init settings
-	 * */
 	Body *p2body = &app->game.player2.body;
-
-	p2body->ang_vel = 0.4;
-	p2body->max_vel = 6;
-	p2body->angle = 1;
-	p2body->life = 100.0;
-	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
-	p2body->item.ammo_used = 0 ;
-	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
-	p2body->shoot_key = SDLK_z;
 	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
 	app->game.latest_enemy_updated = 0;
@@ -84,8 +61,35 @@ void resetApp(App *app)
 {
 	app->game.total_kill_count= 0;
 	app->game.won = 0;
-	app->game.player1.body.status = BODY_DEAD;
-	app->game.player2.body.status = BODY_DEAD;
+
+	/**
+	 * Player 1 init settings
+	 * */
+	Body *p1body = &app->game.player1.body;
+	p1body->status = BODY_DEAD;
+	p1body->ang_vel = 0.04;
+	p1body->max_vel = 4;
+	p1body->angle = 0;
+	p1body->life = 100.0;
+	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
+	p1body->item.ammo_used = 0 ;
+	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
+	p1body->shoot_key = SDLK_a;
+
+	/**
+	 * Player 2 init settings
+	 * */
+	Body *p2body = &app->game.player2.body;
+	p2body->status = BODY_DEAD;
+	p2body->ang_vel = 0.4;
+	p2body->max_vel = 6;
+	p2body->angle = 1;
+	p2body->life = 100.0;
+	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
+	p2body->item.ammo_used = 0 ;
+	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
+	p2body->shoot_key = SDLK_z;
+
 	setWave(app,0); // calls gameInit
 }
 
@@ -274,7 +278,7 @@ void handleDelay(Uint32 start) {
   int actual_delta = end - start;
   int expected_delta = 1000/FPS;
   int delay = MAX(0, expected_delta - actual_delta);
-  printf("delay %d %d %d\n", actual_delta, expected_delta, delay);
+  //printf("delay %d %d %d\n", actual_delta, expected_delta, delay);
   SDL_Delay(delay);
 }
 
@@ -433,7 +437,7 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].score = 5;
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].sound = Mix_LoadWAV("sounds/ouch.wav");
-	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 1;
+	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 15;
 	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
 	app->game.itemtype[ITEM_PLAYER_BULLET].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_PLAYER_BULLET].image = IMG_Load("data/bullet_ammo.png");
@@ -442,7 +446,7 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_PLAYER_BULLET].spread = 3;
 	app->game.itemtype[ITEM_PLAYER_BULLET].ammo_total = 1000;
 	app->game.itemtype[ITEM_PLAYER_BULLET].sound = Mix_LoadWAV("sounds/machinegun.wav");
-	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 5;
+	app->game.itemtype[ITEM_PLAYER_FLAME].damage = 100;
 	app->game.itemtype[ITEM_PLAYER_FLAME].range = 150;
 	app->game.itemtype[ITEM_PLAYER_FLAME].image = IMG_Load("data/fire_ammo.png");
 	app->game.itemtype[ITEM_PLAYER_FLAME].hit_image = IMG_Load("data/fire_hit.png");
@@ -584,6 +588,7 @@ inline int draw(App *app, Body *body, int x, int y)
 		if(target>=4) {
 			int idx = target - 4;
 			hit(app, body, &app->game.enemies[idx].body);
+			break;
 		} else if(target==1 && i==0) {
 			break;
 		}

@@ -289,7 +289,7 @@ int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y)
 
 int powerup_spawn_pos(Game *game, int *x, int *y) {
 	int i;
-	for(i=0; i< 10; i++) {
+	for(i=0; i< 50; i++) {
 		int x1 = rand() % mapWidth;
 		int y1 = rand() % mapHeight;
 		if(game->board.safearea[x1][y1] && !game->board.powerup[x1][y1]) {
