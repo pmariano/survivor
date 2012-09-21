@@ -62,9 +62,10 @@ void moveInit(App *app)
 			Uint32 *p = (Uint32*)( ((Uint8*)hit->pixels) + (x*hit->format->BytesPerPixel+y*hit->pitch) );
 			Uint8 r,g,b;
 			SDL_GetRGB(*p, hit->format, &r, &g, &b);
-			int walk = b+g>r+0x20;
-			int fly = r+g+b>0x20;
-			int safe = g>r+b+0x20;
+			int threshold = 0x40;
+			int walk = b+g>r+threshold;
+			int fly = r+g+b>threshold;
+			int safe = g>r+b+threshold;
 			app->game.board.wall[x][y] = !walk;
 			app->game.board.air[x][y] = !fly;
 			app->game.board.safearea[x][y] = safe;
@@ -172,7 +173,7 @@ void move_enemies(App *app)
         Body *enemy_body = &app->game.enemies[id].body;
 
 		if(app->game.player1.body.status == BODY_ALIVE) {
-			printf("find %d=%d\n", id, crazy);
+			//printf("find %d=%d\n", id, crazy);
 			pathStatus[crazy] = FindPath(crazy,
 				enemy_body->pos.x,
 				enemy_body->pos.y,
@@ -181,7 +182,7 @@ void move_enemies(App *app)
 		}
 
 		if(app->game.player2.body.status == BODY_ALIVE) {
-			printf("find %d=%d\n", id, crazy+1);
+			//printf("find %d=%d\n", id, crazy+1);
 			pathStatus[crazy+1] = FindPath(crazy+1,
 				enemy_body->pos.x,
 				enemy_body->pos.y,
@@ -230,7 +231,7 @@ void move_enemies(App *app)
 		int crazy = app->game.enemies[i].pathfinder;
         if(pathStatus[crazy] == found)
         {
-			printf("read %d=%d\n", i, crazy);
+			//printf("read %d=%d\n", i, crazy);
           int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize*1.25);
           int dx = xPath[crazy] - enemy_body->pos.x;
           int dy = yPath[crazy] - enemy_body->pos.y;
@@ -238,7 +239,7 @@ void move_enemies(App *app)
           body_move(&app->game, enemy_body, angle, .25+.75*rand()/(float)RAND_MAX);
 
 		  if(reach){
-				printf("reach %d=%d %d,%d\n", i, crazy, dx, dy);
+				//printf("reach %d=%d %d,%d\n", i, crazy, dx, dy);
 				pathStatus[app->game.enemies[i].pathfinder_other] = notStarted;
 				hit(app, enemy_body, app->game.enemies[i].target);
 		  }

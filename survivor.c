@@ -122,10 +122,8 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 		case SDLK_s:
 			grab(app, &player1->body);
 			break;
-		case SDLK_d:
-			throw(app, &player1->body, &player2->body);
-			break;
 		case SDLK_x:
+			give(app, &player1->body, &player2->body);
 			grab(app, &player2->body);
 			break;
 	}
@@ -338,10 +336,10 @@ void loadMap(App *app) {
   app->game.board.wave[2].x=bx*2;
   app->game.board.wave[2].y=by*0;
   app->game.board.wave[2].enemy_count=60;
-  app->game.board.wave[3].x=bx*3;
   app->game.board.wave[3].y=by*0;
+  app->game.board.wave[3].x=bx*3-tileSize*7;
   app->game.board.wave[3].enemy_count=80;
-  app->game.board.wave[4].x=bx*3;
+  app->game.board.wave[4].x=bx*3-tileSize*6;
   app->game.board.wave[4].y=by*1;
   app->game.board.wave[4].enemy_count=90;
   app->game.board.wave[5].x=bx*2;
@@ -470,9 +468,25 @@ int grab(App *app, Body *body)
 	int x = body->pos.x/tileSize;
 	int y = body->pos.y/tileSize;
 	int i = app->game.board.powerup[x][y];
+	int offset = 2;
+	int min_offset = -offset;
+
+	while(!i && offset >= min_offset){
+		i = app->game.board.powerup[x][y+offset--];
+		if(!i){
+			i = app->game.board.powerup[x+offset][y+offset];
+		}
+		if(!i){
+			i = app->game.board.powerup[x+offset][y];
+		}
+	}
+
 	if(i && app->game.board.powerups[--i].should_show) {
 		if(app->game.board.powerups[i].type->damage < 0) {
 			body->life -= app->game.board.powerups[i].type->damage;
+			if(body->life > 100.0){
+				body->life = 100.0;
+			}
 		} else  {
 			body->item = app->game.board.powerups[i];
 		}
@@ -480,7 +494,7 @@ int grab(App *app, Body *body)
 		app->game.board.powerup[x][y] = 0;
 	}
 }
-int throw(App *app, Body *body1, Body *body2)
+int give(App *app, Body *body1, Body *body2)
 {
 	int x1 = body1->pos.x/tileSize;
 	int y1 = body1->pos.y/tileSize;
@@ -491,6 +505,7 @@ int throw(App *app, Body *body1, Body *body2)
 		if(fabs(x1 - x2) < 5 && fabs(y1 - y2) < 5){
 			body1->item = body2->item;
 			body2->item.type = &app->game.itemtype[ITEM_NONE];
+			body2->item.ammo_used = 0 ;
 		}
 	}
 }
@@ -563,11 +578,10 @@ int draw(App *app, Body *body, int x, int y)
 		target = is_air(&app->game, body, x, y+i*tileSize);
 		if(target==1 && i>0) // extension only works for enemies, not walls
 			continue;
-		if(target) {
-			if(target>=4) {
-				int idx = target - 4;
-				hit(app, body, &app->game.enemies[idx].body);
-			}
+		if(target>=4) {
+			int idx = target - 4;
+			hit(app, body, &app->game.enemies[idx].body);
+		} else if(target==1 && i==0) {
 			break;
 		}
 	}
@@ -673,9 +687,12 @@ int shoot(App *app, Body *body)
 	int range;
 	if(body->status != BODY_ALIVE)
 		return;
-	if(!app->debug && ++body->item.ammo_used > body->item.type->ammo_total) // infinit ammo on debug
-		return;
 
+	if((body->item.ammo_used >= body->item.type->ammo_total) || app->debug){
+		return;
+	}
+
+	++body->item.ammo_used;
 	range = body->item.type->range;
 	playSound(body->item.type->sound, -1);
 
