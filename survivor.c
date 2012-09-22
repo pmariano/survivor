@@ -62,6 +62,8 @@ void resetApp(App *app)
 {
 	app->game.total_kill_count= 0;
 	app->game.won = 0;
+	app->game.hint_grab = 0;
+	app->game.hint_give = 0;
 
 	/**
 	 * Player 1 init settings
@@ -130,6 +132,9 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			break;
 		case SDLK_x:
 		case SDLK_KP_MINUS:
+			if(app->game.hint_give == 0) {
+				app->game.hint_give = SDL_GetTicks() + 5000;
+			}
 			give(app, &player1->body, &player2->body);
 			grab(app, &player2->body);
 			break;
@@ -682,9 +687,12 @@ int grab(App *app, Body *body)
 {
 	int x = body->pos.x/tileSize;
 	int y = body->pos.y/tileSize;
-	int i = app->game.board.powerup[x][y];
 	int dx,dy;
 
+	if(body->status != BODY_ALIVE)
+		return;
+
+	int i = 0;
 	for(dy=-1;dy<=1;dy++) {
 		for(dx=-1;dx<=1;dx++) {
 			int xx = x+dx;
@@ -712,7 +720,7 @@ int give(App *app, Body *body1, Body *body2)
 {
 	if(body1->status != BODY_ALIVE
 	|| body2->status != BODY_ALIVE)
-		return;
+		return 0;
 	int x1 = body1->pos.x/tileSize;
 	int y1 = body1->pos.y/tileSize;
 	int x2 = body2->pos.x/tileSize;
@@ -723,8 +731,10 @@ int give(App *app, Body *body1, Body *body2)
 			body1->item = body2->item;
 			body2->item.type = &app->game.itemtype[ITEM_NONE];
 			body2->item.ammo_used = 0 ;
+			return 1;
 		}
 	}
+	return 0;
 }
 
 int hit(App *app, Body *source, Body *target){
@@ -1015,6 +1025,9 @@ void addPowerup(App *app)
 				app->game.board.powerups[i].x = x;
 				app->game.board.powerups[i].y = y;
 				app->game.board.powerup[x/tileSize][y/tileSize] = 1+i;
+				if(app->game.hint_grab == 0) {
+					app->game.hint_grab = t + 5000;
+				}
 				break;
 			}
 		}

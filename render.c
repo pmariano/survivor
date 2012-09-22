@@ -127,6 +127,7 @@ void flushRender(App *app)
 void renderPowerups(App *app)
 {
   int i = 0;
+  int t = SDL_GetTicks();
   for(; i < POWERUP_COUNT; i++)
   {
     if(app->game.board.powerups[i].should_show == 1)
@@ -140,6 +141,9 @@ void renderPowerups(App *app)
       int j = app->game.board.sprite_count++;
       app->game.board.sprite[j].image = app->game.board.powerups[i].type->image;
       app->game.board.sprite[j].rect = rect;
+	  if(t < app->game.hint_grab) {
+		  text_write_raw(app->screen, rect.x-80, rect.y+20, "button2 to pickup!!", (t/300) % 2 ? yellow : red, 20);
+	  }
     }
   }
 
@@ -223,8 +227,12 @@ void renderStart(App *app){
 
 void renderFinish(App *app){
   Game game = app->game;
+  int t = SDL_GetTicks();
 
   renderPlayer(&app->game, &game.player1);
+  if(t < app->game.hint_give) {
+	  text_write_raw(app->screen, app->game.player1.body.pos.x-100, app->game.player1.body.pos.y-80, "button2 to give to soldier!!", (t/300) % 2 ? yellow : red, 20);
+  }
   renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
   renderPowerups(app);
