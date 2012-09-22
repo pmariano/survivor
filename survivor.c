@@ -2,6 +2,7 @@
 #include <SDL_keysym.h>
 #include <SDL_image.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <strings.h>
 #include <math.h>
 
@@ -73,7 +74,6 @@ void resetApp(App *app)
 	p1body->life = 100.0;
 	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p1body->item.ammo_used = 0 ;
-	p1body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
 	p1body->shoot_key = SDLK_a;
 
 	/**
@@ -87,7 +87,6 @@ void resetApp(App *app)
 	p2body->life = 100.0;
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p2body->item.ammo_used = 0 ;
-	p2body->onHitSound = Mix_LoadWAV("sounds/ouch.wav");
 	p2body->shoot_key = SDLK_z;
 
 	setWave(app,0); // calls gameInit
@@ -99,7 +98,8 @@ void pauseOrJoinTheGame(App *app, Player *player){
 	app->menu.selected = MENU_RESUME;
   } else{
 	player->body.status = BODY_ALIVE;
-	player->body.status = BODY_ALIVE;
+	player->body.life = 100.0;
+	player_spawn_pos(&app->game, &player->body.pos.x, &player->body.pos.y);
   }
 }
 
@@ -129,6 +129,7 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			grab(app, &player1->body);
 			break;
 		case SDLK_x:
+		case SDLK_KP_MINUS:
 			give(app, &player1->body, &player2->body);
 			grab(app, &player2->body);
 			break;
@@ -198,7 +199,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		player2->body.status = BODY_ALIVE;
 		player2->body.status = BODY_ALIVE;
 	  } else {
-		printf("player 1 is ready\n");
+		//printf("player 1 is ready\n");
 		player1->body.status = BODY_ALIVE;
 		player1->body.status = BODY_ALIVE;
 	  }
@@ -241,16 +242,16 @@ void bindGameplayKeystate(App *app){
    * S = SECONDARY ATTACK
    * */
   player_move(app, &player2->body,
-	  keystate[SDLK_p] || keystate[SDLK_KP6] || keystate[SDLK_t],
-	  keystate[SDLK_QUOTE] || keystate[SDLK_KP8] || keystate[SDLK_i],
-	  keystate[SDLK_SEMICOLON] ||keystate[SDLK_KP4] || keystate[SDLK_y],
-	  keystate[SDLK_l] ||keystate[SDLK_KP5] || keystate[SDLK_KP2] || keystate[SDLK_u],
+	  keystate[SDLK_p]         || keystate[SDLK_KP8] || keystate[SDLK_t],
+	  keystate[SDLK_QUOTE]     || keystate[SDLK_KP6] || keystate[SDLK_i],
+	  keystate[SDLK_SEMICOLON] ||keystate[SDLK_KP5] || keystate[SDLK_y],
+	  keystate[SDLK_l]         ||keystate[SDLK_KP4] || keystate[SDLK_KP2] || keystate[SDLK_u],
 	  keystate[SDLK_x]
 	  );
 
   if(keystate[SDLK_a])
 	shoot(app, &player1->body);
-  if(keystate[SDLK_z])
+  if(keystate[SDLK_z] || keystate[SDLK_KP_PLUS] )
 	shoot(app, &player2->body);
 }
 
@@ -305,16 +306,16 @@ void spawnEnemy(App *app)
 	int spawn  = wave->enemy_count_per_spawn/2 + (rand() % (wave->enemy_count_per_spawn/2));
 	
 	if(spawn + game->on_screen_enemies > wave->enemy_count_on_screen) {
-		printf("spawn %d on_screen\n", game->on_screen_enemies);
+		//printf("spawn %d on_screen\n", game->on_screen_enemies);
 		spawn = wave->enemy_count_on_screen - game->on_screen_enemies;
 	}
 	
 	if(spawn + game->total_enemies > wave->enemy_count) {
-		printf("spawn %d wave\n", game->total_enemies);
+		//printf("spawn %d wave\n", game->total_enemies);
 		spawn = wave->enemy_count - game->total_enemies;
 	}
 
-	printf("spawn %d enemies\n", spawn);
+	//printf("spawn %d enemies\n", spawn);
 	while(spawn > 0) {
 		Enemy *enemy = NULL;
 		for(i = 0; i < wave->enemy_count; i++)
@@ -820,7 +821,7 @@ inline int draw(App *app, Body *body, int x, int y)
 
 inline int lasersight(App *app, Body *body, int x, int y, int n)
 {
-	int hit;
+	int hit = 0;
 	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
 		Uint32 *p = (Uint32*)(((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch));
 		hit = is_air2(&app->game, body, x, y);
@@ -1005,7 +1006,7 @@ void addPowerup(App *app)
 				int k = rand() % roulette;
 				for(j=0;j<ITEM_PLAYER_COUNT;j++) {
 					int kk = app->game.itemtype[j].chance;
-					printf("type %d %d/%d/%d\n",j, k, kk, roulette);
+					//printf("type %d %d/%d/%d\n",j, k, kk, roulette);
 					if(k<kk) break;
 					k-=kk;
 				}
@@ -1021,6 +1022,11 @@ void addPowerup(App *app)
 	}
 }
 
+void terminate()
+{
+	Mix_Quit();
+	SDL_Quit();
+}
 
 
 int main(int argc, char* args[] )
@@ -1035,6 +1041,8 @@ int main(int argc, char* args[] )
   app.credits = CREDITS_TEAM;
 
   if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
+  atexit(terminate);
+
   init_font();
   InitializePathfinder();
   renderInit(&app);
@@ -1042,6 +1050,8 @@ int main(int argc, char* args[] )
   loadItems(&app);
   loadEnemies(&app);
   loadMap(&app);
+  app.game.player1.body.onHitSound = Mix_LoadWAV("sounds/ouch.wav");
+  app.game.player2.body.onHitSound = Mix_LoadWAV("sounds/ouch.wav");
   setWave(&app, 0); // calls moveInit / gameInit
 
   while(app.state != STATE_EXIT){
@@ -1067,6 +1077,32 @@ int main(int argc, char* args[] )
 	}
 	handleDelay(startTime);
   }
+
+  Mix_FreeChunk(app.game.player1.body.onHitSound);
+  Mix_FreeChunk(app.game.player2.body.onHitSound);
+  Mix_FreeChunk(app.game.itemtype[ITEM_ENEMY_MEDIC].sound);
+  Mix_FreeChunk(app.game.itemtype[ITEM_ENEMY_SOLDIER].sound);
+  Mix_FreeChunk(app.game.itemtype[ITEM_PLAYER_BULLET].sound);
+  Mix_FreeChunk(app.game.itemtype[ITEM_PLAYER_FLAME].sound);
+
+  SDL_FreeSurface(app.game.board.base_image);
+  SDL_FreeSurface(app.game.board.base_hit);
+  SDL_FreeSurface(app.game.itemtype[ITEM_ENEMY_MEDIC].hit_image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_ENEMY_SOLDIER].hit_image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_BULLET].hit_image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_BULLET].image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_BULLET].shot_image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_FLAME].image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_FLAME].hit_image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_FLAME].shot_image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_HEALTH_PACK].image);
+  SDL_FreeSurface(app.game.enemy_class[ENEMY_MEDIC].image);
+  SDL_FreeSurface(app.game.enemy_class[ENEMY_SOLDIER].image);
+  SDL_FreeSurface(app.game.board.image);
+  SDL_FreeSurface(app.game.board.hit);
+  renderTerminate(&app);
+  terminate_font();
+
 
   return 0;
 }

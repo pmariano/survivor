@@ -8,6 +8,18 @@ void init_font() {
 	memset(ttf_point_cache, 0, sizeof(ttf_point_cache));
 }
 
+void terminate_font()
+{
+	int i;
+	for(i=0;i<TTF_POINT_LIMIT;i++) {
+		if(ttf_point_cache[i]) {
+			TTF_CloseFont(ttf_point_cache[i]);
+			ttf_point_cache[i] = NULL;
+		}
+	}
+	TTF_Quit();
+}
+
 TTF_Font *setup_ttf(int points){
 	if(points >= TTF_POINT_LIMIT) return NULL;
     TTF_Font *ttf_tmp = ttf_point_cache[points];

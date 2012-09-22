@@ -211,7 +211,7 @@ void renderStart(App *app){
   if(t < app->game.board.wave_start + 2000) {
 	  int alpha = 0xff * (t-app->game.board.wave_start)/2000;
 	  SDL_SetAlpha(game.board.image, SDL_SRCALPHA, alpha);
-	  printf("wave start %d\n", alpha);
+	  // printf("wave start %d\n", alpha);
   } else {
 	  SDL_FillRect(app->screen, NULL , color);
 	  SDL_SetAlpha(game.board.image, 0, 0xff);
@@ -252,7 +252,28 @@ void renderInit(App *app){
   app->game.player2.left = IMG_Load("data/engenheiro1.png");
   app->game.player2.right = IMG_Load("data/engenheiro1.png");
 
-  app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE);//|SDL_FULLSCREEN);
+  app->screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE
+#if RELEASE
+	|SDL_FULLSCREEN
+#endif
+  );
+}
+
+void renderTerminate(App *app){
+	SDL_FreeSurface(app->logo);
+	SDL_FreeSurface(app->menu.soldier);
+	SDL_FreeSurface(app->menu.bigZombie);
+	SDL_FreeSurface(app->menu.zombie);
+	SDL_FreeSurface(app->menu.engineer);
+	SDL_FreeSurface(app->game.player1.up);
+	SDL_FreeSurface(app->game.player1.down);
+	SDL_FreeSurface(app->game.player1.left);
+	SDL_FreeSurface(app->game.player1.right);
+	SDL_FreeSurface(app->game.player2.up);
+	SDL_FreeSurface(app->game.player2.down);
+	SDL_FreeSurface(app->game.player2.left);
+	SDL_FreeSurface(app->game.player2.right);
+
 }
 
 /**
