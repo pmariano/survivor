@@ -6,9 +6,9 @@
 #define ENEMY_COUNT 999
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
-#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT+mapWidth*mapHeight) // w*h=bricks
+#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
 
-#define BUILD_LIMIT 500
+#define BUILD_LIMIT 2000
 #define WAVE_COUNT 256
 
 #include "aStarLibrary.h" // must be after the defines above

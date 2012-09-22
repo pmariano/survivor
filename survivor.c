@@ -1071,7 +1071,7 @@ int build(App *app, Body *body)
 
 	//printf("try build %d %d %d %d\n",x1,y1,x2,y2);
 	if(app->game.board.built[x2][y2] || app->game.board.crowd[x2][y2]==0) {
-		app->game.board.built[x2][y2]+=3;
+		app->game.board.built[x2][y2]+=10;
 		if(app->game.board.built[x2][y2] > BUILD_LIMIT)
 			app->game.board.built[x2][y2] = BUILD_LIMIT;
 		//printf("build %d,%d = %d\n",x2,y2,app->game.board.built[x2][y2] );

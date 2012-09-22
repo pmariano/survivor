@@ -10,8 +10,6 @@ SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 SDL_Color yellow = {0xFF, 0XFF, 0x00};
 
-SDL_Rect SRECT_NULL = { 0,0,0,0 };
-
 void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2){
  int t = SDL_GetTicks();
   if(player1->body.status != BODY_DEAD){
@@ -79,7 +77,6 @@ void renderPlayer(Game *game, Player *player){
 	int j = game->board.sprite_count++;
 	game->board.sprite[j].image = image;
 	game->board.sprite[j].rect = rect;
-	game->board.sprite[j].srect = SRECT_NULL;
 
 	rect.y++;
 	rect.x+=image->w/2;
@@ -87,7 +84,6 @@ void renderPlayer(Game *game, Player *player){
 	game->board.sprite[j].image = player->body.item.type->image;
 	// printf("item %p\n", player->body.item.type);
 	game->board.sprite[j].rect = rect;
-	game->board.sprite[j].srect = SRECT_NULL;
 }
 
 void renderEnemies(App *app)
@@ -108,7 +104,6 @@ void renderEnemies(App *app)
 	  int j = app->game.board.sprite_count++;
 	  app->game.board.sprite[j].image = image;
 	  app->game.board.sprite[j].rect = rect;
-	  app->game.board.sprite[j].srect = SRECT_NULL;
     }
   }
 }
@@ -126,8 +121,7 @@ void flushRender(App *app)
 	qsort(app->game.board.sprite, app->game.board.sprite_count, sizeof(Sprite), sprite_zsort);
 
 	for(i=0; i< app->game.board.sprite_count; i++) {
-		SDL_Rect *srect = app->game.board.sprite[i].srect.w ? &app->game.board.sprite[i].srect : NULL;
-		SDL_BlitSurface(app->game.board.sprite[i].image, srect, app->screen, &app->game.board.sprite[i].rect);
+		SDL_BlitSurface(app->game.board.sprite[i].image, NULL, app->screen, &app->game.board.sprite[i].rect);
 	}
 }
 
@@ -148,7 +142,6 @@ void renderPowerups(App *app)
       int j = app->game.board.sprite_count++;
       app->game.board.sprite[j].image = app->game.board.powerups[i].type->image;
       app->game.board.sprite[j].rect = rect;
-	  app->game.board.sprite[j].srect = SRECT_NULL;
 	  if(t < app->game.hint_grab) {
 		  text_write_raw(app->screen, rect.x-80, rect.y+30, "button2 to pickup!!", (t/300) % 2 ? yellow : red, 20);
 	  }
@@ -179,10 +172,7 @@ void renderBuilt(App *app)
 					h
 				};
 				//printf("wall %d %d %d\n" , h, srect.y, srect.h);
-				int j = app->game.board.sprite_count++;
-				app->game.board.sprite[j].image = app->game.itemtype[ITEM_BUILD].hit_image;
-				app->game.board.sprite[j].rect = drect;
-				app->game.board.sprite[j].srect = srect;
+				SDL_BlitSurface(app->game.itemtype[ITEM_BUILD].hit_image, &srect, app->screen, &drect);
 			}
 		}
 	}

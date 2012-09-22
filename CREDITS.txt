@@ -12,6 +12,10 @@ font: PixelSixated, created by
 pathfinding: Patrick Lester (2005)
 http://www.policyalmanac.org/games/aStarTutorial.htm
 
+Icons
+Sandbag, http://www.ehow.com/how_6393964_make-own-sandbags-fitness.html (fairuse?)
+Shovel, http://nathancmatthews.com/mcinvedit/ (fairuse?)
+
 Music
 
 Home: Cluck, Computer Savvy, http://www.8bitpeoples.com/discography/by/the_j_arthur_keenes_band
