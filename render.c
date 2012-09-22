@@ -10,10 +10,9 @@ SDL_Color green = {0x00, 0XFF, 0x00};
 SDL_Color yellow = {0xFF, 0XFF, 0x00};
 
 void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2){
+ int t = SDL_GetTicks();
   if(player1->body.status != BODY_DEAD){
     text_write_raw(screen, 5, 60, "Player 1", green, 30);
-
-    if(player1->body.status != BODY_DEAD){
 
       char ammo[256];
       sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
@@ -22,9 +21,9 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
       Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
       SDL_Rect rect = { 5, 10, player1->body.life*2, 20};
       SDL_FillRect(screen, &rect, color);
-    }
+  } else {
+	  text_write_raw(screen, 5, 10, "Soldier Press Start", (t/500) % 2 ? yellow : red, 20);
   }
-
 
   char kills[256];
   sprintf(kills, "%i Total kill(s)", app->game.total_kill_count);
@@ -35,7 +34,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
   sprintf(enemies_wave, "%i Enemies", expected_kills - app->game.kill_count);
   text_write_raw(screen, 400, 90, enemies_wave, green, 30);
 
-  int t = SDL_GetTicks();
+
   if(t < app->game.board.wave_start + 5000) {
 	  char new_wave[256];
 	  sprintf(new_wave, "NEW WAVE IN %d", 5-(t-app->game.board.wave_start) / 1000);
@@ -45,16 +44,16 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
   if(player2->body.status != BODY_DEAD){
     text_write_raw(screen, 900, 60, "Player 2", green, 30);
 
-	if(player2->body.status != BODY_DEAD){
 	  char ammo[256];
 	  sprintf(ammo, "ammo: %i", player2->body.item.type->ammo_total - player2->body.item.ammo_used);
-	  text_write_raw(screen, 910, 30, ammo, yellow, 20);
+	  text_write_raw(screen, 880, 30, ammo, yellow, 20);
 
 	  Uint32 color = SDL_MapRGB(screen->format, 0xff, 0,0 );
-	  SDL_Rect rect = { 830, 10, player2->body.life*2, 20};
+	  SDL_Rect rect = { 800, 10, player2->body.life*2, 20};
 	  SDL_FillRect(screen, &rect, color);
+	}else {
+	  text_write_raw(screen, 780, 10, "Enginner Press Start", (t/500) % 2 ? yellow : red, 20);
 	}
-  }
 }
 
 void renderPlayer(Game *game, Player *player){
