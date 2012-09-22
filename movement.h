@@ -8,4 +8,3 @@ void move_enemies(App *app);
 int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y);
 int enemy_spawn_pos(Game *game, int *x, int *y);
 int powerup_spawn_pos(Game *game, int *x, int *y);
-inline int is_air(Game *game, Body *body, int x, int y);

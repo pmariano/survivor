@@ -5,7 +5,7 @@
 
 void movePrepare(App *app)
 {
-	int i;
+	int i, x,y;
 	memcpy(walkability, app->game.board.wall, sizeof(app->game.board.wall)); // 1 = totaly unwalkable
 	memcpy(app->game.board.crowd, app->game.board.wall, sizeof(app->game.board.wall));
 	memcpy(app->game.board.hittable, app->game.board.air, sizeof(app->game.board.air));
@@ -44,6 +44,17 @@ void movePrepare(App *app)
 		}
 	}
 				
+	for (x=0; x < mapWidth;x++) {
+		for (y=0; y < mapHeight;y++) {
+			float f = app->game.board.built[x][y]/(float)BUILD_LIMIT;
+			if(app->game.board.crowd[x][y] < !!f)
+				app->game.board.crowd[x][y] = !!f;
+			if(app->game.board.hittable[x][y] < !!f)
+				app->game.board.hittable[x][y] = !!f;
+			if(walkability[x][y] < mapWidth*f)
+				walkability[x][y] = mapWidth*f; // at least 1% walkable
+		}
+	}
 }
 
 
@@ -99,14 +110,6 @@ void angle_rotate(float *a0_base, float a1, float f)
 	*a0_base = a0;
 }
 
-inline int is_air(Game *game, Body *body, int x, int y)
-{
-	x/=tileSize;
-	y/=tileSize;
-	if(x<0 || y<0 || x>=mapWidth || y>=mapHeight)
-		return 1;
-	return game->board.hittable[x][y];
-}
 inline int is_solid(Game *game, Body *body, int x, int y)
 {
 	x/=tileSize;
@@ -116,6 +119,9 @@ inline int is_solid(Game *game, Body *body, int x, int y)
 		return 1;
 	if(body->pos.x/tileSize == x && body->pos.y/tileSize == y)
 		return 0;
+	if(game->board.built[x][y]>0) {
+		game->board.built[x][y]--;
+	}
 	return game->board.crowd[x][y];
 }
 inline int is_empty(Game *game, Body *body, int x, int y)

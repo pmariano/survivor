@@ -1,4 +1,5 @@
 #include <SDL_image.h>
+#include <math.h>
 #include "render.h"
 #include "font.h"
 #include "aStarLibrary.h"
@@ -8,6 +9,8 @@ SDL_Color trueRed = {0XFF, 0x00, 0x00};
 SDL_Color white = {0xFF, 0XFF, 0xFF};
 SDL_Color green = {0x00, 0XFF, 0x00};
 SDL_Color yellow = {0xFF, 0XFF, 0x00};
+
+SDL_Rect SRECT_NULL = { 0,0,0,0 };
 
 void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2){
  int t = SDL_GetTicks();
@@ -76,6 +79,7 @@ void renderPlayer(Game *game, Player *player){
 	int j = game->board.sprite_count++;
 	game->board.sprite[j].image = image;
 	game->board.sprite[j].rect = rect;
+	game->board.sprite[j].srect = SRECT_NULL;
 
 	rect.y++;
 	rect.x+=image->w/2;
@@ -83,6 +87,7 @@ void renderPlayer(Game *game, Player *player){
 	game->board.sprite[j].image = player->body.item.type->image;
 	// printf("item %p\n", player->body.item.type);
 	game->board.sprite[j].rect = rect;
+	game->board.sprite[j].srect = SRECT_NULL;
 }
 
 void renderEnemies(App *app)
@@ -103,6 +108,7 @@ void renderEnemies(App *app)
 	  int j = app->game.board.sprite_count++;
 	  app->game.board.sprite[j].image = image;
 	  app->game.board.sprite[j].rect = rect;
+	  app->game.board.sprite[j].srect = SRECT_NULL;
     }
   }
 }
@@ -120,7 +126,8 @@ void flushRender(App *app)
 	qsort(app->game.board.sprite, app->game.board.sprite_count, sizeof(Sprite), sprite_zsort);
 
 	for(i=0; i< app->game.board.sprite_count; i++) {
-		SDL_BlitSurface(app->game.board.sprite[i].image, NULL, app->screen, &app->game.board.sprite[i].rect);
+		SDL_Rect *srect = app->game.board.sprite[i].srect.w ? &app->game.board.sprite[i].srect : NULL;
+		SDL_BlitSurface(app->game.board.sprite[i].image, srect, app->screen, &app->game.board.sprite[i].rect);
 	}
 }
 
@@ -141,11 +148,44 @@ void renderPowerups(App *app)
       int j = app->game.board.sprite_count++;
       app->game.board.sprite[j].image = app->game.board.powerups[i].type->image;
       app->game.board.sprite[j].rect = rect;
+	  app->game.board.sprite[j].srect = SRECT_NULL;
 	  if(t < app->game.hint_grab) {
 		  text_write_raw(app->screen, rect.x-80, rect.y+30, "button2 to pickup!!", (t/300) % 2 ? yellow : red, 20);
 	  }
     }
   }
+
+}
+
+void renderBuilt(App *app)
+{
+	int x,y;
+	for (x=0; x < mapWidth;x++) {
+		for (y=0; y < mapHeight;y++) {
+			int f = app->game.board.built[x][y];
+			if(f)
+			{
+				int h = ceil(f * tileSize / (float)BUILD_LIMIT / 4.)*4;
+				SDL_Rect srect = {
+					0,
+					tileSize-h,
+					tileSize,
+					h
+				};
+				SDL_Rect drect = {
+					x*tileSize,
+					y*tileSize-h,
+					tileSize,
+					h
+				};
+				//printf("wall %d %d %d\n" , h, srect.y, srect.h);
+				int j = app->game.board.sprite_count++;
+				app->game.board.sprite[j].image = app->game.itemtype[ITEM_BUILD].hit_image;
+				app->game.board.sprite[j].rect = drect;
+				app->game.board.sprite[j].srect = srect;
+			}
+		}
+	}
 
 }
 
@@ -187,6 +227,10 @@ void renderDebug(App *app)
 		case DEBUG_SAFE: // cyan
 			color = SDL_MapRGBA(app->screen->format, 0x00,0xff,0xff,0xff );
 			map = (int *)app->game.board.safearea;
+			break;
+		case DEBUG_BUILT: // gray
+			color = SDL_MapRGBA(app->screen->format, 0x00,0x80,0x80,0x80 );
+			map = (int *)app->game.board.built;
 			break;
 	}
 
@@ -231,14 +275,19 @@ void renderFinish(App *app){
 
   renderPlayer(&app->game, &game.player1);
   if(t < app->game.hint_pivot) {
-	  text_write_raw(app->screen, app->game.player1.body.pos.x-60, app->game.player1.body.pos.y+20, "button2 to aim!!", (t/300) % 2 ? yellow : red, 20);
+		Player *player = app->game.player1.body.status==BODY_ALIVE ? &app->game.player1 : &app->game.player2;
+	  text_write_raw(app->screen, player->body.pos.x-60, player->body.pos.y+20, "button2 to aim!!", (t/300) % 2 ? yellow : red, 20);
   }
   if(t < app->game.hint_give) {
 	  text_write_raw(app->screen, app->game.player1.body.pos.x-100, app->game.player1.body.pos.y-80, "button2 to give to soldier!!", (t/300) % 2 ? yellow : red, 20);
   }
+  if(t < app->game.hint_build) {
+	  text_write_raw(app->screen, app->game.player2.body.pos.x-100, app->game.player2.body.pos.y-80, "button1 to build wall!!", (t/300) % 2 ? yellow : red, 20);
+  }
   renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
   renderPowerups(app);
+  renderBuilt(app);
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 
   flushRender(app);
@@ -381,6 +430,7 @@ void renderCredits(App *app)
 	text_write_raw(screen, 100, 500, "http://www.freesound.org/people/LAGtheNoggin/sounds/15545/", white, 26);
 	text_write_raw(screen, 100, 550, "http://www.freesound.org/people/Sparrer/sounds/50506/", white, 26);
 	text_write_raw(screen, 100, 600, "http://www.freesound.org/people/DJ20Chronos/sounds/33380/", white, 26);
+	text_write_raw(screen, 100, 650, "http://www.freesound.org/people/WIM/sounds/17918/", white, 26);
   }
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);

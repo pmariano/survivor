@@ -6,8 +6,9 @@
 #define ENEMY_COUNT 999
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
-#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
+#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT+mapWidth*mapHeight) // w*h=bricks
 
+#define BUILD_LIMIT 500
 #define WAVE_COUNT 256
 
 #include "aStarLibrary.h" // must be after the defines above
@@ -19,7 +20,7 @@ enum {
 	ITEM_PLAYER_COUNT,
 	ITEM_ENEMY_MEDIC,
 	ITEM_ENEMY_SOLDIER,
-	ITEM_NONE,
+	ITEM_BUILD,
 	ITEM_COUNT
 };
 enum {
@@ -62,6 +63,7 @@ typedef struct {
   int ammo_total;
   int score;
   int chance;
+  int build;
 } ItemType;
 
 typedef struct {
@@ -114,6 +116,7 @@ typedef struct {
 
 typedef struct {
 	SDL_Rect rect;
+	SDL_Rect srect;
 	SDL_Surface *image;
 } Sprite;
 
@@ -143,6 +146,7 @@ typedef struct{
   int hittable[mapWidth][mapHeight];
   int powerup[mapWidth][mapHeight];
   int safearea[mapWidth][mapHeight];
+  int built[mapWidth][mapHeight];
   int spawn_map[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;
@@ -202,6 +206,7 @@ typedef enum {
 	DEBUG_SHOT,
 	DEBUG_ITEM,
 	DEBUG_SAFE,
+	DEBUG_BUILT,
 	DEBUG_COUNT
 } Debug;
 

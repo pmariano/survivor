@@ -35,6 +35,7 @@ void gameInit(App *app){
 	app->game.spawnTime = app->game.start+5000;
 	app->game.spawnPowerupTime = app->game.start+15000;
 	app->game.kill_count= 0;
+	memset(app->game.board.built, 0, sizeof(app->game.board.built));
 
 	Body *p1body = &app->game.player1.body;
 	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
@@ -134,11 +135,11 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			break;
 		case SDLK_x:
 		case SDLK_KP_MINUS:
-			if(app->game.hint_give == 0) {
+			give(app, &player1->body, &player2->body);
+			
+			if(grab(app, &player2->body) && player1->body.status==BODY_ALIVE && app->game.hint_give == 0) {
 				app->game.hint_give = SDL_GetTicks() + 5000;
 			}
-			give(app, &player1->body, &player2->body);
-			grab(app, &player2->body);
 			break;
 	}
 }
@@ -157,12 +158,6 @@ void bindMenuKeysDown(App *app, SDLKey *key){
   }
 
   switch(*key){
-	case SDLK_1:
-	  player1->body.status = BODY_ALIVE;
-	  break;
-	case SDLK_2:
-	  player2->body.status = BODY_ALIVE;
-	  break;
 	case SDLK_UP:
 	case SDLK_q:
 	case SDLK_t:
@@ -177,6 +172,8 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		menu->selected++;
 	  }
 	  break;
+	case SDLK_1:
+	case SDLK_2:
 	case SDLK_a:
 	case SDLK_z:
 	case SDLK_RETURN:
@@ -202,12 +199,10 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 	  } else if(menu->selected == MENU_RESUME){
 		app->state = STATE_PLAYING;
 	  }
-	  if(*key == SDLK_z){
-		player2->body.status = BODY_ALIVE;
+	  if(*key == SDLK_z || *key == SDLK_2){
 		player2->body.status = BODY_ALIVE;
 	  } else {
 		//printf("player 1 is ready\n");
-		player1->body.status = BODY_ALIVE;
 		player1->body.status = BODY_ALIVE;
 	  }
 	  break;
@@ -258,8 +253,13 @@ void bindGameplayKeystate(App *app){
 
   if(keystate[SDLK_a])
 	shoot(app, &player1->body);
-  if(keystate[SDLK_z] || keystate[SDLK_KP_PLUS] )
-	shoot(app, &player2->body);
+  if(keystate[SDLK_z] || keystate[SDLK_KP_PLUS] ) {
+	if(player2->body.item.type->build) {
+		build(app, &player2->body);
+	} else {
+		shoot(app, &player2->body);
+	}
+  }
 }
 
 void bindKeyboard(App *app)
@@ -670,8 +670,13 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_HEALTH_PACK].damage = -50;
 	app->game.itemtype[ITEM_HEALTH_PACK].image = IMG_Load("data/health.png");
 
-	app->game.itemtype[ITEM_NONE].damage = 0;
-	app->game.itemtype[ITEM_NONE].freq= 0;
+	app->game.itemtype[ITEM_BUILD].build= 1;
+	app->game.itemtype[ITEM_BUILD].damage = 0;
+	app->game.itemtype[ITEM_BUILD].freq= 0;
+	app->game.itemtype[ITEM_BUILD].range= tileSize;
+	app->game.itemtype[ITEM_BUILD].sound = Mix_LoadWAV("sounds/shovel.wav");
+	app->game.itemtype[ITEM_BUILD].image = IMG_Load("data/brick_ammo.png");
+	app->game.itemtype[ITEM_BUILD].hit_image = IMG_Load("data/brick.png");
 
 }
 
@@ -690,6 +695,7 @@ int grab(App *app, Body *body)
 	int x = body->pos.x/tileSize;
 	int y = body->pos.y/tileSize;
 	int dx,dy;
+	int got = 0;
 
 	if(body->status != BODY_ALIVE)
 		return;
@@ -743,10 +749,12 @@ int grab(App *app, Body *body)
 			}
 		} else  {
 			body->item = app->game.board.powerups[idx];
+			got = 1;
 		}
 		app->game.board.powerups[idx].should_show = 0;
 		app->game.board.powerup[x][y] = 0;
 	}
+	return got;
 }
 int give(App *app, Body *body1, Body *body2)
 {
@@ -761,8 +769,11 @@ int give(App *app, Body *body1, Body *body2)
 	if(body2->item.type->freq != 0){
 		if(fabs(x1 - x2) < 5 && fabs(y1 - y2) < 5){
 			body1->item = body2->item;
-			body2->item.type = &app->game.itemtype[ITEM_NONE];
+			body2->item.type = &app->game.itemtype[ITEM_BUILD];
 			body2->item.ammo_used = 0 ;
+			if(app->game.hint_build == 0) {
+				app->game.hint_build = SDL_GetTicks() + 5000;
+			}
 			return 1;
 		}
 	}
@@ -807,7 +818,7 @@ int hit(App *app, Body *source, Body *target){
 	return 0;
 }
 
-inline int is_air2(Game *game, Body *body, int x, int y)
+inline int is_air(Game *game, Body *body, int x, int y)
 {
 	x/=tileSize;
 	y/=tileSize;
@@ -843,10 +854,18 @@ inline int draw(App *app, Body *body, int x, int y)
 	int target = 0;
 	for(i=0; i<enemyTileHeight; i++) { // hit the whole height of the enemies, not just the feet
 		// printf("hit %d,%d-%d /%d\n", x,y,i *tileSize, enemyTileHeight);
-		int tg = is_air2(&app->game, body, x, y+i*tileSize);
+		int tg = is_air(&app->game, body, x, y+i*tileSize);
 		if(tg >=4 || tg && i==0) {
 			// printf("i %d tg %d\n", i, tg);
 			target = tg;
+			x/=tileSize;
+			y/=tileSize;
+			if(i==0
+				&& x>=0 && y>=0 && x<mapWidth && y<mapHeight 
+				&& app->game.board.built[x][y] > 0)
+			{
+				app->game.board.built[x][y]--;
+			}
 			break;
 		}
 	}
@@ -865,7 +884,7 @@ inline int lasersight(App *app, Body *body, int x, int y, int n)
 	int hit = 0;
 	if(x >= 0 && x < app->screen->w && y >= 0 && y < app->screen->h) {
 		Uint32 *p = (Uint32*)(((Uint8*)app->screen->pixels) + (x*app->screen->format->BytesPerPixel+y*app->screen->pitch));
-		hit = is_air2(&app->game, body, x, y);
+		hit = is_air(&app->game, body, x, y);
 		if(hit) n=0;
 		if(n<=0x80) {
 			Uint32 color = SDL_MapRGB(app->screen->format, 0xff-n, 0,0 );
@@ -1025,6 +1044,42 @@ int shoot(App *app, Body *body)
   return 0;
 }
 
+int build(App *app, Body *body)
+{
+	int x1, y1, x2, y2;
+	int range;
+	if(body->status != BODY_ALIVE)
+		return;
+
+	range = body->item.type->range;
+	playSound(body->item.type->sound, -1);
+
+	x1 = body->pos.x;
+	y1 = body->pos.y;
+
+	float a = (int)(body->angle + ((rand() % (body->item.type->spread+1)) - body->item.type->spread/2))%360;
+	x2 = x1 + cos(a * M_PI / 180.) * range;
+	y2 = y1 - sin(a * M_PI / 180.) * range;
+
+	x2/=tileSize;
+	y2/=tileSize;
+
+	if(x2<0) x2=0;
+	if(x2>mapWidth-1) x2=mapWidth-1;
+	if(y2<0) y2=0;
+	if(y2>mapHeight-1) y2=mapHeight-1;
+
+	//printf("try build %d %d %d %d\n",x1,y1,x2,y2);
+	if(app->game.board.built[x2][y2] || app->game.board.crowd[x2][y2]==0) {
+		app->game.board.built[x2][y2]+=3;
+		if(app->game.board.built[x2][y2] > BUILD_LIMIT)
+			app->game.board.built[x2][y2] = BUILD_LIMIT;
+		//printf("build %d,%d = %d\n",x2,y2,app->game.board.built[x2][y2] );
+	}
+
+}
+
+
 void addPowerup(App *app)
 {
 	int i,j;
@@ -1128,6 +1183,7 @@ int main(int argc, char* args[] )
   Mix_FreeChunk(app.game.itemtype[ITEM_ENEMY_SOLDIER].sound);
   Mix_FreeChunk(app.game.itemtype[ITEM_PLAYER_BULLET].sound);
   Mix_FreeChunk(app.game.itemtype[ITEM_PLAYER_FLAME].sound);
+  Mix_FreeChunk(app.game.itemtype[ITEM_BUILD].sound);
 
   SDL_FreeSurface(app.game.board.base_image);
   SDL_FreeSurface(app.game.board.base_hit);
@@ -1140,6 +1196,8 @@ int main(int argc, char* args[] )
   SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_FLAME].hit_image);
   SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_FLAME].shot_image);
   SDL_FreeSurface(app.game.itemtype[ITEM_HEALTH_PACK].image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_BUILD].image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_BUILD].hit_image);
   SDL_FreeSurface(app.game.enemy_class[ENEMY_MEDIC].image);
   SDL_FreeSurface(app.game.enemy_class[ENEMY_SOLDIER].image);
   SDL_FreeSurface(app.game.board.image);
