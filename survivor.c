@@ -814,6 +814,11 @@ int give(App *app, Body *body1, Body *body2)
 }
 
 int hit(App *app, Body *source, Body *target){
+	printf("target %p source %p\n", target, source);
+	printf("source->item.type %p\n", source->item.type);
+	// FIXME segfault here
+	if(target == NULL || source == NULL || source->item.type == NULL)
+		return 0;
 	target->life -= source->item.type->damage;
 
 	if(source->item.type->hit_image) {
