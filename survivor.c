@@ -683,16 +683,15 @@ int grab(App *app, Body *body)
 	int x = body->pos.x/tileSize;
 	int y = body->pos.y/tileSize;
 	int i = app->game.board.powerup[x][y];
-	int offset = 2;
-	int min_offset = -offset;
+	int dx,dy;
 
-	while(!i && offset >= min_offset){
-		i = app->game.board.powerup[x][y+offset--];
-		if(!i){
-			i = app->game.board.powerup[x+offset][y+offset];
-		}
-		if(!i){
-			i = app->game.board.powerup[x+offset][y];
+	for(dy=-1;dy<=1;dy++) {
+		for(dx=-1;dx<=1;dx++) {
+			int xx = x+dx;
+			int yy = y+dy;
+			if(xx<0||xx>=mapWidth||yy<0||yy>=mapHeight) continue;
+			i = app->game.board.powerup[xx][yy];
+			if(i) break;
 		}
 	}
 
