@@ -694,27 +694,57 @@ int grab(App *app, Body *body)
 	if(body->status != BODY_ALIVE)
 		return;
 
-	int i = 0;
-	for(dy=-1;dy<=1;dy++) {
-		for(dx=-1;dx<=1;dx++) {
-			int xx = x+dx;
-			int yy = y+dy;
-			if(xx<0||xx>=mapWidth||yy<0||yy>=mapHeight) continue;
-			i = app->game.board.powerup[xx][yy];
-			if(i) break;
-		}
+	/*
+	               13(-1,-2) 09(+0,-2) 14(+1,-2)
+	     20(-2,-1) 08(-1,-1) 04(+0,-1) 05(+1,-1) 15(+2,-1) 
+	     12(-2,+0) 03(-1,+0) 00(+0,+0) 01(+1,+0) 10(+2,+0) 
+	     19(-2,+1) 07(-1,+1) 02(+0,+1) 06(+1,+1) 16(+2,+1) 
+	               18(-1,+2) 11(+0,+2) 17(+1,+2)
+	*/
+	int search[21][2] = {
+		{+0,+0},
+		{+1,+0},
+		{+0,+1},
+		{-1,+0},
+		{+0,-1},
+		{+1,-1},
+		{+1,+1},
+		{-1,+1},
+		{-1,-1},
+		{+0,-2},
+		{+2,+0},
+		{+0,+2},
+		{-2,+0},
+		{-1,-2},
+		{+1,-2},
+		{+2,-1},
+		{+2,+1},
+		{+1,+2},
+		{-1,+2},
+		{-2,+1},
+		{-2,-1}
+	};
+
+	int i,idx = 0;
+	for(i=0;i<21;i++) {
+		int xx = x+search[i][0];
+		int yy = y+search[i][1];
+		//printf("x %d y %d dx %d dy %d\n", xx, yy, search[i][0], search[i][1]);
+		if(xx<0||xx>=mapWidth||yy<0||yy>=mapHeight) continue;
+		idx = app->game.board.powerup[xx][yy];
+		if(idx) break;
 	}
 
-	if(i && app->game.board.powerups[--i].should_show) {
-		if(app->game.board.powerups[i].type->damage < 0) {
-			body->life -= app->game.board.powerups[i].type->damage;
+	if(idx && app->game.board.powerups[--idx].should_show) {
+		if(app->game.board.powerups[idx].type->damage < 0) {
+			body->life -= app->game.board.powerups[idx].type->damage;
 			if(body->life > 100.0){
 				body->life = 100.0;
 			}
 		} else  {
-			body->item = app->game.board.powerups[i];
+			body->item = app->game.board.powerups[idx];
 		}
-		app->game.board.powerups[i].should_show = 0;
+		app->game.board.powerups[idx].should_show = 0;
 		app->game.board.powerup[x][y] = 0;
 	}
 }
