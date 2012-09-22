@@ -172,8 +172,10 @@ typedef struct {
   HealthPack health_pack;
   ItemType itemtype[ITEM_COUNT];
   EnemyClass enemy_class[ENEMY_TYPE_COUNT];
+  int hint_pivot;
   int hint_grab;
   int hint_give;
+  int hint_build;
 } Game;
 
 typedef enum {

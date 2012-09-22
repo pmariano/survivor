@@ -62,8 +62,10 @@ void resetApp(App *app)
 {
 	app->game.total_kill_count= 0;
 	app->game.won = 0;
+	app->game.hint_pivot = SDL_GetTicks()+5000;
 	app->game.hint_grab = 0;
 	app->game.hint_give = 0;
+	app->game.hint_build = 0;
 
 	/**
 	 * Player 1 init settings
