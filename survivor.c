@@ -56,6 +56,8 @@ void gameInit(App *app){
   {
     app->game.board.powerups[i].should_show = 0;
   }
+
+  movePrepare(app);
 }
 
 void setWave(App *app, int wave_index);
