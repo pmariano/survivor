@@ -20,12 +20,14 @@ enum {
 	ITEM_PLAYER_COUNT,
 	ITEM_ENEMY_MEDIC,
 	ITEM_ENEMY_SOLDIER,
+	ITEM_ENEMY_FASTER,
 	ITEM_BUILD,
 	ITEM_COUNT
 };
 enum {
   ENEMY_MEDIC,
   ENEMY_SOLDIER,
+  ENEMY_FASTER,
   ENEMY_TYPE_COUNT
 };
 
@@ -99,6 +101,7 @@ typedef struct{
   SDL_Surface *image;
   ItemType *type;
   float max_life;
+  float vel;
 } EnemyClass;
 
 typedef struct{

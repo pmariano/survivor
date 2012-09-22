@@ -361,7 +361,7 @@ void spawnEnemy(App *app)
 			enemybody->life = game->enemy_class[i].max_life;
 			enemybody->item.type = game->enemy_class[i].type;
 			enemybody->ang_vel = 0.05;
-			enemybody->max_vel = 2.5;
+			enemybody->max_vel = game->enemy_class[i].vel;
 			enemybody->angle = 0;
 			enemybody->pos.x = x;
 			enemybody->pos.y = y;
@@ -401,6 +401,7 @@ void loadMap(App *app) {
   app->game.board.wave[0].enemy_count_per_spawn=5;
   app->game.board.wave[0].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[0].enemy_chance[ENEMY_SOLDIER]=0;
+  app->game.board.wave[0].enemy_chance[ENEMY_FASTER]=1;
 
   app->game.board.wave[1].x=bx*1;
   app->game.board.wave[1].y=by*0;
@@ -412,6 +413,7 @@ void loadMap(App *app) {
   app->game.board.wave[1].enemy_count_per_spawn=20;
   app->game.board.wave[1].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[1].enemy_chance[ENEMY_SOLDIER]=0;
+  app->game.board.wave[1].enemy_chance[ENEMY_FASTER]=1;
 
   app->game.board.wave[2].x=bx*2;
   app->game.board.wave[2].y=by*0;
@@ -423,6 +425,7 @@ void loadMap(App *app) {
   app->game.board.wave[2].enemy_count_per_spawn=20;
   app->game.board.wave[2].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[2].enemy_chance[ENEMY_SOLDIER]=0;
+  app->game.board.wave[2].enemy_chance[ENEMY_FASTER]=1;
 
   app->game.board.wave[3].y=by*0;
   app->game.board.wave[3].x=bx*3-2;
@@ -434,6 +437,7 @@ void loadMap(App *app) {
   app->game.board.wave[3].enemy_count_per_spawn=20;
   app->game.board.wave[3].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[3].enemy_chance[ENEMY_SOLDIER]=0;
+  app->game.board.wave[3].enemy_chance[ENEMY_FASTER]=1;
 
   app->game.board.wave[4].x=bx*3-6;
   app->game.board.wave[4].y=by*1;
@@ -445,6 +449,7 @@ void loadMap(App *app) {
   app->game.board.wave[4].enemy_count_per_spawn=20;
   app->game.board.wave[4].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[4].enemy_chance[ENEMY_SOLDIER]=0;
+  app->game.board.wave[4].enemy_chance[ENEMY_FASTER]=1;
 
   app->game.board.wave[5].x=bx*2;
   app->game.board.wave[5].y=by*1;
@@ -456,6 +461,7 @@ void loadMap(App *app) {
   app->game.board.wave[5].enemy_count_per_spawn=20;
   app->game.board.wave[5].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[5].enemy_chance[ENEMY_SOLDIER]=1;
+  app->game.board.wave[5].enemy_chance[ENEMY_FASTER]=15;
 
   app->game.board.wave[6].x=bx*1;
   app->game.board.wave[6].y=by*1;
@@ -467,6 +473,7 @@ void loadMap(App *app) {
   app->game.board.wave[6].enemy_count_per_spawn=20;
   app->game.board.wave[6].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[6].enemy_chance[ENEMY_SOLDIER]=2;
+  app->game.board.wave[6].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[7].x=bx*0;
   app->game.board.wave[7].y=by*1;
@@ -478,6 +485,7 @@ void loadMap(App *app) {
   app->game.board.wave[7].enemy_count_per_spawn=21;
   app->game.board.wave[7].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[7].enemy_chance[ENEMY_SOLDIER]=3;
+  app->game.board.wave[7].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[8].x=bx*0;
   app->game.board.wave[8].y=by*2;
@@ -489,6 +497,7 @@ void loadMap(App *app) {
   app->game.board.wave[8].enemy_count_per_spawn=22;
   app->game.board.wave[8].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[8].enemy_chance[ENEMY_SOLDIER]=4;
+  app->game.board.wave[8].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[9].x=bx*0;
   app->game.board.wave[9].y=by*3+3;
@@ -500,6 +509,7 @@ void loadMap(App *app) {
   app->game.board.wave[9].enemy_count_per_spawn=23;
   app->game.board.wave[9].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[9].enemy_chance[ENEMY_SOLDIER]=5;
+  app->game.board.wave[9].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[10].x=bx*1;
   app->game.board.wave[10].y=by*3;
@@ -511,6 +521,7 @@ void loadMap(App *app) {
   app->game.board.wave[10].enemy_count_per_spawn=24;
   app->game.board.wave[10].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[10].enemy_chance[ENEMY_SOLDIER]=6;
+  app->game.board.wave[10].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[11].x=bx*2;
   app->game.board.wave[11].y=by*3+3;
@@ -522,6 +533,7 @@ void loadMap(App *app) {
   app->game.board.wave[11].enemy_count_per_spawn=25;
   app->game.board.wave[11].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[11].enemy_chance[ENEMY_SOLDIER]=7;
+  app->game.board.wave[11].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[12].x=bx*2;
   app->game.board.wave[12].y=by*2;
@@ -533,6 +545,7 @@ void loadMap(App *app) {
   app->game.board.wave[12].enemy_count_per_spawn=26;
   app->game.board.wave[12].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[12].enemy_chance[ENEMY_SOLDIER]=8;
+  app->game.board.wave[12].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[13].x=bx*3;
   app->game.board.wave[13].y=by*2;
@@ -544,6 +557,7 @@ void loadMap(App *app) {
   app->game.board.wave[13].enemy_count_per_spawn=27;
   app->game.board.wave[13].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[13].enemy_chance[ENEMY_SOLDIER]=9;
+  app->game.board.wave[13].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[14].x=bx*3;
   app->game.board.wave[14].y=by*3+3;
@@ -555,6 +569,7 @@ void loadMap(App *app) {
   app->game.board.wave[14].enemy_count_per_spawn=28;
   app->game.board.wave[14].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[14].enemy_chance[ENEMY_SOLDIER]=10;
+  app->game.board.wave[14].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[15].x=bx*4;
   app->game.board.wave[15].y=by*3+3;
@@ -566,6 +581,7 @@ void loadMap(App *app) {
   app->game.board.wave[15].enemy_count_per_spawn=29;
   app->game.board.wave[15].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[15].enemy_chance[ENEMY_SOLDIER]=15;
+  app->game.board.wave[15].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[16].x=bx*4;
   app->game.board.wave[16].y=by*2;
@@ -577,6 +593,7 @@ void loadMap(App *app) {
   app->game.board.wave[16].enemy_count_per_spawn=30;
   app->game.board.wave[16].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[16].enemy_chance[ENEMY_SOLDIER]=20;
+  app->game.board.wave[16].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[17].x=bx*4;
   app->game.board.wave[17].y=by*1;
@@ -588,6 +605,7 @@ void loadMap(App *app) {
   app->game.board.wave[17].enemy_count_per_spawn=32;
   app->game.board.wave[17].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[17].enemy_chance[ENEMY_SOLDIER]=30;
+  app->game.board.wave[17].enemy_chance[ENEMY_FASTER]=10;
 
   app->game.board.wave[18].x=bx*4;
   app->game.board.wave[18].y=by*0+1;
@@ -599,6 +617,7 @@ void loadMap(App *app) {
   app->game.board.wave[18].enemy_count_per_spawn=50;
   app->game.board.wave[18].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[18].enemy_chance[ENEMY_SOLDIER]=40;
+  app->game.board.wave[18].enemy_chance[ENEMY_FASTER]=10;
 
 }
 
@@ -650,6 +669,11 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].sound = Mix_LoadWAV("sounds/ouch.wav");
 
+	app->game.itemtype[ITEM_ENEMY_FASTER].damage = 4;
+	app->game.itemtype[ITEM_ENEMY_FASTER].score = 1;
+	app->game.itemtype[ITEM_ENEMY_FASTER].hit_image = IMG_Load("data/bullet_hit.png");
+	app->game.itemtype[ITEM_ENEMY_FASTER].sound = Mix_LoadWAV("sounds/ouch.wav");
+
 	app->game.itemtype[ITEM_PLAYER_BULLET].chance = 50;
 	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 15;
 	app->game.itemtype[ITEM_PLAYER_BULLET].range = 1024;
@@ -689,9 +713,15 @@ void loadEnemies(App *app) {
   app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie2.png");
   app->game.enemy_class[ENEMY_MEDIC].type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
   app->game.enemy_class[ENEMY_MEDIC].max_life = 100;
+  app->game.enemy_class[ENEMY_MEDIC].vel = 3.1;
+  app->game.enemy_class[ENEMY_FASTER].image = IMG_Load("data/faster-front.png");
+  app->game.enemy_class[ENEMY_FASTER].type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
+  app->game.enemy_class[ENEMY_FASTER].max_life = 40;
+  app->game.enemy_class[ENEMY_FASTER].vel = 10.2;
   app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie1.png");
   app->game.enemy_class[ENEMY_SOLDIER].type = &app->game.itemtype[ITEM_ENEMY_SOLDIER];
   app->game.enemy_class[ENEMY_SOLDIER].max_life = 500;
+  app->game.enemy_class[ENEMY_SOLDIER].vel = 3.3;
 }
 
 
@@ -1160,7 +1190,7 @@ void addPowerup(App *app)
 
 void terminate()
 {
-	Mix_Quit();
+	//Mix_Quit();
 	SDL_Quit();
 }
 
