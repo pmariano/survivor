@@ -51,8 +51,8 @@ void movePrepare(App *app)
 				app->game.board.crowd[x][y] = !!f;
 			if(app->game.board.hittable[x][y] < !!f)
 				app->game.board.hittable[x][y] = !!f;
-			if(walkability[x][y] < mapWidth*f)
-				walkability[x][y] = mapWidth*f; // at least 1% walkable
+			if(walkability[x][y] < mapWidth*10*f)
+				walkability[x][y] = mapWidth*10*f; // at least 1% walkable
 		}
 	}
 }
@@ -120,7 +120,9 @@ inline int is_solid(Game *game, Body *body, int x, int y)
 	if(body->pos.x/tileSize == x && body->pos.y/tileSize == y)
 		return 0;
 	if(game->board.built[x][y]>0) {
-		game->board.built[x][y]--;
+		game->board.built[x][y]-=3;
+		if(game->board.built[x][y]<0)
+			game->board.built[x][y] = 0;
 	}
 	return game->board.crowd[x][y];
 }

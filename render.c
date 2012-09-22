@@ -158,7 +158,7 @@ void renderBuilt(App *app)
 			int f = app->game.board.built[x][y];
 			if(f)
 			{
-				int h = ceil(f * tileSize / (float)BUILD_LIMIT / 4.)*4;
+				int h = ceil(f * tileSize / (float)BUILD_LIMIT);
 				SDL_Rect srect = {
 					0,
 					tileSize-h,
@@ -167,7 +167,7 @@ void renderBuilt(App *app)
 				};
 				SDL_Rect drect = {
 					x*tileSize,
-					y*tileSize-h,
+					y*tileSize-h+tileSize*1.5,
 					tileSize,
 					h
 				};

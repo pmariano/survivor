@@ -137,7 +137,11 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 		case SDLK_KP_MINUS:
 			give(app, &player1->body, &player2->body);
 			
-			if(grab(app, &player2->body) && player1->body.status==BODY_ALIVE && app->game.hint_give == 0) {
+			if(grab(app, &player2->body)
+			&& player1->body.status==BODY_ALIVE
+			&& player2->body.status==BODY_ALIVE
+			&& app->game.hint_give == 0)
+			{
 				app->game.hint_give = SDL_GetTicks() + 5000;
 			}
 			break;
@@ -673,7 +677,6 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_BUILD].build= 1;
 	app->game.itemtype[ITEM_BUILD].damage = 0;
 	app->game.itemtype[ITEM_BUILD].freq= 0;
-	app->game.itemtype[ITEM_BUILD].range= tileSize;
 	app->game.itemtype[ITEM_BUILD].sound = Mix_LoadWAV("sounds/shovel.wav");
 	app->game.itemtype[ITEM_BUILD].image = IMG_Load("data/brick_ammo.png");
 	app->game.itemtype[ITEM_BUILD].hit_image = IMG_Load("data/brick.png");
@@ -1047,11 +1050,12 @@ int shoot(App *app, Body *body)
 int build(App *app, Body *body)
 {
 	int x1, y1, x2, y2;
+	int i;
 	int range;
 	if(body->status != BODY_ALIVE)
 		return;
 
-	range = body->item.type->range;
+	range = tileSize*3;
 	playSound(body->item.type->sound, -1);
 
 	x1 = body->pos.x;
@@ -1069,12 +1073,38 @@ int build(App *app, Body *body)
 	if(y2<0) y2=0;
 	if(y2>mapHeight-1) y2=mapHeight-1;
 
-	//printf("try build %d %d %d %d\n",x1,y1,x2,y2);
-	if(app->game.board.built[x2][y2] || app->game.board.crowd[x2][y2]==0) {
-		app->game.board.built[x2][y2]+=10;
-		if(app->game.board.built[x2][y2] > BUILD_LIMIT)
-			app->game.board.built[x2][y2] = BUILD_LIMIT;
-		//printf("build %d,%d = %d\n",x2,y2,app->game.board.built[x2][y2] );
+	int search[21][2] = {
+		{+0,+0},
+		{+1,+0},
+		{+0,+1},
+		{-1,+0},
+		{+0,-1},
+		{+1,-1},
+		{+1,+1},
+		{-1,+1},
+		{-1,-1},
+		{+0,-2},
+		{+2,+0},
+		{+0,+2},
+		{-2,+0},
+		{-1,-2},
+		{+1,-2},
+		{+2,-1},
+		{+2,+1},
+		{+1,+2},
+		{-1,+2},
+		{-2,+1},
+		{-2,-1}
+	};
+
+	for(i=0;i<21;i++) {
+		int x = x2+search[i][0];
+		int y = y2+search[i][1];
+		if(app->game.board.built[x][y] || app->game.board.crowd[x][y]==0) {
+			app->game.board.built[x][y]+=ceil((21-i)/4.);
+			if(app->game.board.built[x][y] > BUILD_LIMIT)
+				app->game.board.built[x][y] = BUILD_LIMIT;
+		}
 	}
 
 }

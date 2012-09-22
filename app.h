@@ -8,7 +8,7 @@
 #define PLAYER_COUNT 2
 #define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
 
-#define BUILD_LIMIT 2000
+#define BUILD_LIMIT 360
 #define WAVE_COUNT 256
 
 #include "aStarLibrary.h" // must be after the defines above
