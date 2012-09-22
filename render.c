@@ -14,9 +14,10 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
   if(player1->body.status != BODY_DEAD){
     text_write_raw(screen, 5, 60, "Player 1", green, 30);
 
-      char ammo[256];
-      sprintf(ammo, "ammo: %i", player1->body.item.type->ammo_total - player1->body.item.ammo_used) ;
-      text_write_raw(screen, 5, 30, ammo, yellow, 20);
+      char ammo_label[256];
+	  int ammo = player1->body.item.type->ammo_total - player1->body.item.ammo_used;
+      sprintf(ammo_label, "ammo: %i", ammo) ;
+      text_write_raw(screen, 5, 30, ammo_label, ammo < 200 ? ( (t/200) % 2 ? trueRed : white) : yellow, 20);
 
       Uint32 color = SDL_MapRGB(screen->format, 99, 0,0 );
       SDL_Rect rect = { 5, 10, player1->body.life*2, 20};
@@ -44,9 +45,10 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
   if(player2->body.status != BODY_DEAD){
     text_write_raw(screen, 900, 60, "Player 2", green, 30);
 
-	  char ammo[256];
-	  sprintf(ammo, "ammo: %i", player2->body.item.type->ammo_total - player2->body.item.ammo_used);
-	  text_write_raw(screen, 880, 30, ammo, yellow, 20);
+      char ammo_label[256];
+	  int ammo = player2->body.item.type->ammo_total - player2->body.item.ammo_used;
+      sprintf(ammo_label, "ammo: %i", ammo) ;
+      text_write_raw(screen, 800, 30, ammo_label, ammo < 200 ? ( (t/200) % 2 ? trueRed : white) : yellow, 20);
 
 	  Uint32 color = SDL_MapRGB(screen->format, 0xff, 0,0 );
 	  SDL_Rect rect = { 800, 10, player2->body.life*2, 20};
