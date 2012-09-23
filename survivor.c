@@ -400,7 +400,7 @@ void loadMap(App *app) {
   app->game.board.wave[0].enemy_count_per_spawn=5;
   app->game.board.wave[0].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[0].enemy_chance[ENEMY_SOLDIER]=0;
-  app->game.board.wave[0].enemy_chance[ENEMY_FASTER]=1;
+  app->game.board.wave[0].enemy_chance[ENEMY_FASTER]=0;
   app->game.board.wave[0].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[1].x=bx*1;
@@ -413,7 +413,7 @@ void loadMap(App *app) {
   app->game.board.wave[1].enemy_count_per_spawn=20;
   app->game.board.wave[1].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[1].enemy_chance[ENEMY_SOLDIER]=0;
-  app->game.board.wave[1].enemy_chance[ENEMY_FASTER]=1;
+  app->game.board.wave[1].enemy_chance[ENEMY_FASTER]=0;
   app->game.board.wave[1].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[2].x=bx*2;
@@ -426,7 +426,7 @@ void loadMap(App *app) {
   app->game.board.wave[2].enemy_count_per_spawn=20;
   app->game.board.wave[2].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[2].enemy_chance[ENEMY_SOLDIER]=0;
-  app->game.board.wave[2].enemy_chance[ENEMY_FASTER]=1;
+  app->game.board.wave[2].enemy_chance[ENEMY_FASTER]=0;
   app->game.board.wave[2].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[3].y=by*0;
@@ -439,7 +439,7 @@ void loadMap(App *app) {
   app->game.board.wave[3].enemy_count_per_spawn=20;
   app->game.board.wave[3].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[3].enemy_chance[ENEMY_SOLDIER]=0;
-  app->game.board.wave[3].enemy_chance[ENEMY_FASTER]=1;
+  app->game.board.wave[3].enemy_chance[ENEMY_FASTER]=0;
   app->game.board.wave[3].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[4].x=bx*3-6;
@@ -452,7 +452,7 @@ void loadMap(App *app) {
   app->game.board.wave[4].enemy_count_per_spawn=20;
   app->game.board.wave[4].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[4].enemy_chance[ENEMY_SOLDIER]=0;
-  app->game.board.wave[4].enemy_chance[ENEMY_FASTER]=1;
+  app->game.board.wave[4].enemy_chance[ENEMY_FASTER]=0;
   app->game.board.wave[4].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[5].x=bx*2;
@@ -465,8 +465,8 @@ void loadMap(App *app) {
   app->game.board.wave[5].enemy_count_per_spawn=20;
   app->game.board.wave[5].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[5].enemy_chance[ENEMY_SOLDIER]=1;
-  app->game.board.wave[5].enemy_chance[ENEMY_FASTER]=15;
-  app->game.board.wave[5].enemy_chance[ENEMY_SUICIDAL]=8;
+  app->game.board.wave[5].enemy_chance[ENEMY_FASTER]=0;
+  app->game.board.wave[5].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[6].x=bx*1;
   app->game.board.wave[6].y=by*1;
@@ -478,8 +478,8 @@ void loadMap(App *app) {
   app->game.board.wave[6].enemy_count_per_spawn=20;
   app->game.board.wave[6].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[6].enemy_chance[ENEMY_SOLDIER]=2;
-  app->game.board.wave[6].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[6].enemy_chance[ENEMY_SUICIDAL]=8;
+  app->game.board.wave[6].enemy_chance[ENEMY_FASTER]=0;
+  app->game.board.wave[6].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[7].x=bx*0;
   app->game.board.wave[7].y=by*1;
@@ -491,8 +491,8 @@ void loadMap(App *app) {
   app->game.board.wave[7].enemy_count_per_spawn=21;
   app->game.board.wave[7].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[7].enemy_chance[ENEMY_SOLDIER]=3;
-  app->game.board.wave[7].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[7].enemy_chance[ENEMY_SUICIDAL]=8;
+  app->game.board.wave[7].enemy_chance[ENEMY_FASTER]=0;
+  app->game.board.wave[7].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[8].x=bx*0;
   app->game.board.wave[8].y=by*2;
@@ -504,8 +504,8 @@ void loadMap(App *app) {
   app->game.board.wave[8].enemy_count_per_spawn=22;
   app->game.board.wave[8].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[8].enemy_chance[ENEMY_SOLDIER]=4;
-  app->game.board.wave[8].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[8].enemy_chance[ENEMY_SUICIDAL]=8;
+  app->game.board.wave[8].enemy_chance[ENEMY_FASTER]=1;
+  app->game.board.wave[8].enemy_chance[ENEMY_SUICIDAL]=0;
 
   app->game.board.wave[9].x=bx*0;
   app->game.board.wave[9].y=by*3+3;
@@ -517,7 +517,7 @@ void loadMap(App *app) {
   app->game.board.wave[9].enemy_count_per_spawn=23;
   app->game.board.wave[9].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[9].enemy_chance[ENEMY_SOLDIER]=5;
-  app->game.board.wave[9].enemy_chance[ENEMY_FASTER]=10;
+  app->game.board.wave[9].enemy_chance[ENEMY_FASTER]=2;
   app->game.board.wave[9].enemy_chance[ENEMY_SUICIDAL]=8;
 
   app->game.board.wave[10].x=bx*1;
@@ -530,8 +530,8 @@ void loadMap(App *app) {
   app->game.board.wave[10].enemy_count_per_spawn=24;
   app->game.board.wave[10].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[10].enemy_chance[ENEMY_SOLDIER]=6;
-  app->game.board.wave[10].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[10].enemy_chance[ENEMY_SUICIDAL]=8;
+  app->game.board.wave[10].enemy_chance[ENEMY_FASTER]=4;
+  app->game.board.wave[10].enemy_chance[ENEMY_SUICIDAL]=1;
 
   app->game.board.wave[11].x=bx*2;
   app->game.board.wave[11].y=by*3+3;
@@ -543,8 +543,8 @@ void loadMap(App *app) {
   app->game.board.wave[11].enemy_count_per_spawn=25;
   app->game.board.wave[11].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[11].enemy_chance[ENEMY_SOLDIER]=7;
-  app->game.board.wave[11].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[11].enemy_chance[ENEMY_SUICIDAL]=8;
+  app->game.board.wave[11].enemy_chance[ENEMY_FASTER]=5;
+  app->game.board.wave[11].enemy_chance[ENEMY_SUICIDAL]=2;
 
   app->game.board.wave[12].x=bx*2;
   app->game.board.wave[12].y=by*2;
@@ -556,8 +556,8 @@ void loadMap(App *app) {
   app->game.board.wave[12].enemy_count_per_spawn=26;
   app->game.board.wave[12].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[12].enemy_chance[ENEMY_SOLDIER]=8;
-  app->game.board.wave[12].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[12].enemy_chance[ENEMY_SUICIDAL]=8;
+  app->game.board.wave[12].enemy_chance[ENEMY_FASTER]=6;
+  app->game.board.wave[12].enemy_chance[ENEMY_SUICIDAL]=3;
 
   app->game.board.wave[13].x=bx*3;
   app->game.board.wave[13].y=by*2;
@@ -569,8 +569,8 @@ void loadMap(App *app) {
   app->game.board.wave[13].enemy_count_per_spawn=27;
   app->game.board.wave[13].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[13].enemy_chance[ENEMY_SOLDIER]=9;
-  app->game.board.wave[13].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[13].enemy_chance[ENEMY_SUICIDAL]=10;
+  app->game.board.wave[13].enemy_chance[ENEMY_FASTER]=7;
+  app->game.board.wave[13].enemy_chance[ENEMY_SUICIDAL]=4;
 
   app->game.board.wave[14].x=bx*3;
   app->game.board.wave[14].y=by*3+3;
@@ -582,8 +582,8 @@ void loadMap(App *app) {
   app->game.board.wave[14].enemy_count_per_spawn=28;
   app->game.board.wave[14].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[14].enemy_chance[ENEMY_SOLDIER]=10;
-  app->game.board.wave[14].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[14].enemy_chance[ENEMY_SUICIDAL]=10;
+  app->game.board.wave[14].enemy_chance[ENEMY_FASTER]=8;
+  app->game.board.wave[14].enemy_chance[ENEMY_SUICIDAL]=5;
 
   app->game.board.wave[15].x=bx*4;
   app->game.board.wave[15].y=by*3+3;
