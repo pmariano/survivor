@@ -64,7 +64,6 @@ void moveInit(App *app)
 	SDL_Surface *hit = app->game.board.hit;
 	memset(app->game.board.wall, 0, sizeof(app->game.board.wall));
 	memset(app->game.board.air, 0, sizeof(app->game.board.air));
-	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
 	memset(app->game.board.safearea, 0, sizeof(app->game.board.safearea));
 	memset(app->game.board.spawn_map, 0, sizeof(app->game.board.spawn_map));
 	app->game.board.spawn_count = 0;

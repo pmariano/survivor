@@ -1,1 +1,3 @@
+- fix interface mproblem on resume vs new game accidental hit on continuing game
+- fix interface problem on pivoting (aiming without move) vs grabbing or giving
 

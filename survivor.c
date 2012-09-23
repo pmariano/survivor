@@ -27,6 +27,7 @@ void checkGameover(App *app){
   int numCurrentPlayers = (player1->body.status != BODY_DEAD) + (player2->body.status != BODY_DEAD);
   if(!numCurrentPlayers){
 	app->state = STATE_GAMEOVER;
+	app->menu.selected = MENU_NEW_GAME;
   }
 }
 
@@ -35,13 +36,8 @@ void gameInit(App *app){
 	app->game.spawnTime = app->game.start+5000;
 	app->game.spawnPowerupTime = app->game.start+15000;
 	app->game.kill_count= 0;
+	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
 	memset(app->game.board.built, 0, sizeof(app->game.board.built));
-
-	Body *p1body = &app->game.player1.body;
-	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
-
-	Body *p2body = &app->game.player2.body;
-	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
 
 	app->game.latest_enemy_updated = 0;
 
@@ -58,6 +54,13 @@ void gameInit(App *app){
   }
 
   movePrepare(app);
+
+	Body *p1body = &app->game.player1.body;
+	player_spawn_pos(&app->game, &p1body->pos.x, &p1body->pos.y);
+
+	Body *p2body = &app->game.player2.body;
+	player_spawn_pos(&app->game, &p2body->pos.x, &p2body->pos.y);
+
 }
 
 void setWave(App *app, int wave_index);
@@ -179,6 +182,21 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 	  break;
 	case SDLK_1:
 	case SDLK_2:
+	  if(player2->body.status != BODY_ALIVE &&
+		  player1->body.status != BODY_ALIVE) {
+		  resetApp(app);
+	  }
+	  app->state = STATE_PLAYING;
+	  if(*key == SDLK_2){
+		  player2->body.status = BODY_ALIVE;
+		  player2->body.life = 100;
+		  player_spawn_pos(&app->game, &player2->body.pos.x, &player2->body.pos.y);
+	  } else {
+		  player1->body.status = BODY_ALIVE;
+		  player1->body.life = 100;
+		  player_spawn_pos(&app->game, &player1->body.pos.x, &player1->body.pos.y);
+	  }
+	  break;
 	case SDLK_a:
 	case SDLK_z:
 	case SDLK_RETURN:
@@ -204,11 +222,15 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 	  } else if(menu->selected == MENU_RESUME){
 		app->state = STATE_PLAYING;
 	  }
-	  if(*key == SDLK_z || *key == SDLK_2){
+	  if(*key == SDLK_z){
 		player2->body.status = BODY_ALIVE;
+		player2->body.life = 100;
+		player_spawn_pos(&app->game, &player2->body.pos.x, &player2->body.pos.y);
 	  } else {
 		//printf("player 1 is ready\n");
 		player1->body.status = BODY_ALIVE;
+		player1->body.life = 100;
+		player_spawn_pos(&app->game, &player1->body.pos.x, &player1->body.pos.y);
 	  }
 	  break;
 	case SDLK_ESCAPE:
@@ -315,8 +337,9 @@ void spawnEnemy(App *app)
 		roulette += wave->enemy_chance[i];
 	}
 
-	int spawn  = wave->enemy_count_per_spawn/2 + (rand() % (wave->enemy_count_per_spawn/2));
-	
+	int spawn = (int)ceil(wave->enemy_count_per_spawn/2.) 
+		+ (rand() % (int)ceil(wave->enemy_count_per_spawn/2.));
+
 	if(spawn + game->on_screen_enemies > wave->enemy_count_on_screen) {
 		//printf("spawn %d on_screen\n", game->on_screen_enemies);
 		spawn = wave->enemy_count_on_screen - game->on_screen_enemies;
@@ -394,10 +417,10 @@ void loadMap(App *app) {
   app->game.board.wave[0].y=by*0;
   app->game.board.wave[0].w=mapWidth;
   app->game.board.wave[0].h=mapHeight;
-  app->game.board.wave[0].enemy_spawn_interval=2000;
-  app->game.board.wave[0].enemy_count=40;
-  app->game.board.wave[0].enemy_count_on_screen=20;
-  app->game.board.wave[0].enemy_count_per_spawn=5;
+  app->game.board.wave[0].enemy_spawn_interval=5000;
+  app->game.board.wave[0].enemy_count=10;
+  app->game.board.wave[0].enemy_count_on_screen=5;
+  app->game.board.wave[0].enemy_count_per_spawn=2;
   app->game.board.wave[0].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[0].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[0].enemy_chance[ENEMY_FASTER]=0;
@@ -408,9 +431,9 @@ void loadMap(App *app) {
   app->game.board.wave[1].w=mapWidth;
   app->game.board.wave[1].h=mapHeight;
   app->game.board.wave[1].enemy_spawn_interval=5000;
-  app->game.board.wave[1].enemy_count=50;
-  app->game.board.wave[1].enemy_count_on_screen=25;
-  app->game.board.wave[1].enemy_count_per_spawn=20;
+  app->game.board.wave[1].enemy_count=40;
+  app->game.board.wave[1].enemy_count_on_screen=20;
+  app->game.board.wave[1].enemy_count_per_spawn=10;
   app->game.board.wave[1].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[1].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[1].enemy_chance[ENEMY_FASTER]=0;
@@ -420,10 +443,10 @@ void loadMap(App *app) {
   app->game.board.wave[2].y=by*0;
   app->game.board.wave[2].w=mapWidth;
   app->game.board.wave[2].h=mapHeight;
-  app->game.board.wave[2].enemy_spawn_interval=5000;
-  app->game.board.wave[2].enemy_count=60;
-  app->game.board.wave[2].enemy_count_on_screen=30;
-  app->game.board.wave[2].enemy_count_per_spawn=20;
+  app->game.board.wave[2].enemy_spawn_interval=2000;
+  app->game.board.wave[2].enemy_count=120;
+  app->game.board.wave[2].enemy_count_on_screen=80;
+  app->game.board.wave[2].enemy_count_per_spawn=10;
   app->game.board.wave[2].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[2].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[2].enemy_chance[ENEMY_FASTER]=0;
@@ -433,10 +456,10 @@ void loadMap(App *app) {
   app->game.board.wave[3].x=bx*3-2;
   app->game.board.wave[3].w=(mapWidth-5);
   app->game.board.wave[3].h=mapHeight;
-  app->game.board.wave[3].enemy_spawn_interval=5000;
-  app->game.board.wave[3].enemy_count=80;
-  app->game.board.wave[3].enemy_count_on_screen=35;
-  app->game.board.wave[3].enemy_count_per_spawn=20;
+  app->game.board.wave[3].enemy_spawn_interval=250;
+  app->game.board.wave[3].enemy_count=120;
+  app->game.board.wave[3].enemy_count_on_screen=30;
+  app->game.board.wave[3].enemy_count_per_spawn=2;
   app->game.board.wave[3].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[3].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[3].enemy_chance[ENEMY_FASTER]=0;
@@ -446,9 +469,9 @@ void loadMap(App *app) {
   app->game.board.wave[4].y=by*1;
   app->game.board.wave[4].w=mapWidth;
   app->game.board.wave[4].h=mapHeight;
-  app->game.board.wave[4].enemy_spawn_interval=5000;
-  app->game.board.wave[4].enemy_count=90;
-  app->game.board.wave[4].enemy_count_on_screen=40;
+  app->game.board.wave[4].enemy_spawn_interval=2000;
+  app->game.board.wave[4].enemy_count=250;
+  app->game.board.wave[4].enemy_count_on_screen=80;
   app->game.board.wave[4].enemy_count_per_spawn=20;
   app->game.board.wave[4].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[4].enemy_chance[ENEMY_SOLDIER]=0;
@@ -537,10 +560,10 @@ void loadMap(App *app) {
   app->game.board.wave[11].y=by*3+3;
   app->game.board.wave[11].w=(mapWidth-4);
   app->game.board.wave[11].h=(mapHeight-3);
-  app->game.board.wave[11].enemy_spawn_interval=10500;
-  app->game.board.wave[11].enemy_count=160;
-  app->game.board.wave[11].enemy_count_on_screen=65;
-  app->game.board.wave[11].enemy_count_per_spawn=25;
+  app->game.board.wave[11].enemy_spawn_interval=5000;
+  app->game.board.wave[11].enemy_count=300;
+  app->game.board.wave[11].enemy_count_on_screen=30;
+  app->game.board.wave[11].enemy_count_per_spawn=10;
   app->game.board.wave[11].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[11].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[11].enemy_chance[ENEMY_FASTER]=5;
@@ -589,12 +612,12 @@ void loadMap(App *app) {
   app->game.board.wave[15].y=by*3+3;
   app->game.board.wave[15].w=mapWidth;
   app->game.board.wave[15].h=mapHeight;
-  app->game.board.wave[15].enemy_spawn_interval=12500;
-  app->game.board.wave[15].enemy_count=200;
-  app->game.board.wave[15].enemy_count_on_screen=85;
-  app->game.board.wave[15].enemy_count_per_spawn=29;
-  app->game.board.wave[15].enemy_chance[ENEMY_MEDIC]=80;
-  app->game.board.wave[15].enemy_chance[ENEMY_SOLDIER]=20;
+  app->game.board.wave[15].enemy_spawn_interval=7000;
+  app->game.board.wave[15].enemy_count=300;
+  app->game.board.wave[15].enemy_count_on_screen=200;
+  app->game.board.wave[15].enemy_count_per_spawn=100;
+  app->game.board.wave[15].enemy_chance[ENEMY_MEDIC]=0;
+  app->game.board.wave[15].enemy_chance[ENEMY_SOLDIER]=5;
   app->game.board.wave[15].enemy_chance[ENEMY_FASTER]=100;
   app->game.board.wave[15].enemy_chance[ENEMY_SUICIDAL]=1;
 
@@ -629,13 +652,13 @@ void loadMap(App *app) {
   app->game.board.wave[18].w=mapWidth;
   app->game.board.wave[18].h=mapHeight;
   app->game.board.wave[18].enemy_spawn_interval=15000;
-  app->game.board.wave[18].enemy_count=500;
-  app->game.board.wave[18].enemy_count_on_screen=100;
+  app->game.board.wave[18].enemy_count=1000;
+  app->game.board.wave[18].enemy_count_on_screen=400;
   app->game.board.wave[18].enemy_count_per_spawn=50;
-  app->game.board.wave[18].enemy_chance[ENEMY_MEDIC]=10;
+  app->game.board.wave[18].enemy_chance[ENEMY_MEDIC]=20;
   app->game.board.wave[18].enemy_chance[ENEMY_SOLDIER]=40;
-  app->game.board.wave[18].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[18].enemy_chance[ENEMY_SUICIDAL]=12;
+  app->game.board.wave[18].enemy_chance[ENEMY_FASTER]=30;
+  app->game.board.wave[18].enemy_chance[ENEMY_SUICIDAL]=10;
 
 }
 
