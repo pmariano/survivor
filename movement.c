@@ -241,7 +241,7 @@ void move_enemies(App *app)
         if(pathStatus[crazy] == found)
         {
 			//printf("read %d=%d\n", i, crazy);
-          int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize*1.25);
+          int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize);
           int dx = xPath[crazy] - enemy_body->pos.x;
           int dy = yPath[crazy] - enemy_body->pos.y;
           float angle = ATAN2(dx,dy);
@@ -251,11 +251,6 @@ void move_enemies(App *app)
 				//printf("reach %d=%d %d,%d\n", i, crazy, dx, dy);
 				pathStatus[app->game.enemies[i].pathfinder_other] = notStarted;
 				hit(app, enemy_body, app->game.enemies[i].target);
-        if(enemy_body->should_explode)
-        {
-          enemy_body->life = 0;
-          enemy_body->status = BODY_DEAD;
-        }
 
 		  }
 		}

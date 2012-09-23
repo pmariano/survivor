@@ -33,8 +33,11 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 
   char enemies_wave[256];
   int expected_kills = app->game.board.wave[app->game.board.wave_index].enemy_count;
-  sprintf(enemies_wave, "%i Enemies", expected_kills - app->game.kill_count);
-  text_write_raw(screen, 400, 90, enemies_wave, green, 30);
+  sprintf(enemies_wave, "Wave %i, %i Enemies", 
+		  app->game.board.wave_index + 1,
+		  expected_kills - app->game.kill_count
+  );
+  text_write_raw(screen, 360, 90, enemies_wave, green, 30);
 
 
   if(t < app->game.board.wave_start + 5000) {
@@ -55,7 +58,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 	  SDL_Rect rect = { 800, 10, player2->body.life*2, 20};
 	  SDL_FillRect(screen, &rect, color);
 	}else {
-	  text_write_raw(screen, 780, 10, "Enginner Press Start", (t/500) % 2 ? yellow : red, 20);
+	  text_write_raw(screen, 780, 10, "Engineer Press Start", (t/500) % 2 ? yellow : red, 20);
 	}
 }
 

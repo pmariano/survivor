@@ -68,6 +68,7 @@ typedef struct {
   int score;
   int chance;
   int build;
+  int should_explode;
 } ItemType;
 
 typedef struct {
@@ -89,7 +90,6 @@ typedef struct {
   float angle; // degree
   int shoot_key; // OH GOD WHY!
   Mix_Chunk *onHitSound;
-  int should_explode;
 } Body;
 
 typedef struct{
@@ -105,7 +105,6 @@ typedef struct{
   ItemType *type;
   float max_life;
   float vel;
-  int should_explode;
 } EnemyClass;
 
 typedef struct{
