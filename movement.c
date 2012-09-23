@@ -251,6 +251,12 @@ void move_enemies(App *app)
 				//printf("reach %d=%d %d,%d\n", i, crazy, dx, dy);
 				pathStatus[app->game.enemies[i].pathfinder_other] = notStarted;
 				hit(app, enemy_body, app->game.enemies[i].target);
+        if(enemy_body->should_explode)
+        {
+          enemy_body->life = 0;
+          enemy_body->status = BODY_DEAD;
+        }
+
 		  }
 		}
 	}

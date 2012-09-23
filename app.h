@@ -21,6 +21,7 @@ enum {
 	ITEM_ENEMY_MEDIC,
 	ITEM_ENEMY_SOLDIER,
 	ITEM_ENEMY_FASTER,
+	ITEM_ENEMY_SUICIDAL,
 	ITEM_BUILD,
 	ITEM_COUNT
 };
@@ -28,6 +29,7 @@ enum {
   ENEMY_MEDIC,
   ENEMY_SOLDIER,
   ENEMY_FASTER,
+  ENEMY_SUICIDAL,
   ENEMY_TYPE_COUNT
 };
 
@@ -87,6 +89,7 @@ typedef struct {
   float angle; // degree
   int shoot_key; // OH GOD WHY!
   Mix_Chunk *onHitSound;
+  int should_explode;
 } Body;
 
 typedef struct{
@@ -102,6 +105,7 @@ typedef struct{
   ItemType *type;
   float max_life;
   float vel;
+  int should_explode;
 } EnemyClass;
 
 typedef struct{
