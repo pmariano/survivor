@@ -696,7 +696,7 @@ void loadItems(App *app) {
 	app->game.itemtype[ITEM_ENEMY_FASTER].sound = Mix_LoadWAV("sounds/ouch.wav");
 
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].damage = 20;
-	app->game.itemtype[ITEM_ENEMY_SUICIDAL].range = 2*tileSize;
+	app->game.itemtype[ITEM_ENEMY_SUICIDAL].range = 3*tileSize;
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].score = 3;
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].hit_image = IMG_Load("data/fire_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].sound = Mix_LoadWAV("sounds/ouch.wav");
@@ -1239,12 +1239,6 @@ void addPowerup(App *app)
 	}
 }
 
-void terminate()
-{
-	//Mix_Quit();
-	SDL_Quit();
-}
-
 
 int main(int argc, char* args[] )
 {
@@ -1258,7 +1252,6 @@ int main(int argc, char* args[] )
   app.credits = CREDITS_TEAM;
 
   if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ) return 1;
-  atexit(terminate);
 
   init_font();
   InitializePathfinder();
@@ -1326,6 +1319,8 @@ int main(int argc, char* args[] )
   SDL_FreeSurface(app.game.board.hit);
   renderTerminate(&app);
   terminate_font();
+  sound_terminate();
+  SDL_Quit();
 
 
   return 0;

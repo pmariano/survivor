@@ -5,6 +5,11 @@ char* lastMusic = "";
 Audio a;
 const char* levelMusics[3] = {"ascending.mp3", "arpanauts.mp3", "underclocked.mp3"};
 
+void sound_terminate()
+{
+	//Mix_Quit();
+}
+
 void playMusic(const char* path, int qtd){
   char name[300];
 

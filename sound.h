@@ -12,3 +12,4 @@ void soundInit();
 void halt_music();
 void playRandomLevelMusic();
 void playSound();
+void sound_terminate();

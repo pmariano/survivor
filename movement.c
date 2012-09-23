@@ -241,7 +241,7 @@ void move_enemies(App *app)
         if(pathStatus[crazy] == found)
         {
 			//printf("read %d=%d\n", i, crazy);
-          int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize);
+          int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize*1.5);
           int dx = xPath[crazy] - enemy_body->pos.x;
           int dy = yPath[crazy] - enemy_body->pos.y;
           float angle = ATAN2(dx,dy);
