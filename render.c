@@ -58,7 +58,7 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 	  SDL_Rect rect = { 800, 10, player2->body.life*2, 20};
 	  SDL_FillRect(screen, &rect, color);
 	}else {
-	  text_write_raw(screen, 780, 10, "Enginner Press Start", (t/500) % 2 ? yellow : red, 20);
+	  text_write_raw(screen, 780, 10, "Engineer Press Start", (t/500) % 2 ? yellow : red, 20);
 	}
 }
 
