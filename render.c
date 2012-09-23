@@ -33,8 +33,11 @@ void renderStats(App *app, SDL_Surface *screen, Player *player1, Player *player2
 
   char enemies_wave[256];
   int expected_kills = app->game.board.wave[app->game.board.wave_index].enemy_count;
-  sprintf(enemies_wave, "%i Enemies/ Wave: %i", expected_kills - app->game.kill_count, app->game.board.wave_index + 1);
-  text_write_raw(screen, 400, 90, enemies_wave, green, 30);
+  sprintf(enemies_wave, "Wave %i, %i Enemies", 
+		  app->game.board.wave_index + 1,
+		  expected_kills - app->game.kill_count
+  );
+  text_write_raw(screen, 360, 90, enemies_wave, green, 30);
 
 
   if(t < app->game.board.wave_start + 5000) {

@@ -139,7 +139,6 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 			
 			if(grab(app, &player2->body)
 			&& player1->body.status==BODY_ALIVE
-			&& player2->body.status==BODY_ALIVE
 			&& app->game.hint_give == 0)
 			{
 				app->game.hint_give = SDL_GetTicks() + 5000;
@@ -363,7 +362,6 @@ void spawnEnemy(App *app)
 			enemybody->angle = 0;
 			enemybody->pos.x = x;
 			enemybody->pos.y = y;
-			enemybody->should_explode = game->enemy_class[i].should_explode;
 		} else {
 			spawnDelay = 500;
 			break; // did not finished group spawn, persist
@@ -503,7 +501,7 @@ void loadMap(App *app) {
   app->game.board.wave[8].enemy_count_on_screen=50;
   app->game.board.wave[8].enemy_count_per_spawn=22;
   app->game.board.wave[8].enemy_chance[ENEMY_MEDIC]=10;
-  app->game.board.wave[8].enemy_chance[ENEMY_SOLDIER]=4;
+  app->game.board.wave[8].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[8].enemy_chance[ENEMY_FASTER]=1;
   app->game.board.wave[8].enemy_chance[ENEMY_SUICIDAL]=0;
 
@@ -516,8 +514,8 @@ void loadMap(App *app) {
   app->game.board.wave[9].enemy_count_on_screen=55;
   app->game.board.wave[9].enemy_count_per_spawn=23;
   app->game.board.wave[9].enemy_chance[ENEMY_MEDIC]=10;
-  app->game.board.wave[9].enemy_chance[ENEMY_SOLDIER]=5;
-  app->game.board.wave[9].enemy_chance[ENEMY_FASTER]=2;
+  app->game.board.wave[9].enemy_chance[ENEMY_SOLDIER]=0;
+  app->game.board.wave[9].enemy_chance[ENEMY_FASTER]=0;
   app->game.board.wave[9].enemy_chance[ENEMY_SUICIDAL]=8;
 
   app->game.board.wave[10].x=bx*1;
@@ -529,8 +527,8 @@ void loadMap(App *app) {
   app->game.board.wave[10].enemy_count_on_screen=60;
   app->game.board.wave[10].enemy_count_per_spawn=24;
   app->game.board.wave[10].enemy_chance[ENEMY_MEDIC]=10;
-  app->game.board.wave[10].enemy_chance[ENEMY_SOLDIER]=6;
-  app->game.board.wave[10].enemy_chance[ENEMY_FASTER]=4;
+  app->game.board.wave[10].enemy_chance[ENEMY_SOLDIER]=0;
+  app->game.board.wave[10].enemy_chance[ENEMY_FASTER]=1;
   app->game.board.wave[10].enemy_chance[ENEMY_SUICIDAL]=1;
 
   app->game.board.wave[11].x=bx*2;
@@ -542,7 +540,7 @@ void loadMap(App *app) {
   app->game.board.wave[11].enemy_count_on_screen=65;
   app->game.board.wave[11].enemy_count_per_spawn=25;
   app->game.board.wave[11].enemy_chance[ENEMY_MEDIC]=10;
-  app->game.board.wave[11].enemy_chance[ENEMY_SOLDIER]=7;
+  app->game.board.wave[11].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[11].enemy_chance[ENEMY_FASTER]=5;
   app->game.board.wave[11].enemy_chance[ENEMY_SUICIDAL]=2;
 
@@ -555,7 +553,7 @@ void loadMap(App *app) {
   app->game.board.wave[12].enemy_count_on_screen=70;
   app->game.board.wave[12].enemy_count_per_spawn=26;
   app->game.board.wave[12].enemy_chance[ENEMY_MEDIC]=10;
-  app->game.board.wave[12].enemy_chance[ENEMY_SOLDIER]=8;
+  app->game.board.wave[12].enemy_chance[ENEMY_SOLDIER]=4;
   app->game.board.wave[12].enemy_chance[ENEMY_FASTER]=6;
   app->game.board.wave[12].enemy_chance[ENEMY_SUICIDAL]=3;
 
@@ -568,7 +566,7 @@ void loadMap(App *app) {
   app->game.board.wave[13].enemy_count_on_screen=75;
   app->game.board.wave[13].enemy_count_per_spawn=27;
   app->game.board.wave[13].enemy_chance[ENEMY_MEDIC]=10;
-  app->game.board.wave[13].enemy_chance[ENEMY_SOLDIER]=9;
+  app->game.board.wave[13].enemy_chance[ENEMY_SOLDIER]=2;
   app->game.board.wave[13].enemy_chance[ENEMY_FASTER]=7;
   app->game.board.wave[13].enemy_chance[ENEMY_SUICIDAL]=4;
 
@@ -593,10 +591,10 @@ void loadMap(App *app) {
   app->game.board.wave[15].enemy_count=200;
   app->game.board.wave[15].enemy_count_on_screen=85;
   app->game.board.wave[15].enemy_count_per_spawn=29;
-  app->game.board.wave[15].enemy_chance[ENEMY_MEDIC]=10;
-  app->game.board.wave[15].enemy_chance[ENEMY_SOLDIER]=15;
-  app->game.board.wave[15].enemy_chance[ENEMY_FASTER]=10;
-  app->game.board.wave[15].enemy_chance[ENEMY_SUICIDAL]=10;
+  app->game.board.wave[15].enemy_chance[ENEMY_MEDIC]=80;
+  app->game.board.wave[15].enemy_chance[ENEMY_SOLDIER]=20;
+  app->game.board.wave[15].enemy_chance[ENEMY_FASTER]=100;
+  app->game.board.wave[15].enemy_chance[ENEMY_SUICIDAL]=1;
 
   app->game.board.wave[16].x=bx*4;
   app->game.board.wave[16].y=by*2;
@@ -678,24 +676,29 @@ void setWave(App *app, int wave_index) {
 
 void loadItems(App *app) {
 	app->game.itemtype[ITEM_ENEMY_MEDIC].damage = 1;
+	app->game.itemtype[ITEM_ENEMY_MEDIC].range = 2*tileSize;
 	app->game.itemtype[ITEM_ENEMY_MEDIC].score = 1;
 	app->game.itemtype[ITEM_ENEMY_MEDIC].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_MEDIC].sound = Mix_LoadWAV("sounds/ouch.wav");
 
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].damage = 4;
+	app->game.itemtype[ITEM_ENEMY_SOLDIER].range = 2*tileSize;
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].score = 5;
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SOLDIER].sound = Mix_LoadWAV("sounds/ouch.wav");
 
 	app->game.itemtype[ITEM_ENEMY_FASTER].damage = 2;
+	app->game.itemtype[ITEM_ENEMY_FASTER].range = 1*tileSize;
 	app->game.itemtype[ITEM_ENEMY_FASTER].score = 1;
 	app->game.itemtype[ITEM_ENEMY_FASTER].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_FASTER].sound = Mix_LoadWAV("sounds/ouch.wav");
 
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].damage = 20;
+	app->game.itemtype[ITEM_ENEMY_SUICIDAL].range = 2*tileSize;
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].score = 3;
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].hit_image = IMG_Load("data/fire_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].sound = Mix_LoadWAV("sounds/ouch.wav");
+	app->game.itemtype[ITEM_ENEMY_SUICIDAL].should_explode = 1;
 
 	app->game.itemtype[ITEM_PLAYER_BULLET].chance = 50;
 	app->game.itemtype[ITEM_PLAYER_BULLET].damage = 15;
@@ -736,26 +739,22 @@ void loadEnemies(App *app) {
   app->game.enemy_class[ENEMY_MEDIC].image = IMG_Load("data/zombie2.png");
   app->game.enemy_class[ENEMY_MEDIC].type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
   app->game.enemy_class[ENEMY_MEDIC].max_life = 100;
-  app->game.enemy_class[ENEMY_MEDIC].vel = 3.1;
-  app->game.enemy_class[ENEMY_MEDIC].should_explode = 0;
+  app->game.enemy_class[ENEMY_MEDIC].vel = 4;
 
   app->game.enemy_class[ENEMY_FASTER].image = IMG_Load("data/faster-front.png");
   app->game.enemy_class[ENEMY_FASTER].type = &app->game.itemtype[ITEM_ENEMY_MEDIC];
-  app->game.enemy_class[ENEMY_FASTER].max_life = 40;
-  app->game.enemy_class[ENEMY_FASTER].vel = 10.2;
-  app->game.enemy_class[ENEMY_FASTER].should_explode = 0;
+  app->game.enemy_class[ENEMY_FASTER].max_life = 20;
+  app->game.enemy_class[ENEMY_FASTER].vel = 10;
 
   app->game.enemy_class[ENEMY_SUICIDAL].image = IMG_Load("data/suicidal-front.png");
   app->game.enemy_class[ENEMY_SUICIDAL].type = &app->game.itemtype[ITEM_ENEMY_SUICIDAL];
-  app->game.enemy_class[ENEMY_SUICIDAL].max_life = 100;
-  app->game.enemy_class[ENEMY_SUICIDAL].vel = 7.2;
-  app->game.enemy_class[ENEMY_SUICIDAL].should_explode = 1;
+  app->game.enemy_class[ENEMY_SUICIDAL].max_life = 120;
+  app->game.enemy_class[ENEMY_SUICIDAL].vel = 6;
 
   app->game.enemy_class[ENEMY_SOLDIER].image = IMG_Load("data/zombie1.png");
   app->game.enemy_class[ENEMY_SOLDIER].type = &app->game.itemtype[ITEM_ENEMY_SOLDIER];
   app->game.enemy_class[ENEMY_SOLDIER].max_life = 500;
-  app->game.enemy_class[ENEMY_SOLDIER].vel = 3.3;
-  app->game.enemy_class[ENEMY_SOLDIER].should_explode = 0;
+  app->game.enemy_class[ENEMY_SOLDIER].vel = 3;
 }
 
 
@@ -767,7 +766,7 @@ int grab(App *app, Body *body)
 	int got = 0;
 
 	if(body->status != BODY_ALIVE)
-		return;
+		return 0;
 
 	/*
 	               13(-1,-2) 09(+0,-2) 14(+1,-2)
@@ -850,11 +849,22 @@ int give(App *app, Body *body1, Body *body2)
 }
 
 int hit(App *app, Body *source, Body *target){
-	printf("target %p source %p\n", target, source);
-	printf("source->item.type %p\n", source->item.type);
-	// FIXME segfault here
-	if(target == NULL || source == NULL || source->item.type == NULL)
+	if(target == NULL || source == NULL || source->item.type == NULL) {
+		// FIXME trying to understand what leads to segfault here
+		printf("target %p source %p\n", target, source);
+		printf("source->item.type %p\n", source->item.type);
 		return 0;
+	}
+
+	float dist = sqrt(
+		pow(target->pos.x - source->pos.x,2)+
+		pow(target->pos.y - source->pos.y,2)
+	);
+	if(dist > source->item.type->range) {
+		//printf("dist %f > source->item.type->range %d dmg %d\n", dist, source->item.type->range, source->item.type->damage);
+		return 0;
+	}
+
 	target->life -= source->item.type->damage;
 
 	if(source->item.type->hit_image) {
@@ -866,6 +876,11 @@ int hit(App *app, Body *source, Body *target){
 		};
 		SDL_BlitSurface(source->item.type->hit_image, NULL, app->screen, &rect);
 		// printf("splash %d %d\n", target->pos.x, target->pos.y);
+	}
+
+	if(source->item.type->should_explode && source != target) {
+		source->life = 1;
+		hit(app, source, source);
 	}
 
 	if(target->status != BODY_DEAD){
