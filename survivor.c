@@ -694,7 +694,7 @@ void loadItems(App *app) {
 
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].damage = 20;
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].score = 3;
-	app->game.itemtype[ITEM_ENEMY_SUICIDAL].hit_image = IMG_Load("data/fire_ammo.png");
+	app->game.itemtype[ITEM_ENEMY_SUICIDAL].hit_image = IMG_Load("data/fire_hit.png");
 	app->game.itemtype[ITEM_ENEMY_SUICIDAL].sound = Mix_LoadWAV("sounds/ouch.wav");
 
 	app->game.itemtype[ITEM_PLAYER_BULLET].chance = 50;
@@ -1285,9 +1285,13 @@ int main(int argc, char* args[] )
   Mix_FreeChunk(app.game.itemtype[ITEM_PLAYER_BULLET].sound);
   Mix_FreeChunk(app.game.itemtype[ITEM_PLAYER_FLAME].sound);
   Mix_FreeChunk(app.game.itemtype[ITEM_BUILD].sound);
+  Mix_FreeChunk(app.game.itemtype[ITEM_ENEMY_FASTER].sound);
+  Mix_FreeChunk(app.game.itemtype[ITEM_ENEMY_SUICIDAL].sound);
 
   SDL_FreeSurface(app.game.board.base_image);
   SDL_FreeSurface(app.game.board.base_hit);
+  SDL_FreeSurface(app.game.itemtype[ITEM_ENEMY_FASTER].hit_image);
+  SDL_FreeSurface(app.game.itemtype[ITEM_ENEMY_SUICIDAL].hit_image);
   SDL_FreeSurface(app.game.itemtype[ITEM_ENEMY_MEDIC].hit_image);
   SDL_FreeSurface(app.game.itemtype[ITEM_ENEMY_SOLDIER].hit_image);
   SDL_FreeSurface(app.game.itemtype[ITEM_PLAYER_BULLET].hit_image);
