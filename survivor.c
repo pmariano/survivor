@@ -418,9 +418,9 @@ void loadMap(App *app) {
   app->game.board.wave[0].w=mapWidth;
   app->game.board.wave[0].h=mapHeight;
   app->game.board.wave[0].enemy_spawn_interval=5000;
-  app->game.board.wave[0].enemy_count=10;
-  app->game.board.wave[0].enemy_count_on_screen=5;
-  app->game.board.wave[0].enemy_count_per_spawn=2;
+  app->game.board.wave[0].enemy_count=7;
+  app->game.board.wave[0].enemy_count_on_screen=3;
+  app->game.board.wave[0].enemy_count_per_spawn=3;
   app->game.board.wave[0].enemy_chance[ENEMY_MEDIC]=1;
   app->game.board.wave[0].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[0].enemy_chance[ENEMY_FASTER]=0;
@@ -1279,6 +1279,9 @@ int main(int argc, char* args[] )
   init_font();
   InitializePathfinder();
   renderInit(&app);
+  SDL_WM_SetCaption("survivor - pseudogames", "survivor");
+  SDL_ShowCursor(0);
+
   soundInit();
   loadItems(&app);
   loadEnemies(&app);
