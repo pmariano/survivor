@@ -418,7 +418,7 @@ void loadMap(App *app) {
   app->game.board.wave[0].w=mapWidth;
   app->game.board.wave[0].h=mapHeight;
   app->game.board.wave[0].enemy_spawn_interval=5000;
-  app->game.board.wave[0].enemy_count=7;
+  app->game.board.wave[0].enemy_count=10;
   app->game.board.wave[0].enemy_count_on_screen=3;
   app->game.board.wave[0].enemy_count_per_spawn=3;
   app->game.board.wave[0].enemy_chance[ENEMY_MEDIC]=1;
@@ -662,8 +662,10 @@ void loadMap(App *app) {
 
 }
 
+void gameEnding(App *app);
 void setWave(App *app, int wave_index) {
 	if(wave_index >= app->game.board.wave_count) {
+		gameEnding(app);
 		app->state = STATE_GAMEOVER;
 		app->game.won = 1;
 	}
@@ -1262,6 +1264,35 @@ void addPowerup(App *app)
 	}
 }
 
+void gameEnding(App *app)
+{
+	int i;
+	playMusic("menu.mp3", -1);
+	app->game.hint_pivot = -9999;
+	app->game.hint_grab = -9999;
+	app->game.hint_give = -9999;
+	app->game.hint_build = -9999;
+	app->game.player1.body.angle = 180;
+	app->game.player2.body.angle = 180;
+	while( app->game.board.wave_index >= 0) {
+		float duration = pow(1.1,app->game.board.wave_index)/2.;
+		int frames = duration*FPS;
+		for(i=0; i<frames; i++) {
+			Uint32 startTime = SDL_GetTicks();
+			SDL_Event event;
+			while(SDL_PollEvent(&event)){
+				// slurp
+			}
+			renderStart(app);
+			app->game.spawnPowerupTime = 0;
+			addPowerup(app);
+			renderFinish(app);
+			handleDelay(startTime);
+		}
+		setWave(app, app->game.board.wave_index-1);
+		app->game.board.wave_start=-9999;
+	}
+}
 
 int main(int argc, char* args[] )
 {
