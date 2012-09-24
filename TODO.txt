@@ -1,3 +1,9 @@
+BUG:
+- spawning player outside safe areas
+- walls too weak
+- zombies not trying to go around walls
+
+DESIGN:
 - fix interface mproblem on resume vs new game accidental hit on continuing game
 - fix interface problem on pivoting (aiming without move) vs grabbing or giving
 
