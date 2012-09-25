@@ -1,5 +1,6 @@
 BUG:
 - mark deadly areas for zombies and add cost on A*
+- enemies may spawn over barricades (avoid building on borders)
 
 DESIGN:
 - fix interface mproblem on resume vs new game accidental hit on continuing game
