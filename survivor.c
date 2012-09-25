@@ -467,7 +467,7 @@ void loadMap(App *app) {
 
   app->game.board.wave[4].x=bx*3-6;
   app->game.board.wave[4].y=by*1;
-  app->game.board.wave[4].w=mapWidth;
+  app->game.board.wave[4].w=mapWidth-1;
   app->game.board.wave[4].h=mapHeight;
   app->game.board.wave[4].enemy_spawn_interval=2000;
   app->game.board.wave[4].enemy_count=250;
@@ -547,10 +547,10 @@ void loadMap(App *app) {
   app->game.board.wave[10].y=by*3;
   app->game.board.wave[10].w=mapWidth;
   app->game.board.wave[10].h=mapHeight;
-  app->game.board.wave[10].enemy_spawn_interval=10000;
-  app->game.board.wave[10].enemy_count=150;
-  app->game.board.wave[10].enemy_count_on_screen=60;
-  app->game.board.wave[10].enemy_count_per_spawn=24;
+  app->game.board.wave[10].enemy_spawn_interval=5000;
+  app->game.board.wave[10].enemy_count=300;
+  app->game.board.wave[10].enemy_count_on_screen=75;
+  app->game.board.wave[10].enemy_count_per_spawn=30;
   app->game.board.wave[10].enemy_chance[ENEMY_MEDIC]=10;
   app->game.board.wave[10].enemy_chance[ENEMY_SOLDIER]=0;
   app->game.board.wave[10].enemy_chance[ENEMY_FASTER]=1;
@@ -666,8 +666,7 @@ void gameEnding(App *app);
 void setWave(App *app, int wave_index) {
 	if(wave_index >= app->game.board.wave_count) {
 		gameEnding(app);
-		app->state = STATE_GAMEOVER;
-		app->game.won = 1;
+		return;
 	}
 	app->game.board.wave_index = wave_index;
 	app->game.board.wave_start = SDL_GetTicks();
@@ -1276,7 +1275,7 @@ void gameEnding(App *app)
 	app->game.hint_build = -9999;
 	app->game.player1.body.angle = 180;
 	app->game.player2.body.angle = 180;
-	while( app->game.board.wave_index >= 0) {
+	for(;;) {
 		float duration = pow(1.1,app->game.board.wave_index)/2.;
 		int frames = duration*FPS;
 		for(i=0; i<frames; i++) {
@@ -1291,9 +1290,13 @@ void gameEnding(App *app)
 			renderFinish(app);
 			handleDelay(startTime);
 		}
+		if( app->game.board.wave_index == 0) break;;
 		setWave(app, app->game.board.wave_index-1);
 		app->game.board.wave_start=-9999;
+		app->game.kill_count = app->game.board.wave[app->game.board.wave_index].enemy_count;
 	}
+	app->state = STATE_GAMEOVER;
+	app->game.won = 1;
 }
 
 int main(int argc, char* args[] )
