@@ -44,15 +44,14 @@ void movePrepare(App *app)
 		}
 	}
 				
+	int hit_built = rand()%2;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
 			float f = app->game.board.built[x][y]/(float)BUILD_LIMIT;
 			if(app->game.board.crowd[x][y] < !!f)
 				app->game.board.crowd[x][y] = !!f;
-#ifdef HIT_BUILD
-			if(app->game.board.hittable[x][y] < !!f)
+			if(hit_built && app->game.board.hittable[x][y] < !!f)
 				app->game.board.hittable[x][y] = !!f;
-#endif
 			int cost = 2*mapWidth*f;
 			if(walkability[x][y] < cost)
 				walkability[x][y] = cost;

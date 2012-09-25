@@ -3,14 +3,12 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-// #define HIT_BUILD
-
 #define ENEMY_COUNT 999
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
 #define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
 
-#define BUILD_LIMIT 250
+#define BUILD_LIMIT 100
 #define WAVE_COUNT 256
 
 #include "aStarLibrary.h" // must be after the defines above

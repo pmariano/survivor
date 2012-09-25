@@ -974,16 +974,16 @@ inline int draw(App *app, Body *body, int x, int y)
 		if(tg >=4 || tg && i==0) {
 			// printf("i %d tg %d\n", i, tg);
 			target = tg;
-#ifdef HIT_BUILD
+
+			// hit_built
 			x/=tileSize;
 			y/=tileSize;
 			if(i==0
 				&& x>=0 && y>=0 && x<mapWidth && y<mapHeight 
 				&& app->game.board.built[x][y] > 0)
 			{
-				app->game.board.built[x][y]--;
+				app->game.board.built[x][y]/=2;
 			}
-#endif
 			break;
 		}
 	}
@@ -1216,7 +1216,7 @@ int build(App *app, Body *body)
 		int x = x2+search[i][0];
 		int y = y2+search[i][1];
 		if(app->game.board.built[x][y] || app->game.board.crowd[x][y]==0) {
-			app->game.board.built[x][y]+=ceil((21-i)/4.);
+			app->game.board.built[x][y]+=ceil((21-i)/5.);
 			if(app->game.board.built[x][y] > BUILD_LIMIT)
 				app->game.board.built[x][y] = BUILD_LIMIT;
 		}
