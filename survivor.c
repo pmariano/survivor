@@ -974,6 +974,7 @@ inline int draw(App *app, Body *body, int x, int y)
 		if(tg >=4 || tg && i==0) {
 			// printf("i %d tg %d\n", i, tg);
 			target = tg;
+#ifdef HIT_BUILD
 			x/=tileSize;
 			y/=tileSize;
 			if(i==0
@@ -982,6 +983,7 @@ inline int draw(App *app, Body *body, int x, int y)
 			{
 				app->game.board.built[x][y]--;
 			}
+#endif
 			break;
 		}
 	}
@@ -1327,7 +1329,7 @@ int main(int argc, char* args[] )
 	if (app.state == STATE_PLAYING) {
 	  renderStart(&app);
 	}
-	bindKeyboard(&app);
+	bindKeyboard(&app);                                   
 
 	if (app.state == STATE_PLAYING){
 	  playRandomMusic();

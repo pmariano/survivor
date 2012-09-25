@@ -239,12 +239,12 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 		openY[newOpenListItemID] = b;//record the x and y coordinates of the new item
 
 		//Figure out its G cost
-		int cost = walkability[a][b];
-		if(cost == 0) cost = 1;
 		if (abs(a-parentXval) == 1 && abs(b-parentYval) == 1)
 			addedGCost = 14;//cost of going to diagonal squares
 		else
 			addedGCost = 10;//cost of going to non-diagonal squares
+		int cost = walkability[a][b];
+		if(cost == 0) cost = 1;
 		Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost * cost;
 		// printf("gcost [%d][%d] = %d\n", a,b, Gcost[a][b]);
 
@@ -287,7 +287,9 @@ int FindPath (int pathfinderID,int startingX, int startingY,
 			addedGCost = 14;//cost of going to diagonal tiles
 		else
 			addedGCost = 10;//cost of going to non-diagonal tiles
-		tempGcost = Gcost[parentXval][parentYval] + addedGCost;
+		int cost = walkability[a][b];
+		if(cost == 0) cost = 1;
+		tempGcost = Gcost[parentXval][parentYval] + addedGCost * cost;
 
 		//If this path is shorter (G cost is lower) then change
 		//the parent cell, G cost and F cost.

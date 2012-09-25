@@ -49,10 +49,13 @@ void movePrepare(App *app)
 			float f = app->game.board.built[x][y]/(float)BUILD_LIMIT;
 			if(app->game.board.crowd[x][y] < !!f)
 				app->game.board.crowd[x][y] = !!f;
+#ifdef HIT_BUILD
 			if(app->game.board.hittable[x][y] < !!f)
 				app->game.board.hittable[x][y] = !!f;
-			if(walkability[x][y] < mapWidth*10*f)
-				walkability[x][y] = mapWidth*10*f; // at least 1% walkable
+#endif
+			int cost = 2*mapWidth*f;
+			if(walkability[x][y] < cost)
+				walkability[x][y] = cost;
 		}
 	}
 }
@@ -119,9 +122,9 @@ inline int is_solid(Game *game, Body *body, int x, int y)
 	if(body->pos.x/tileSize == x && body->pos.y/tileSize == y)
 		return 0;
 	if(game->board.built[x][y]>0) {
-		game->board.built[x][y]-=3;
-		if(game->board.built[x][y]<0)
-			game->board.built[x][y] = 0;
+		game->board.built[x][y]--;
+		if(game->board.built[x][y]<0) 
+			game->board.built[x][y]=0;
 	}
 	return game->board.crowd[x][y];
 }
@@ -261,13 +264,12 @@ void move_enemies(App *app)
 
 void player_move(App *app, Body *body, int up, int right, int down, int left, int halt)
 {
-    Game game = app->game; 
     aim(app, body);
     int dx=right-left;
     int dy=down-up;
     if(dx||dy) {
         float angle = ATAN2(dx,dy);
-        body_move(&game, body, angle, !halt);
+        body_move(&app->game, body, angle, !halt);
     }
 }
 
@@ -284,10 +286,12 @@ int enemy_spawn_pos(Game *game, int *x, int *y) {
 
 int player_spawn_pos(Game *game, Uint16 *x, Uint16 *y)
 {
-	int i;
-	for(i=0; i< 100; i++) {
+	int i=0;
+	//printf("--------\n");
+	while(1) {
 		int x1 = rand() % mapWidth;
 		int y1 = rand() % mapHeight;
+		//printf("try %d %d %d\n",i++,x1,y1);
 		if(game->board.safearea[x1][y1] && !game->board.crowd[x1][y1]) {
 			*x = x1 * tileSize + tileSize/2;
 			*y = y1 * tileSize + tileSize/2;

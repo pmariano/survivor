@@ -185,8 +185,6 @@ void renderBuilt(App *app)
 
 void renderDebug(App *app)
 {
-	int x,y;
-
 	int color;
 	int *map = NULL;
 	switch(app->debug) {
@@ -223,12 +221,13 @@ void renderDebug(App *app)
 			map = (int *)app->game.board.safearea;
 			break;
 		case DEBUG_BUILT: // gray
-			color = SDL_MapRGBA(app->screen->format, 0x00,0x80,0x80,0x80 );
+			color = SDL_MapRGBA(app->screen->format, 0x80,0x80,0x80,0xff );
 			map = (int *)app->game.board.built;
 			break;
 	}
 
 	if(map){
+		int x,y;
 		for (x=0; x < mapWidth;x++) {
 			for (y=0; y < mapHeight;y++) {
 				if(map[x*mapHeight+y]) {
@@ -239,6 +238,29 @@ void renderDebug(App *app)
 		}
 
 		SDL_BlitSurface(app->game.board.hit, NULL, app->screen, NULL);
+
+		color = SDL_MapRGBA(app->screen->format, 0xff,0x00,0x00,0xff );
+		int i;
+		for(i=0; i < ENEMY_COUNT; i++) 
+		{
+			if(app->game.enemies[i].body.status == BODY_ALIVE)
+			{
+				extern int pathBank [numberPeople+1][maxPathLength*2];
+				int p = app->game.enemies[i].pathfinder;
+				int s = 2;
+				int n = tileSize/s;
+				int x1 = i % n;
+				int y1 = (i / n) % n;
+				int j;
+				for(j=0; j<pathLength[p]; j++) {
+					int x = pathBank[p][j*2+0];
+					int y = pathBank[p][j*2+1];
+					SDL_Rect rect = { x*tileSize+x1*s, y*tileSize+y1*s, s, s };
+					SDL_FillRect(app->screen, &rect , color);
+				}
+			}
+		}
+
 	}
 
 }
@@ -261,6 +283,7 @@ void renderStart(App *app){
   }
   SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
 
+  renderBuilt(app);
 }
 
 void renderFinish(App *app){
@@ -281,7 +304,6 @@ void renderFinish(App *app){
   renderPlayer(&app->game, &game.player2);
   renderEnemies(app);
   renderPowerups(app);
-  renderBuilt(app);
   //SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 
   flushRender(app);
