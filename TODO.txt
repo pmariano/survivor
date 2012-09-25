@@ -1,7 +1,5 @@
 BUG:
-- spawning player outside safe areas
-- walls too weak
-- zombies not trying to go around walls
+- mark deadly areas for zombies and add cost on A*
 
 DESIGN:
 - fix interface mproblem on resume vs new game accidental hit on continuing game
