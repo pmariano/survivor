@@ -38,6 +38,7 @@ void gameInit(App *app){
 	app->game.kill_count= 0;
 	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
 	memset(app->game.board.built, 0, sizeof(app->game.board.built));
+	memset(app->game.board.death, 0, sizeof(app->game.board.death));
 
 	app->game.latest_enemy_updated = 0;
 
@@ -72,6 +73,7 @@ void resetApp(App *app)
 	app->game.hint_grab = 0;
 	app->game.hint_give = 0;
 	app->game.hint_build = 0;
+	app->game.board.zombie_memory = 0;
 
 	/**
 	 * Player 1 init settings
@@ -85,6 +87,7 @@ void resetApp(App *app)
 	p1body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p1body->item.ammo_used = 0 ;
 	p1body->shoot_key = SDLK_a;
+	p1body->last_ai = 0;
 
 	/**
 	 * Player 2 init settings
@@ -98,6 +101,7 @@ void resetApp(App *app)
 	p2body->item.type = &app->game.itemtype[ITEM_PLAYER_BULLET];
 	p2body->item.ammo_used = 0 ;
 	p2body->shoot_key = SDLK_z;
+	p2body->last_ai = 0;
 
 	setWave(app,0); // calls gameInit
 }
@@ -341,16 +345,16 @@ void spawnEnemy(App *app)
 		+ (rand() % (int)ceil(wave->enemy_count_per_spawn/2.));
 
 	if(spawn + game->on_screen_enemies > wave->enemy_count_on_screen) {
-		//printf("spawn %d on_screen\n", game->on_screen_enemies);
+		// printf("spawn %d on_screen\n", game->on_screen_enemies);
 		spawn = wave->enemy_count_on_screen - game->on_screen_enemies;
 	}
 	
 	if(spawn + game->total_enemies > wave->enemy_count) {
-		//printf("spawn %d wave\n", game->total_enemies);
+		// printf("spawn %d wave\n", game->total_enemies);
 		spawn = wave->enemy_count - game->total_enemies;
 	}
 
-	//printf("spawn %d enemies\n", spawn);
+	// printf("spawn %d enemies\n", spawn);
 	while(spawn > 0) {
 		Enemy *enemy = NULL;
 		for(i = 0; i < wave->enemy_count; i++)
@@ -387,6 +391,8 @@ void spawnEnemy(App *app)
 			enemybody->angle = 0;
 			enemybody->pos.x = x;
 			enemybody->pos.y = y;
+			enemybody->last_ai = 0;
+			enemybody->exploded = 0;
 		} else {
 			spawnDelay = 500;
 			break; // did not finished group spawn, persist
@@ -652,7 +658,7 @@ void loadMap(App *app) {
   app->game.board.wave[18].w=mapWidth;
   app->game.board.wave[18].h=mapHeight;
   app->game.board.wave[18].enemy_spawn_interval=15000;
-  app->game.board.wave[18].enemy_count=1000;
+  app->game.board.wave[18].enemy_count=ENEMY_COUNT;
   app->game.board.wave[18].enemy_count_on_screen=400;
   app->game.board.wave[18].enemy_count_per_spawn=50;
   app->game.board.wave[18].enemy_chance[ENEMY_MEDIC]=20;
@@ -906,6 +912,7 @@ int hit(App *app, Body *source, Body *target){
 
 	if(source->item.type->should_explode && source != target) {
 		source->life = 1;
+		source->exploded = 1;
 		hit(app, source, source);
 	}
 
@@ -914,12 +921,71 @@ int hit(App *app, Body *source, Body *target){
 	}
 
 	if(target->life <= 0){
+		target->life = 0;
 		if(target->status == BODY_ALIVE){
-			if(!app->debug || target->item.type->score) { // player immortal on debug
-				int kill = !!target->item.type->score;
-				app->game.kill_count += kill;
-				app->game.total_kill_count += kill;
-				app->game.on_screen_enemies -= kill;
+			int enemy_killed = !!target->item.type->score; // enemy killed
+			if(!app->debug || enemy_killed) { // player immortal on debug
+				int x0 = target->pos.x/tileSize;
+				int y0 = target->pos.y/tileSize;
+				int search[21][2] = {
+					{+0,+0},
+					{+1,+0},
+					{+0,+1},
+					{-1,+0},
+					{+0,-1},
+					{+1,-1},
+					{+1,+1},
+					{-1,+1},
+					{-1,-1},
+					{+0,-2},
+					{+2,+0},
+					{+0,+2},
+					{-2,+0},
+					{-1,-2},
+					{+1,-2},
+					{+2,-1},
+					{+2,+1},
+					{+1,+2},
+					{-1,+2},
+					{-2,+1},
+					{-2,-1}
+				};
+
+				int i;
+				Wave *wave = &app->game.board.wave[app->game.board.wave_index];
+				if(enemy_killed) {
+					app->game.on_screen_enemies --;
+					if(target->exploded) {
+						app->game.total_enemies --;
+					} else {
+						app->game.kill_count ++;
+						app->game.total_kill_count ++;
+						for(i=0;i<21;i++) {
+							int x = x0+search[i][0];
+							int y = y0+search[i][1];
+							if( x < 1 || y < 1 || x >= wave->w-1 || y >= wave->h-1 || walkability[x][y]==1) 
+								continue; // dont outside or on the enemy spawn borders
+							app->game.board.death[x][y] +=ceil( (21-i) / 4.);
+						}
+					}
+				} else { // player_killed
+					int x1 = source->pos.x/tileSize;
+					int y1 = source->pos.y/tileSize;
+					for(i=0;i<21;i++) {
+						int x = x1+search[i][0];
+						int y = y1+search[i][1];
+						if( x < 1 || y < 1 || x >= wave->w-1 || y >= wave->h-1 || walkability[x][y]==1) 
+							continue; // dont outside or on the enemy spawn borders
+						app->game.board.death[x][y] /= 2;
+					}
+					for(i=0;i<21;i++) {
+						int x = x0+search[i][0];
+						int y = y0+search[i][1];
+						if( x < 1 || y < 1 || x >= wave->w-1 || y >= wave->h-1 || walkability[x][y]==1) 
+							continue; // dont outside or on the enemy spawn borders
+						app->game.board.death[x][y] /= 2;
+					}
+				}
 				target->status = BODY_DEAD;
 				int index = app->game.board.wave_index;
 				int count = app->game.board.wave[app->game.board.wave_index].enemy_count;
@@ -1211,11 +1277,14 @@ int build(App *app, Body *body)
 		{-2,-1}
 	};
 
+	Wave *wave = &app->game.board.wave[app->game.board.wave_index];
 	for(i=0;i<21;i++) {
 		int x = x2+search[i][0];
 		int y = y2+search[i][1];
+		if( x < 1 || y < 1 || x >= wave->w-1 || y >= wave->h-1) 
+			continue; // dont build outside or on the enemy spawn borders
 		if(app->game.board.built[x][y] || app->game.board.crowd[x][y]==0) {
-			app->game.board.built[x][y]+=ceil((21-i)/5.);
+			app->game.board.built[x][y]+=ceil((21-i)/4.);
 			if(app->game.board.built[x][y] > BUILD_LIMIT)
 				app->game.board.built[x][y] = BUILD_LIMIT;
 		}

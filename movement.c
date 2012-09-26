@@ -1,6 +1,9 @@
 #include "movement.h"
 #include "aStarLibrary.h"
 
+#define AI_FREQ 500
+#define AI_PER_FRAME 20
+#define HIT_FREQ 200
 #define ATAN2(dx,dy) ((int)(720+atan2(-(dy),(dx))*180/M_PI)%360) // FIXME wrap angle properly
 
 void movePrepare(App *app)
@@ -40,22 +43,48 @@ void movePrepare(App *app)
 			int y = app->game.enemies[i].body.pos.y/tileSize;
 			app->game.board.crowd[x][y] = 4+i;
 			app->game.board.hittable[x][y] = 4+i;
-			walkability[x][y] = mapWidth; // 1% walkable
+			walkability[x][y] = 2+mapWidth/4;
 		}
 	}
 				
+	int death[mapWidth][mapHeight];
+	int t = SDL_GetTicks();
+	int flush = t > app->game.board.zombie_memory + ZOMBIE_MEMORY_FLUSH;
+	if(flush) {
+		app->game.board.zombie_memory = t;
+		memset(death,0,sizeof(death));
+	}
 	int hit_built = rand()%2;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
-			float f = app->game.board.built[x][y]/(float)BUILD_LIMIT;
-			if(app->game.board.crowd[x][y] < !!f)
-				app->game.board.crowd[x][y] = !!f;
-			if(hit_built && app->game.board.hittable[x][y] < !!f)
-				app->game.board.hittable[x][y] = !!f;
-			int cost = 2*mapWidth*f;
-			if(walkability[x][y] < cost)
-				walkability[x][y] = cost;
+			if(flush) {
+				int xx, yy;
+				int xx0 = x-1 > 0 ? x-1 : 0;
+				int xx1 = x+1 < mapWidth ? x+1 : mapWidth-1;
+				int yy0 = y-1 > 0 ? y-1 : 0;
+				int yy1 = y+1 < mapHeight ? y+1 : mapHeight-1;
+				for (xx=xx0; xx<=xx1; xx++) {
+					for (yy=yy0; yy<=yy1; yy++) {
+						death[x][y] += app->game.board.death[xx][yy] * (x==xx&&y==yy ? 4 : 1);
+					}
+				}
+				death[x][y] /= 15; // 12
+			}
+			int d = app->game.board.death[x][y];
+			float b = app->game.board.built[x][y]/(float)BUILD_LIMIT;
+			int bb = !!b;
+			if(app->game.board.crowd[x][y] < bb)
+				app->game.board.crowd[x][y] = bb;
+			if(hit_built && app->game.board.hittable[x][y] < bb)
+				app->game.board.hittable[x][y] = bb;
+			int cost = mapWidth*(2*b + d/30);
+			if(walkability[x][y] != 1 && cost > 0) {
+				walkability[x][y] = 1+cost;
+			}
 		}
+	}
+	if(flush) {
+		memcpy(app->game.board.death, death, sizeof(death));
 	}
 }
 
@@ -142,21 +171,31 @@ void body_move(Game *game, Body *body, float angle, float vel)
 
 	angle_rotate(&body->angle, angle, body->ang_vel);
 	float a = body->angle * M_PI / 180.;
-	float dx = (int)(cos(a) * v * 100)/100.;
-	float dy = (int)(sin(a) * v * 100)/100.;
+	float dx = cos(a) * v;
+	float dy = sin(a) * v;
 	int x0 = body->pos.x;
 	int y0 = body->pos.y;
 	int x1 = x0 + dx;
 	int y1 = y0 - dy;
 
-	if(is_empty(game, body,x1,y1)) {
-		body->pos.x = x1;
-		body->pos.y = y1;
-	} else {
-		if(is_empty(game, body,x1,y0)) {
+
+	int mx = x0/tileSize - x1/tileSize;
+	int my = y0/tileSize - y1/tileSize;
+	if(!mx) body->pos.x = x1;
+	if(!my) body->pos.y = y1;
+	if(mx || my) {
+		if(is_empty(game, body,x1,y1)) {
 			body->pos.x = x1;
-		} else if(is_empty(game, body,x0,y1)) {
 			body->pos.y = y1;
+			//printf("xy: ");
+		} else {
+			if(mx && is_empty(game, body,x1,y0)) {
+				//printf("x %d %d: ",x0,x1);
+				body->pos.x = x1;
+			} else if(my && is_empty(game, body,x0,y1)) {
+				//printf("y %d %d: ",y0,y1);
+				body->pos.y = y1;
+			}
 		}
 	}
 
@@ -167,6 +206,7 @@ void body_move(Game *game, Body *body, float angle, float vel)
 void move_enemies(App *app)
 {
   int i;
+  int t = SDL_GetTicks();
   for(i=0; i < ENEMY_COUNT; i++)
   {
     if(app->game.enemies[i].body.status == BODY_ALIVE
@@ -175,15 +215,18 @@ void move_enemies(App *app)
 	}
   }
 
-  int n=30; // ENEMY_COUNT
-  for(i=0; i < n; i++) 
+  //printf("-------------\n");
+  int n=AI_PER_FRAME;
+  for(i=0; i < ENEMY_COUNT && n > 0; i++) 
   {
     int id = app->game.latest_enemy_updated = ( app->game.latest_enemy_updated + 1 ) % ENEMY_COUNT;
     int crazy = id*2;
-    if(app->game.enemies[id].body.status == BODY_ALIVE)
+    if(app->game.enemies[id].body.status == BODY_ALIVE && t > app->game.enemies[id].body.last_ai+AI_FREQ)
     {
         Body *enemy_body = &app->game.enemies[id].body;
-		n++;
+		n--;
+		//printf("path %d %d %d\n", i, n, id);
+		app->game.enemies[id].body.last_ai = t;
 		pathLength[crazy] = 9999;
 		pathLength[crazy+1] = 9999;
 
@@ -245,13 +288,18 @@ void move_enemies(App *app)
           int reach = ReadPath(crazy, enemy_body->pos.x, enemy_body->pos.y, tileSize*1.5);
           int dx = xPath[crazy] - enemy_body->pos.x;
           int dy = yPath[crazy] - enemy_body->pos.y;
-          float angle = ATAN2(dx,dy);
+          //float angle = ATAN2(dx,dy);
+          float angle = (int)(720 + ATAN2(dx,dy) + sin((t/5000.+crazy/(float)AI_PER_FRAME)*M_PI)*30 ) % 360;
           body_move(&app->game, enemy_body, angle, .25+.75*rand()/(float)RAND_MAX);
+		  //printf("enemy %d (%d, %d) angle %f -> %f\n", crazy, enemy_body->pos.x, enemy_body->pos.y, angle, enemy_body->angle);
 
-		  if(reach){
-				//printf("reach %d=%d %d,%d\n", i, crazy, dx, dy);
-				pathStatus[app->game.enemies[i].pathfinder_other] = notStarted;
-				hit(app, enemy_body, app->game.enemies[i].target);
+			  
+		  if(reach && (enemy_body->item.type->should_explode || 
+					  t > app->game.enemies[i].target->last_ai+HIT_FREQ)){
+			  app->game.enemies[i].target->last_ai = t;
+			  //printf("reach %d=%d %d,%d\n", i, crazy, dx, dy);
+			  pathStatus[app->game.enemies[i].pathfinder_other] = notStarted;
+			  hit(app, enemy_body, app->game.enemies[i].target);
 
 		  }
 		}

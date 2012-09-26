@@ -224,6 +224,10 @@ void renderDebug(App *app)
 			color = SDL_MapRGBA(app->screen->format, 0x80,0x80,0x80,0xff );
 			map = (int *)app->game.board.built;
 			break;
+		case DEBUG_DEATH: // dark red
+			color = SDL_MapRGBA(app->screen->format, 0x80,0x00,0x00,0xff );
+			map = (int *)app->game.board.death;
+			break;
 	}
 
 	if(map){
@@ -236,8 +240,6 @@ void renderDebug(App *app)
 				}
 			}
 		}
-
-		SDL_BlitSurface(app->game.board.hit, NULL, app->screen, NULL);
 
 		color = SDL_MapRGBA(app->screen->format, 0xff,0x00,0x00,0xff );
 		int i;
@@ -261,8 +263,10 @@ void renderDebug(App *app)
 			}
 		}
 
-	}
+		SDL_Rect rect = { 250, 20, 0, 0 };
+		SDL_BlitSurface(app->game.board.hit, NULL, app->screen, &rect);
 
+	}
 }
 
 
@@ -283,7 +287,9 @@ void renderStart(App *app){
   }
   SDL_BlitSurface(app->game.board.image, NULL, app->screen, NULL);
 
+  renderDebug(app);
   renderBuilt(app);
+
 }
 
 void renderFinish(App *app){
@@ -308,8 +314,6 @@ void renderFinish(App *app){
 
   flushRender(app);
   renderStats(app, app->screen, &game.player1, &game.player2);
-
-  renderDebug(app);
 
   SDL_Flip(app->screen);
 }

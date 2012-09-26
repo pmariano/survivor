@@ -3,13 +3,14 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-#define ENEMY_COUNT 999
+#define ENEMY_COUNT 1000
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
 #define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
 
-#define BUILD_LIMIT 100
+#define BUILD_LIMIT 200
 #define WAVE_COUNT 256
+#define ZOMBIE_MEMORY_FLUSH 15000;
 
 #include "aStarLibrary.h" // must be after the defines above
 
@@ -25,6 +26,7 @@ enum {
 	ITEM_BUILD,
 	ITEM_COUNT
 };
+
 enum {
   ENEMY_MEDIC,
   ENEMY_SOLDIER,
@@ -32,7 +34,6 @@ enum {
   ENEMY_SUICIDAL,
   ENEMY_TYPE_COUNT
 };
-
 
 typedef enum {
   MENU_RESUME = 0,
@@ -90,6 +91,8 @@ typedef struct {
   float angle; // degree
   int shoot_key; // OH GOD WHY!
   Mix_Chunk *onHitSound;
+  int last_ai; // enemy=last pathfind; player=last time was reached
+  int exploded;
 } Body;
 
 typedef struct{
@@ -153,12 +156,14 @@ typedef struct{
   int powerup[mapWidth][mapHeight];
   int safearea[mapWidth][mapHeight];
   int built[mapWidth][mapHeight];
+  int death[mapWidth][mapHeight];
   int spawn_map[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;
   Sprite sprite[SPRITE_COUNT];
   int sprite_count;
   Item powerups[POWERUP_COUNT];
+  int zombie_memory;
 } Board;
 
 typedef struct {
@@ -213,6 +218,7 @@ typedef enum {
 	DEBUG_ITEM,
 	DEBUG_SAFE,
 	DEBUG_BUILT,
+	DEBUG_DEATH,
 	DEBUG_COUNT
 } Debug;
 
