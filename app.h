@@ -156,7 +156,6 @@ typedef struct{
   int safearea[mapWidth][mapHeight];
   int built[mapWidth][mapHeight];
   int death1[mapWidth][mapHeight];
-  int death2a[mapWidth][mapHeight];
   int death2[mapWidth][mapHeight];
   int spawn_map[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];

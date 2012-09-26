@@ -40,7 +40,6 @@ void gameInit(App *app){
 	memset(app->game.board.built, 0, sizeof(app->game.board.built));
 	memset(app->game.board.death1, 0, sizeof(app->game.board.death1));
 	memset(app->game.board.death2, 0, sizeof(app->game.board.death2));
-	memset(app->game.board.death2a, 0, sizeof(app->game.board.death2a));
 
 	app->game.latest_enemy_updated = 0;
 
@@ -971,7 +970,7 @@ int hit(App *app, Body *source, Body *target){
 								continue; // dont outside or on the enemy spawn borders
 							int s = score * ceil( (21-i) / 4.);
 							app->game.board.death1[x][y] += s;
-							app->game.board.death2a[x][y] += s;
+							app->game.board.death2[x][y] += s;
 						}
 					}
 				} else { // player_killed

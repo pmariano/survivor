@@ -4,7 +4,7 @@
 #define AI_FREQ 500
 #define AI_PER_FRAME 20
 #define ZOMBIE_MEMORY1_FLUSH 600;
-#define ZOMBIE_MEMORY2_FLUSH 16000;
+#define ZOMBIE_MEMORY2_FLUSH 4000;
 #define HIT_FREQ 200
 #define ATAN2(dx,dy) ((int)(720+atan2(-(dy),(dx))*180/M_PI)%360) // FIXME wrap angle properly
 
@@ -63,6 +63,13 @@ void movePrepare(App *app)
 		app->game.board.zombie_memory2 = t;
 	}
 	int hit_built = rand()%2;
+	int death2_max = 0;
+	for (x=0; x < mapWidth;x++) {
+		for (y=0; y < mapHeight;y++) {
+			if(death2_max < app->game.board.death2[x][y])
+				death2_max = app->game.board.death2[x][y];
+		}
+	}
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
 			if(flush1||flush2) {
@@ -79,30 +86,29 @@ void movePrepare(App *app)
 								+= app->game.board.death1[xx][yy] * (x==xx&&y==yy ? 600 : 100);
 						}
 					}
-					death1a[x][y] /= 1401;
+					death1a[x][y] /= 1410;
 				}
 
 				if(flush2) {
-					death2a[x][y] = app->game.board.death2[xx][yy] * 4;
 					for (xx=xx0; xx<=xx1; xx++) {
 						for (yy=yy0; yy<=yy1; yy++) {
 							death2a[x][y] 
-								+= app->game.board.death2a[xx][yy] * (x==xx&&y==yy ? 2 : 1);
+								+= app->game.board.death2[xx][yy] * (x==xx&&y==yy ? 200 : 100);
 						}
 					}
-					death2a[x][y] /= 14;
+					death2a[x][y] /= 1000;
 				}
 
 			}
 			int d1 = app->game.board.death1[x][y];
-			int d2 = app->game.board.death2[x][y];
+			float d2 = app->game.board.death2[x][y]/(float)death2_max;
 			float b = app->game.board.built[x][y]/(float)BUILD_LIMIT;
 			int bb = !!b;
 			if(app->game.board.crowd[x][y] < bb)
 				app->game.board.crowd[x][y] = bb;
 			if(hit_built && app->game.board.hittable[x][y] < bb)
 				app->game.board.hittable[x][y] = bb;
-			int cost = mapWidth*(2*b + d1/100. + (int)(d2/50)*2);
+			int cost = mapWidth*(2*b + d1/100. + 2*d2);
 			if(walkability[x][y] != 1 && cost > 0) {
 				walkability[x][y] = 1+cost;
 			}
@@ -112,7 +118,6 @@ void movePrepare(App *app)
 		memcpy(app->game.board.death1, death1a, sizeof(death1a));
 	}
 	if(flush2) {
-		memset(app->game.board.death2a, 0, sizeof(app->game.board.death2a));
 		memcpy(app->game.board.death2, death2a, sizeof(death2a));
 	}
 }
