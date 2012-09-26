@@ -224,9 +224,13 @@ void renderDebug(App *app)
 			color = SDL_MapRGBA(app->screen->format, 0x80,0x80,0x80,0xff );
 			map = (int *)app->game.board.built;
 			break;
-		case DEBUG_DEATH: // dark red
+		case DEBUG_DEATH1: // dark red
 			color = SDL_MapRGBA(app->screen->format, 0x80,0x00,0x00,0xff );
-			map = (int *)app->game.board.death;
+			map = (int *)app->game.board.death1;
+			break;
+		case DEBUG_DEATH2: // dark purple
+			color = SDL_MapRGBA(app->screen->format, 0x80,0x00,0x80,0xff );
+			map = (int *)app->game.board.death2;
 			break;
 	}
 

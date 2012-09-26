@@ -38,7 +38,9 @@ void gameInit(App *app){
 	app->game.kill_count= 0;
 	memset(app->game.board.powerup, 0, sizeof(app->game.board.powerup));
 	memset(app->game.board.built, 0, sizeof(app->game.board.built));
-	memset(app->game.board.death, 0, sizeof(app->game.board.death));
+	memset(app->game.board.death1, 0, sizeof(app->game.board.death1));
+	memset(app->game.board.death2, 0, sizeof(app->game.board.death2));
+	memset(app->game.board.death2a, 0, sizeof(app->game.board.death2a));
 
 	app->game.latest_enemy_updated = 0;
 
@@ -73,7 +75,8 @@ void resetApp(App *app)
 	app->game.hint_grab = 0;
 	app->game.hint_give = 0;
 	app->game.hint_build = 0;
-	app->game.board.zombie_memory = 0;
+	app->game.board.zombie_memory1 = 0;
+	app->game.board.zombie_memory2 = 0;
 
 	/**
 	 * Player 1 init settings
@@ -966,7 +969,9 @@ int hit(App *app, Body *source, Body *target){
 							int y = y0+search[i][1];
 							if( x < 1 || y < 1 || x >= wave->w-1 || y >= wave->h-1 || walkability[x][y]==1) 
 								continue; // dont outside or on the enemy spawn borders
-							app->game.board.death[x][y] += score * ceil( (21-i) / 4.);
+							int s = score * ceil( (21-i) / 4.);
+							app->game.board.death1[x][y] += s;
+							app->game.board.death2a[x][y] += s;
 						}
 					}
 				} else { // player_killed
@@ -977,14 +982,14 @@ int hit(App *app, Body *source, Body *target){
 						int y = y1+search[i][1];
 						if( x < 1 || y < 1 || x >= wave->w-1 || y >= wave->h-1 || walkability[x][y]==1) 
 							continue; // dont outside or on the enemy spawn borders
-						app->game.board.death[x][y] /= 2;
+						app->game.board.death1[x][y] /= 2;
 					}
 					for(i=0;i<21;i++) {
 						int x = x0+search[i][0];
 						int y = y0+search[i][1];
 						if( x < 1 || y < 1 || x >= wave->w-1 || y >= wave->h-1 || walkability[x][y]==1) 
 							continue; // dont outside or on the enemy spawn borders
-						app->game.board.death[x][y] /= 2;
+						app->game.board.death1[x][y] /= 2;
 					}
 				}
 				target->status = BODY_DEAD;

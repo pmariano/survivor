@@ -3,7 +3,8 @@
 
 #define AI_FREQ 500
 #define AI_PER_FRAME 20
-#define ZOMBIE_MEMORY_FLUSH 5000;
+#define ZOMBIE_MEMORY1_FLUSH 600;
+#define ZOMBIE_MEMORY2_FLUSH 16000;
 #define HIT_FREQ 200
 #define ATAN2(dx,dy) ((int)(720+atan2(-(dy),(dx))*180/M_PI)%360) // FIXME wrap angle properly
 
@@ -47,45 +48,72 @@ void movePrepare(App *app)
 			walkability[x][y] = 2+mapWidth/4;
 		}
 	}
-				
-	int death[mapWidth][mapHeight];
+
 	int t = SDL_GetTicks();
-	int flush = t > app->game.board.zombie_memory + ZOMBIE_MEMORY_FLUSH;
-	if(flush) {
-		app->game.board.zombie_memory = t;
-		memset(death,0,sizeof(death));
+	int flush1 = t > app->game.board.zombie_memory1 + ZOMBIE_MEMORY1_FLUSH;
+	int flush2 = t > app->game.board.zombie_memory2 + ZOMBIE_MEMORY2_FLUSH;
+	int death1a[mapWidth][mapHeight];
+	int death2a[mapWidth][mapHeight];
+	if(flush1) {
+		memset(death1a, 0, sizeof(death1a));
+		app->game.board.zombie_memory1 = t;
+	}
+	if(flush2) {
+		memset(death2a, 0, sizeof(death2a));
+		app->game.board.zombie_memory2 = t;
 	}
 	int hit_built = rand()%2;
 	for (x=0; x < mapWidth;x++) {
 		for (y=0; y < mapHeight;y++) {
-			if(flush) {
+			if(flush1||flush2) {
 				int xx, yy;
 				int xx0 = x-1 > 0 ? x-1 : 0;
 				int xx1 = x+1 < mapWidth ? x+1 : mapWidth-1;
 				int yy0 = y-1 > 0 ? y-1 : 0;
 				int yy1 = y+1 < mapHeight ? y+1 : mapHeight-1;
-				for (xx=xx0; xx<=xx1; xx++) {
-					for (yy=yy0; yy<=yy1; yy++) {
-						death[x][y] += app->game.board.death[xx][yy] * (x==xx&&y==yy ? 200 : 100);
+
+				if(flush1) {
+					for (xx=xx0; xx<=xx1; xx++) {
+						for (yy=yy0; yy<=yy1; yy++) {
+							death1a[x][y] 
+								+= app->game.board.death1[xx][yy] * (x==xx&&y==yy ? 600 : 100);
+						}
 					}
+					death1a[x][y] /= 1401;
 				}
-				death[x][y] /= 1025;
+
+				if(flush2) {
+					death2a[x][y] = app->game.board.death2[xx][yy] * 4;
+					for (xx=xx0; xx<=xx1; xx++) {
+						for (yy=yy0; yy<=yy1; yy++) {
+							death2a[x][y] 
+								+= app->game.board.death2a[xx][yy] * (x==xx&&y==yy ? 2 : 1);
+						}
+					}
+					death2a[x][y] /= 14;
+				}
+
 			}
-			int d = app->game.board.death[x][y];
+			int d1 = app->game.board.death1[x][y];
+			int d2 = app->game.board.death2[x][y];
 			float b = app->game.board.built[x][y]/(float)BUILD_LIMIT;
 			int bb = !!b;
 			if(app->game.board.crowd[x][y] < bb)
 				app->game.board.crowd[x][y] = bb;
 			if(hit_built && app->game.board.hittable[x][y] < bb)
 				app->game.board.hittable[x][y] = bb;
-			int cost = mapWidth*(2*b + d/30);
+			int cost = mapWidth*(2*b + d1/100. + (int)(d2/50)*2);
 			if(walkability[x][y] != 1 && cost > 0) {
 				walkability[x][y] = 1+cost;
 			}
 		}
 	}
-	if(flush) {
-		memcpy(app->game.board.death, death, sizeof(death));
+	if(flush1) {
+		memcpy(app->game.board.death1, death1a, sizeof(death1a));
+	}
+	if(flush2) {
+		memset(app->game.board.death2a, 0, sizeof(app->game.board.death2a));
+		memcpy(app->game.board.death2, death2a, sizeof(death2a));
 	}
 }
 

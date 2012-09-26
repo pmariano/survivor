@@ -155,14 +155,17 @@ typedef struct{
   int powerup[mapWidth][mapHeight];
   int safearea[mapWidth][mapHeight];
   int built[mapWidth][mapHeight];
-  int death[mapWidth][mapHeight];
+  int death1[mapWidth][mapHeight];
+  int death2a[mapWidth][mapHeight];
+  int death2[mapWidth][mapHeight];
   int spawn_map[mapWidth][mapHeight];
   Spawn spawn[mapWidth*mapHeight];
   int spawn_count;
   Sprite sprite[SPRITE_COUNT];
   int sprite_count;
   Item powerups[POWERUP_COUNT];
-  int zombie_memory;
+  int zombie_memory1;
+  int zombie_memory2;
 } Board;
 
 typedef struct {
@@ -217,7 +220,8 @@ typedef enum {
 	DEBUG_ITEM,
 	DEBUG_SAFE,
 	DEBUG_BUILT,
-	DEBUG_DEATH,
+	DEBUG_DEATH1,
+	DEBUG_DEATH2,
 	DEBUG_COUNT
 } Debug;
 
