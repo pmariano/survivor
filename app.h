@@ -10,7 +10,6 @@
 
 #define BUILD_LIMIT 200
 #define WAVE_COUNT 256
-#define ZOMBIE_MEMORY_FLUSH 15000;
 
 #include "aStarLibrary.h" // must be after the defines above
 

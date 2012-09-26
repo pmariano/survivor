@@ -721,7 +721,7 @@ void loadItems(App *app) {
 
 	app->game.itemtype[ITEM_ENEMY_FASTER].damage = 2;
 	app->game.itemtype[ITEM_ENEMY_FASTER].range = 1*tileSize;
-	app->game.itemtype[ITEM_ENEMY_FASTER].score = 1;
+	app->game.itemtype[ITEM_ENEMY_FASTER].score = 2;
 	app->game.itemtype[ITEM_ENEMY_FASTER].hit_image = IMG_Load("data/bullet_hit.png");
 	app->game.itemtype[ITEM_ENEMY_FASTER].sound = Mix_LoadWAV("sounds/ouch.wav");
 
@@ -960,12 +960,13 @@ int hit(App *app, Body *source, Body *target){
 					} else {
 						app->game.kill_count ++;
 						app->game.total_kill_count ++;
+						int score = target->item.type->score;
 						for(i=0;i<21;i++) {
 							int x = x0+search[i][0];
 							int y = y0+search[i][1];
 							if( x < 1 || y < 1 || x >= wave->w-1 || y >= wave->h-1 || walkability[x][y]==1) 
 								continue; // dont outside or on the enemy spawn borders
-							app->game.board.death[x][y] +=ceil( (21-i) / 4.);
+							app->game.board.death[x][y] += score * ceil( (21-i) / 4.);
 						}
 					}
 				} else { // player_killed

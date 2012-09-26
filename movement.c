@@ -3,6 +3,7 @@
 
 #define AI_FREQ 500
 #define AI_PER_FRAME 20
+#define ZOMBIE_MEMORY_FLUSH 5000;
 #define HIT_FREQ 200
 #define ATAN2(dx,dy) ((int)(720+atan2(-(dy),(dx))*180/M_PI)%360) // FIXME wrap angle properly
 
@@ -65,10 +66,10 @@ void movePrepare(App *app)
 				int yy1 = y+1 < mapHeight ? y+1 : mapHeight-1;
 				for (xx=xx0; xx<=xx1; xx++) {
 					for (yy=yy0; yy<=yy1; yy++) {
-						death[x][y] += app->game.board.death[xx][yy] * (x==xx&&y==yy ? 4 : 1);
+						death[x][y] += app->game.board.death[xx][yy] * (x==xx&&y==yy ? 200 : 100);
 					}
 				}
-				death[x][y] /= 15; // 12
+				death[x][y] /= 1025;
 			}
 			int d = app->game.board.death[x][y];
 			float b = app->game.board.built[x][y]/(float)BUILD_LIMIT;
