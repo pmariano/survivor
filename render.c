@@ -417,6 +417,21 @@ void renderMenu(App *app){
   SDL_UpdateRect(app->screen, 0, 0, 0, 0);
 }
 
+void renderLobby(App *app)
+{
+  Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );
+  SDL_Surface *screen = app->screen;
+  SDL_FillRect(screen, NULL , color);
+
+  SDL_Rect charPos = {-670, -50, screen->w, screen->h};
+  SDL_BlitSurface(app->menu.engineer, &charPos, screen, NULL );
+
+  text_write_raw(screen, 300, 50, "Lobby", red, 96);
+
+	text_write_raw(screen, 100, 150, "waiting...", green, 36);
+}
+
+
 void renderCredits(App *app)
 {
   Uint32 color = SDL_MapRGB(app->screen->format, 33, 33,33 );

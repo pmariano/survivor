@@ -11,6 +11,7 @@
 #include "sound.h"
 #include "render.h"
 #include "movement.h"
+#include "net.h"
 #include "aStarLibrary.h"
 
 #define FPS 30
@@ -119,12 +120,12 @@ void pauseOrJoinTheGame(App *app, Player *player){
   }
 }
 
-void bindGameplayKeysDown(App *app, SDLKey *key){
+void bindGameplayKeysDown(App *app, SDLKey key){
 	Player *player1 = &app->game.player1;
 	Player *player2 = &app->game.player2;
 	SDLMod mod = SDL_GetModState();
 
-	switch(*key){
+	switch(key){
 		case SDLK_1:
 			pauseOrJoinTheGame(app, player1);
 			break;
@@ -158,7 +159,7 @@ void bindGameplayKeysDown(App *app, SDLKey *key){
 	}
 }
 
-void bindMenuKeysDown(App *app, SDLKey *key){
+void bindMenuKeysDown(App *app, SDLKey key){
   Player *player1 = &app->game.player1;
   Player *player2 = &app->game.player2;
   Menu *menu = &app->menu;
@@ -171,7 +172,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 	firstMenu = MENU_RESUME;
   }
 
-  switch(*key){
+  switch(key){
 	case SDLK_UP:
 	case SDLK_q:
 	case SDLK_t:
@@ -193,7 +194,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 		  resetApp(app);
 	  }
 	  app->state = STATE_PLAYING;
-	  if(*key == SDLK_2){
+	  if(key == SDLK_2){
 		  player2->body.status = BODY_ALIVE;
 		  player2->body.life = 100;
 		  player_spawn_pos(&app->game, &player2->body.pos.x, &player2->body.pos.y);
@@ -228,7 +229,7 @@ void bindMenuKeysDown(App *app, SDLKey *key){
 	  } else if(menu->selected == MENU_RESUME){
 		app->state = STATE_PLAYING;
 	  }
-	  if(*key == SDLK_z){
+	  if(key == SDLK_z){
 		player2->body.status = BODY_ALIVE;
 		player2->body.life = 100;
 		player_spawn_pos(&app->game, &player2->body.pos.x, &player2->body.pos.y);
@@ -252,9 +253,6 @@ void bindGameplayKeystate(App *app){
   Player *player1 = &app->game.player1;
   Player *player2 = &app->game.player2;
 
-  Uint8 *keystate;
-  keystate = SDL_GetKeyState(NULL);
-
   /**
    * Player 1 settings:
    * Q = UP; W = DOWN; E = LEFT; R = RIGHT
@@ -263,11 +261,11 @@ void bindGameplayKeystate(App *app){
    * */
 
   player_move(app, &player1->body,
-	  keystate[SDLK_UP] || keystate[SDLK_q],
-	  keystate[SDLK_RIGHT] || keystate[SDLK_r],
-	  keystate[SDLK_DOWN] || keystate[SDLK_w],
-	  keystate[SDLK_LEFT] || keystate[SDLK_e],
-	  keystate[SDLK_s]
+	  app->pressed[SDLK_UP] || app->pressed[SDLK_q],
+	  app->pressed[SDLK_RIGHT] || app->pressed[SDLK_r],
+	  app->pressed[SDLK_DOWN] || app->pressed[SDLK_w],
+	  app->pressed[SDLK_LEFT] || app->pressed[SDLK_e],
+	  app->pressed[SDLK_s]
 	  );
 
   /**
@@ -277,16 +275,16 @@ void bindGameplayKeystate(App *app){
    * S = SECONDARY ATTACK
    * */
   player_move(app, &player2->body,
-	  keystate[SDLK_p]         || keystate[SDLK_KP8] || keystate[SDLK_t],
-	  keystate[SDLK_QUOTE]     || keystate[SDLK_KP6] || keystate[SDLK_i],
-	  keystate[SDLK_SEMICOLON] ||keystate[SDLK_KP5] || keystate[SDLK_y],
-	  keystate[SDLK_l]         ||keystate[SDLK_KP4] || keystate[SDLK_KP2] || keystate[SDLK_u],
-	  keystate[SDLK_x]
+	  app->pressed[SDLK_p]         || app->pressed[SDLK_KP8] || app->pressed[SDLK_t],
+	  app->pressed[SDLK_QUOTE]     || app->pressed[SDLK_KP6] || app->pressed[SDLK_i],
+	  app->pressed[SDLK_SEMICOLON] ||app->pressed[SDLK_KP5] || app->pressed[SDLK_y],
+	  app->pressed[SDLK_l]         ||app->pressed[SDLK_KP4] || app->pressed[SDLK_KP2] || app->pressed[SDLK_u],
+	  app->pressed[SDLK_x]
 	  );
 
-  if(keystate[SDLK_a])
+  if(app->pressed[SDLK_a])
 	shoot(app, &player1->body);
-  if(keystate[SDLK_z] || keystate[SDLK_KP_PLUS] ) {
+  if(app->pressed[SDLK_z] || app->pressed[SDLK_KP_PLUS] ) {
 	if(player2->body.item.type->build) {
 		build(app, &player2->body);
 	} else {
@@ -299,12 +297,24 @@ void bindKeyboard(App *app)
 {
   SDL_Event event;
   while(SDL_PollEvent(&event)){
-	switch(event.type) {
-	  case SDL_KEYDOWN:
-		if (app->state == STATE_PLAYING){
-		  bindGameplayKeysDown(app, &event.key.keysym.sym);
-		} else{
-		  bindMenuKeysDown(app, &event.key.keysym.sym);
+	if(app->net.role == NET_CLIENT) {
+		switch(event.type) {
+		  case SDL_KEYDOWN:
+		  case SDL_KEYUP:
+			app->net.evt_queue[app->net.evt_queue_count++] = event;
+			break;
+		}
+	} else {
+		switch(event.type) {
+		  case SDL_KEYDOWN:
+			if (app->state == STATE_PLAYING){
+			  bindGameplayKeysDown(app, event.key.keysym.sym);
+			} else{
+			  bindMenuKeysDown(app, event.key.keysym.sym);
+			}
+			// slip..
+		  case SDL_KEYUP:
+			app->pressed[event.key.keysym.sym] = (event.type == SDL_KEYDOWN);
 		}
 	}
   }
@@ -1085,9 +1095,7 @@ inline int lasersight(App *app, Body *body, int x, int y, int n)
 
 int aim(App *app, Body *body)
 {
-  Uint8 *keystate;
-  keystate = SDL_GetKeyState(NULL);
-  if(keystate[body->shoot_key] ) return;
+  if(app->pressed[body->shoot_key] ) return;
 	int x1, y1, x2, y2;
 	int dx, dy, i, e;
 	int incx, incy, inc1, inc2;
@@ -1373,7 +1381,7 @@ void gameEnding(App *app)
 	app->game.won = 1;
 }
 
-int main(int argc, char* args[] )
+int main(int argc, char* argv[] )
 {
   srand(time(NULL));
   App app;
@@ -1393,6 +1401,14 @@ int main(int argc, char* args[] )
   SDL_ShowCursor(0);
 
   soundInit();
+  if(argc>1) {
+	  net_init(&app);
+	  if(argc>2) {
+		  net_setup(&app, argv[1], DEFAULT_PORT);
+	  } else {
+		  net_setup(&app, argv[1], atoi(argv[2]));
+	  }
+  }
   loadItems(&app);
   loadEnemies(&app);
   loadMap(&app);
@@ -1402,25 +1418,35 @@ int main(int argc, char* args[] )
 
   while(app.state != STATE_EXIT){
 	Uint32 startTime = SDL_GetTicks();
-	movePrepare(&app);
-	if (app.state == STATE_PLAYING) {
-	  renderStart(&app);
-	}
-	bindKeyboard(&app);                                   
 
-	if (app.state == STATE_PLAYING){
-	  playRandomMusic();
-	  addPowerup(&app);
-	  spawnEnemy(&app);
-	  move_enemies(&app);
-	  renderFinish(&app);
-	  checkGameover(&app);
-	} else if (app.state == STATE_CREDITS) {
-	  renderCredits(&app);
-	} else {
-	  renderMenu(&app);
-	  playMusic("menu.mp3", -1);
+	if(app.net.role == NET_CLIENT && app.net.state == NET_WAITING) {
+			renderLobby(&app);
+			playMusic("menu.mp3", -1);
 	}
+		
+
+		if (app.state == STATE_PLAYING) {
+			movePrepare(&app);
+			renderStart(&app);
+		}
+		bindKeyboard(&app);                                   
+		net_exchange(&app);
+
+		if (app.state == STATE_PLAYING){
+		  playRandomMusic();
+		  addPowerup(&app);
+		  spawnEnemy(&app);
+		  move_enemies(&app);
+		  renderFinish(&app);
+		  checkGameover(&app);
+		} else if (app.state == STATE_CREDITS) {
+		  renderCredits(&app);
+		} else {
+		  renderMenu(&app);
+		  playMusic("menu.mp3", -1);
+		}
+	
+
 	handleDelay(startTime);
   }
 
@@ -1454,6 +1480,7 @@ int main(int argc, char* args[] )
   SDL_FreeSurface(app.game.board.image);
   SDL_FreeSurface(app.game.board.hit);
   renderTerminate(&app);
+  net_terminate(&app);
   terminate_font();
   sound_terminate();
   SDL_Quit();

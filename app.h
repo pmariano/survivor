@@ -1,15 +1,20 @@
 #ifndef _APP_H
 #define _APP_H
 #include <SDL.h>
+#include <SDL_net.h>
 #include <SDL_mixer.h>
 
 #define ENEMY_COUNT 1000
 #define POWERUP_COUNT 32
 #define PLAYER_COUNT 2
-#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT)
+#define FIRE_COUNT 1000
+#define SPRITE_COUNT (PLAYER_COUNT+ENEMY_COUNT+POWERUP_COUNT+FIRE_COUNT)
 
 #define BUILD_LIMIT 200
 #define WAVE_COUNT 256
+
+#define DEFAULT_PORT 4748 
+#define EVT_QUEUE_SIZE 100
 
 #include "aStarLibrary.h" // must be after the defines above
 
@@ -224,6 +229,28 @@ typedef enum {
 	DEBUG_COUNT
 } Debug;
 
+enum {
+	NET_STANDALONE=0,
+	NET_SERVER=1,
+	NET_CLIENT=2
+};
+
+enum {
+	NET_WAITING=0,
+	NET_CONNECTED=1,
+};
+
+typedef struct {
+	int role;
+	int state;
+	UDPsocket udpsock;
+	IPaddress address;
+	UDPpacket *packet;
+	int exchange_time[ENEMY_COUNT];
+	SDL_Event evt_queue[EVT_QUEUE_SIZE];
+	int evt_queue_count;
+} Net;
+
 typedef struct {
   SDL_Surface *screen;
   Game game;
@@ -237,6 +264,8 @@ typedef struct {
   AppState stateBeforeCredits;
   SDL_Surface *logo;
   Menu menu;
+  Net net;
+  int pressed[SDLK_LAST];
 } App;
 
 int hit(App *app, Body *source, Body *target);
