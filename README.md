@@ -1,3 +1,6 @@
+#MOVED
+This repository was moved to [https://github.com/pseudogames/survivor](https://github.com/pseudogames/survivor)
+
 #Survivor
 
 Survivor, is a survivor style game developed during [SPJAM](www.spjam.com.br) game marathon. The first version of the game (check the gameplay [here](http://www.youtube.com/watch?v=ALpgIIls-yc) was fully developed in just 48 hours.
